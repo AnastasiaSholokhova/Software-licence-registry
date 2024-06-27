@@ -1,8 +1,10 @@
-from flask import Flask, request, session, redirect, url_for, render_template, flash
+from flask import Flask, request, session, redirect, url_for, render_template, flash, Response
 import psycopg2 #pip install psycopg2 
 import psycopg2.extras
 import re 
 from werkzeug.security import generate_password_hash, check_password_hash
+import io
+import xlwt
  
 app = Flask(__name__)
 app.secret_key = 'anastasia-database'
@@ -88,7 +90,7 @@ def update_licence(id):
                     количество_ПО=%s,
                     тип_ПО=%s
                     WHERE номер_пп=%s
-                    """, (наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, срок_полезного_использования_мес, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, тип_ПО))
+                    """, (наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, срок_полезного_использования_мес, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, тип_ПО, id))
         flash("Запись успешно обновлена!")
         conn2.commit()
         return redirect(url_for('home'))
@@ -234,7 +236,7 @@ def update_software(id):
                     признак_ПО=%s,
                     тип_ПО=%s
                     WHERE код_ПО=%s
-                    """, (наименование_ПО, описание_ПО, ссылка_на_сайт_ПО, вендор, стоимость_за_единицу, признак_ПО, тип_ПО))
+                    """, (наименование_ПО, описание_ПО, ссылка_на_сайт_ПО, вендор, стоимость_за_единицу, признак_ПО, тип_ПО, id))
         flash("Запись успешно обновлена!")
         conn2.commit()
         return redirect(url_for('software_list'))
@@ -246,6 +248,37 @@ def delete_software(id):
     conn2.commit()
     flash('Запись успешно удалена!')
     return redirect(url_for('software_list'))
+
+@app.route('/download_software/report/excel')
+def download_software_report():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Справочник_ПО')
+    res_software = cur.fetchall()
+    output_software = io.BytesIO()
+    workbook_software = xlwt.Workbook()
+    sh_software = workbook_software.add_sheet('Отчет по ПО')
+    sh_software.write(0, 0, 'Код ПО')
+    sh_software.write(0, 1, 'Наименование ПО')
+    sh_software.write(0, 2, 'Описание ПО')
+    sh_software.write(0, 3, 'Ссылка на сайт ПО')
+    sh_software.write(0, 4, 'Вендор')
+    sh_software.write(0, 5, 'Стоимость за единицу')
+    sh_software.write(0, 6, 'Признак ПО')
+    sh_software.write(0, 7, 'Тип ПО')
+    idx = 0 
+    for row in res_software:
+        sh_software.write(idx+1, 0, str(row['код_ПО']))
+        sh_software.write(idx+1, 1, row['наименование_ПО'])
+        sh_software.write(idx+1, 2, row['описание_ПО'])
+        sh_software.write(idx+1, 3, row['ссылка_на_сайт_ПО'])
+        sh_software.write(idx+1, 4, row['вендор'])
+        sh_software.write(idx+1, 5, row['стоимость_за_единицу'])
+        sh_software.write(idx+1, 6, row['признак_ПО'])
+        sh_software.write(idx+1, 7, row['тип_ПО'])
+        idx += 1
+    workbook_software.save(output_software)
+    output_software.seek(0)
+    return Response(output_software, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=software_report.xls"})
 
 @app.route('/vendor')
 def vendor_list():
@@ -292,7 +325,7 @@ def update_vendor(id):
                     описание_производителя=%s,
                     ссылка_на_сайт_производителя=%s
                     WHERE код_производителя=%s
-                    """, (производитель, описание_производителя, ссылка_на_сайт_производителя))
+                    """, (производитель, описание_производителя, ссылка_на_сайт_производителя, id))
         flash("Запись успешно обновлена!")
         conn2.commit()
         return redirect(url_for('vendor_list'))
@@ -304,6 +337,29 @@ def delete_vendor(id):
     conn2.commit()
     flash('Запись успешно удалена!')
     return redirect(url_for('vendor_list'))
+
+@app.route('/download_vendor/report/excel')
+def download_vendor_report():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Справочник_производителей_ПО')
+    result_vendor = cur.fetchall()
+    output_vendor = io.BytesIO()
+    workbook_vendor = xlwt.Workbook()
+    sh_vendor = workbook_vendor.add_sheet('Отчет по производителям ПО')
+    sh_vendor.write(0, 0, 'Код производителя')
+    sh_vendor.write(0, 1, 'Производитель')
+    sh_vendor.write(0, 2, 'Описание производителя')
+    sh_vendor.write(0, 3, 'Ссылка на сайт производителя')
+    idx = 0
+    for row in result_vendor:
+        sh_vendor.write(idx+1, 0, str(row['код_производителя']))
+        sh_vendor.write(idx+1, 1, row['производитель'])
+        sh_vendor.write(idx+1, 2, row['описание_производителя'])
+        sh_vendor.write(idx+1, 3, row['ссылка_на_сайт_производителя'])
+        idx += 1
+    workbook_vendor.save(output_vendor)
+    output_vendor.seek(0)
+    return Response(output_vendor, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=vendor_report.xls"})
 
 @app.route('/customer')
 def customer_list():
@@ -364,6 +420,29 @@ def delete_customer(id):
     flash('Запись успешно удалена!')
     return redirect(url_for('customer_list'))
 
+@app.route('/download_customer/report/excel')
+def download_customer_report():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Справочник_заказчиков_ПО')
+    result_customer = cur.fetchall()
+    output_customer = io.BytesIO()
+    workbook_customer = xlwt.Workbook()
+    sh_customer = workbook_customer.add_sheet('Отчет по заказчикам')
+    sh_customer.write(0, 0, 'Код заказчика')
+    sh_customer.write(0, 1, 'Заказчик ПО')
+    sh_customer.write(0, 2, 'Описание заказчика')
+    sh_customer.write(0, 3, 'Ссылка на сайт заказчика')
+    idx = 0
+    for row in result_customer:
+        sh_customer.write(idx+1, 0, str(row['код_заказчика']))
+        sh_customer.write(idx+1, 1, row['заказчик_ПО'])
+        sh_customer.write(idx+1, 2, row['описание_заказчика'])
+        sh_customer.write(idx+1, 3, row['ссылка_на_сайт_заказчика'])
+        idx += 1
+    workbook_customer.save(output_customer)
+    output_customer.seek(0)
+    return Response(output_customer, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=customer_report.xls"})
+
 @app.route('/licence')
 def licence_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -407,7 +486,7 @@ def update_licence_list(id):
                     тип_лицензии=%s,
                     счёт_списания=%s
                     WHERE код_лицензии=%s
-                    """, (наименование_лицензии, тип_лицензии, счёт_списания))
+                    """, (наименование_лицензии, тип_лицензии, счёт_списания, id))
         flash('Запись успешно обновлена!')
         conn2.commit()
         return redirect(url_for('licence_list'))
@@ -419,6 +498,70 @@ def delete_licence_from_list(id):
     conn2.commit()
     flash('Запись успешно удалена!')
     return redirect(url_for('licence_list'))
+
+@app.route('/download_licence/report/excel')
+def download_licence_report():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Справочник_лицензий')
+    result_licence = cur.fetchall()
+    output_licence = io.BytesIO()
+    workbook_licence = xlwt.Workbook()
+    sh_licence = workbook_licence.add_sheet('Отчет по лицензиям')
+    sh_licence.write(0, 0, 'Код лицензии')
+    sh_licence.write(0, 1, 'Наименование лицензии')
+    sh_licence.write(0, 2, 'Тип лицензии')
+    sh_licence.write(0, 3, 'Счёт списания')
+    idx = 0  
+    for row in result_licence:
+        sh_licence.write(idx+1, 0, str(row['код_лицензии']))
+        sh_licence.write(idx+1, 1, row['наименование_лицензии'])
+        sh_licence.write(idx+1, 2, row['тип_лицензии'])
+        sh_licence.write(idx+1, 3, row['счёт_списания'])
+        idx += 1
+    workbook_licence.save(output_licence)
+    output_licence.seek(0)
+    return Response(output_licence, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=licence_report.xls"})
+
+@app.route('/download/report/excel')
+def download_report():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM лицензии')
+    result = cur.fetchall()
+    output = io.BytesIO()
+    workbook = xlwt.Workbook()
+    sh = workbook.add_sheet('Отчет')
+    sh.write(0, 0, 'Номер пп')
+    sh.write(0, 1, 'Наименование ПО')
+    sh.write(0, 2, 'Вендор')
+    sh.write(0, 3, 'Начало действия лицензии')
+    sh.write(0, 4, 'Окончание действия лицензии')
+    sh.write(0, 5, 'Срок полезного использования (мес)')
+    sh.write(0, 6, 'Стоимость за единицу')
+    sh.write(0, 7, 'Итоговая стоимость')
+    sh.write(0, 8, 'Заказчик ПО')
+    sh.write(0, 9, 'Признак ПО')
+    sh.write(0, 10, 'Количество ПО')
+    sh.write(0, 11, 'Срок действия лицензии')
+    sh.write(0, 12, 'Тип ПО')
+    idx = 0
+    for row in result:
+        sh.write(idx+1, 0, str(row['номер_пп']))
+        sh.write(idx+1, 1, row['наименование_ПО'])
+        sh.write(idx+1, 2, row['вендор'])
+        sh.write(idx+1, 3, row['начало_действия_лицензии'])
+        sh.write(idx+1, 4, row['окончание_действия_лицензии'])
+        sh.write(idx+1, 5, row['срок_полезного_использования_мес'])
+        sh.write(idx+1, 6, row['стоимость_за_единицу'])
+        sh.write(idx+1, 7, row['итоговая_стоимость'])
+        sh.write(idx+1, 8, row['заказчик_ПО'])
+        sh.write(idx+1, 9, row['признак_ПО'])
+        sh.write(idx+1, 10, row['количество_ПО'])
+        sh.write(idx+1, 11, row['срок_действия_лицензии'])
+        sh.write(idx+1, 12, row['тип_ПО'])
+        idx += 1
+    workbook.save(output)
+    output.seek(0)
+    return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=total_report.xls"})
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
