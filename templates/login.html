@@ -20,6 +20,7 @@
         <label>Пароль</label>
         <input type="password" class="form-control" name="password" placeholder="Password" id="password" required>
         <input type="checkbox" value="checked"><b>Запомнить</b>
+        <a href={{url_for('reset_password') }}> Забыли пароль? </a>
         <input type="submit" value="Login" class="form-control btn btn-success " name="">
     </form>
     {% with messages = get_flashed_messages()  %}
@@ -34,7 +35,7 @@
     {% endfor %}
     {% endif %}
     {% endwith %}
-    <p>No account <a href="{{ url_for('register') }}">Зарегистрироваться</a></p>
+    <p>Нет аккаунта <a href="{{ url_for('register') }}">Зарегистрироваться</a></p>
   </div>
  </div>
  </body>

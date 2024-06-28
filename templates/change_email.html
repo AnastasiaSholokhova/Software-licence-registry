@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+{% block title %}  Смена адреса электронной почты {% endblock %}
+{% block content %}
+<div class="container">
+    <h4 class="text-center my-3">
+        Смена адреса электронной почты
+    </h4>
+    <div class="row d-flex justify-content-center">
+        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+            {% with messages=get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category,message in messages %}
+            <div class="alert alert-{{category}}">
+                <strong>{{message}}</strong>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+            <div class="card">
+                <div class="card-body">
+                    <form action="" method="POST">
+                        <div class="my-2">
+                            <label for=""><b>Введите ваш старый адрес электронной почты</b></label>
+                            <input type="text" name="old_email" id="new_email" class="form-control my-1">
+                        </div>
+                        <div class="my-2">
+                            <label for=""><b>Введите ваш новый адрес электронной почты</b></label>
+                            <input type="text" name="new_email" id="new_email" class="form-control my-1">
+                        </div>
+                        <button class="btn btn-success">Поменять адрес электронной почты</button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
