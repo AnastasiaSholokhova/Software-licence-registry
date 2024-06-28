@@ -11,7 +11,7 @@ app.secret_key = 'anastasia-database'
  
 DB_HOST = "localhost"
 DB_NAME = "Users"
-DB_NAME2 = 'Реестр лицензий ПО'
+DB_NAME2 = 'software_licences'
 DB_USER = "postgres"
 DB_PASS = "12345"
 
@@ -461,7 +461,8 @@ def add_licence_to_list():
         наименование_лицензии = request.form['наименование_лицензии']
         тип_лицензии = request.form['тип_лицензии']
         счёт_списания = request.form['счёт_списания']
-        cur.execute('INSERT INTO Справочник_лицензий (код_лицензии, наименование_лицензии, тип_лицензии, счёт_списания) VALUES(%s,%s,%s,%s)', (код_лицензии, наименование_лицензии, тип_лицензии, счёт_списания))
+        версия_лицензии = request.form['версия_лицензии']
+        cur.execute('INSERT INTO Справочник_лицензий (код_лицензии, наименование_лицензии, тип_лицензии, счёт_списания, версия_лицензии) VALUES(%s,%s,%s,%s,%s)', (код_лицензии, наименование_лицензии, тип_лицензии, счёт_списания, версия_лицензии))
         conn2.commit()
         flash('Запись успешно создана!')
         return redirect(url_for('licence_list'))
@@ -480,13 +481,15 @@ def update_licence_list(id):
         наименование_лицензии = request.form['наименование_лицензии']
         тип_лицензии = request.form['тип_лицензии']
         счёт_списания = request.form['счёт_списания']
+        версия_лицензии = request.form['версия_лицензии']
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute(""" UPDATE Справочник_лицензий
                     SET наименование_лицензии=%s,
                     тип_лицензии=%s,
-                    счёт_списания=%s
+                    счёт_списания=%s,
+                    версия_лицензии=%s
                     WHERE код_лицензии=%s
-                    """, (наименование_лицензии, тип_лицензии, счёт_списания, id))
+                    """, (наименование_лицензии, тип_лицензии, счёт_списания, версия_лицензии, id))
         flash('Запись успешно обновлена!')
         conn2.commit()
         return redirect(url_for('licence_list'))
@@ -498,6 +501,80 @@ def delete_licence_from_list(id):
     conn2.commit()
     flash('Запись успешно удалена!')
     return redirect(url_for('licence_list'))
+
+@app.route('/partners_list')
+def partners_list():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if 'loggedin' in session:
+        string = "SELECT * FROM Контрагенты"
+        cur.execute(string)
+        partner_list = cur.fetchall()
+        return render_template('partner.html', partner_list=partner_list)
+    return redirect(url_for('login'))
+
+@app.route('/add_partner', methods=['POST'])
+def add_partner():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        код_контрагента = request.form['код_контрагента']
+        наименование_контрагента = request.form['наименование_контрагента']
+        договор = request.form['договор']
+        cur.execute('INSERT INTO Контрагенты (код_контрагента, наименование_контрагента, договор) VALUES(%s,%s,%s)', (код_контрагента, наименование_контрагента, договор))
+        conn2.commit()
+        flash('Запись успешно создана!')
+        return redirect(url_for('partners_list'))
+    
+@app.route('/edit_partner/<id>', methods=['POST', 'GET'])
+def edit_partner(id):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Контрагенты WHERE код_контрагента=%s', (id))
+    partners = cur.fetchall()
+    print(partners[0])
+    return render_template('edit_partner.html', partner = partners[0])
+
+@app.route('/update_partner/<id>', methods=['POST'])
+def update_partner(id):
+    if request.method == 'POST':
+        наименование_контрагента = request.form['наименование_контрагента']
+        договор = request.form['договор']
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute(""" UPDATE Контрагенты
+                    SET наименование_контрагента=%s,
+                    договор=%s
+                    WHERE код_контрагента=%s
+                    """, (наименование_контрагента, договор, id))
+        flash('Запись успешно обновлена!')
+        conn2.commit()
+        return redirect(url_for('partners_list'))
+    
+@app.route('/delete_partner/<string:id>', methods=['POST', 'GET'])
+def delete_partner(id):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('DELETE FROM Контрагенты WHERE код_контрагента={0}'.format(id))
+    conn2.commit()
+    flash('Запись успешно удалена!')
+    return redirect(url_for('partners_list'))
+
+@app.route('/download_partner/report/excel')
+def download_partner_report():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Контрагенты')
+    result_partner = cur.fetchall()
+    output_partner = io.BytesIO()
+    workbook_partner = xlwt.Workbook()
+    sh_partner = workbook_partner.add_sheet('Отчет по контрагентам')
+    sh_partner.write(0, 0, 'Код контрагента')
+    sh_partner.write(0, 1, 'Наименование контрагента')
+    sh_partner.write(0, 2, 'Договор')
+    idx = 0
+    for row in result_partner:
+        sh_partner.write(idx+1, 0, str(row['код_контрагента']))
+        sh_partner.write(idx+1, 1, row['наименование_контрагента'])
+        sh_partner.write(idx+1, 2, row['договор'])
+        idx += 1
+    workbook_partner.save(output_partner)
+    output_partner.seek(0)
+    return Response(output_partner, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=partner_report.xls"})
 
 @app.route('/download_licence/report/excel')
 def download_licence_report():
@@ -511,12 +588,14 @@ def download_licence_report():
     sh_licence.write(0, 1, 'Наименование лицензии')
     sh_licence.write(0, 2, 'Тип лицензии')
     sh_licence.write(0, 3, 'Счёт списания')
+    sh_licence.write(0, 4, 'Версия лицензии')
     idx = 0  
     for row in result_licence:
         sh_licence.write(idx+1, 0, str(row['код_лицензии']))
         sh_licence.write(idx+1, 1, row['наименование_лицензии'])
         sh_licence.write(idx+1, 2, row['тип_лицензии'])
         sh_licence.write(idx+1, 3, row['счёт_списания'])
+        sh_licence.write(idx+1, 4, row['версия_лицензии'])
         idx += 1
     workbook_licence.save(output_licence)
     output_licence.seek(0)
@@ -563,5 +642,92 @@ def download_report():
     output.seek(0)
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=total_report.xls"})
 
+
+@app.route('/user_change_password', methods = ['POST', 'GET'])
+def user_change_password():
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if not 'loggedin' in session:
+        return redirect(url_for('login'))
+    else:
+        email = request.form.get('email')
+        cur.execute('SELECT * FROM users WHERE email=%s', (email,))
+        account = cur.fetchone()
+        if request.method == 'POST':
+            old_password = request.form.get('old_password')
+            new_password = request.form.get('new_password')
+            if not email or not old_password or not new_password:
+                flash('Пожалуйста, заполните форму!')
+            else:
+                if account:
+                    if email == account['email']:
+                        if not check_password_hash(account['password'], old_password):
+                            flash('Неверный старый пароль!')
+                            return redirect(url_for('user_change_password'))
+                        id=account['id']
+                        _hashed_password = generate_password_hash(new_password)
+                        cur.execute("""UPDATE users
+                                    SET password=%s
+                                    WHERE id=%s
+                                    """, (_hashed_password, id))
+                        flash('Запись успешно обновлена!')
+                        conn.commit()
+                        return redirect(url_for('profile'))
+                else:
+                    flash('Введен некорректный адрес электронной почты!')
+                    return redirect(url_for('usser_change_password'))
+                
+        return render_template('change_password.html', title="Поменять пароль")
+
+@app.route('/user_change_email', methods=['POST', 'GET'])
+def user_change_email():
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if not 'loggedin' in session:
+        return redirect(url_for('login'))
+    else:
+        old_email = request.form.get('old_email')
+        cur.execute('SELECT * FROM users WHERE email=%s', (old_email,))
+        account = cur.fetchone()
+        if request.method == 'POST':
+            new_email = request.form.get('new_email')
+            if not old_email or not new_email:
+                flash("Пожалуйста, заполните форму!")
+            else:
+                if account:
+                    if new_email == old_email:
+                        flash('Новый адрес электронной почты совпадает с предыдущим!')
+                        return redirect(url_for('user_change_email'))
+                    id = account['id']
+                    cur.execute("""UPDATE users
+                                SET email=%s
+                                WHERE id=%s""", (new_email, id))
+                    flash('Запись успешно обновлена!')
+                    conn.commit()
+                    return redirect(url_for('profile'))
+                else:
+                    flash('Введен некорректный алдрес электронной почты!')
+                    return redirect(url_for('user_change_email'))
+        return render_template('change_email.html', title='Поменять адрес электронной почты')
+    
+@app.route('/reset_password', methods = ['POST', 'GET'])
+def reset_password():
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        email = request.form.get('email')
+        cur.execute('SELECT * FROM users WHERE email=%s', (email,))
+        user = cur.fetchone()
+        if not user:
+            flash('Неправильный адрес электронной почты! Пожалуйста, попробуйте еще раз.')
+            return render_template('reset_password.html')
+        id = user['id']
+        new_password = request.form.get('new_password')
+        _hashed_password = generate_password_hash(new_password)
+        cur.execute("""UPDATE users
+                    SET password=%s
+                    WHERE id=%s""", (_hashed_password, id))
+        flash('Пароль успешно обновлен!')
+        conn.commit()
+        return redirect(url_for('login'))
+    return render_template('reset_password.html', title='Пользователь забыл пароль')
+        
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
