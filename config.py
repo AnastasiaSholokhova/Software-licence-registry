@@ -806,7 +806,8 @@ def add_installation():
         IP_адрес = request.form['IP_адрес']
         наименование_машины = request.form['наименование_машины']
         тип_ПО = request.form['тип_ПО']
-        cur.execute('INSERT INTO Установка_ПО (код_установки, наименование_ПО, ФИО, IP_адрес, наименование_машины, тип_ПО) VALUES(%s,%s,%s,%s,%s,%s)', (код_установки, наименование_ПО, ФИО, IP_адрес, наименование_машины, тип_ПО))
+        чекбокс = bool(request.form.get('чекбокс'))
+        cur.execute('INSERT INTO Установка_ПО (код_установки, наименование_ПО, ФИО, IP_адрес, наименование_машины, тип_ПО, чекбокс) VALUES(%s,%s,%s,%s,%s,%s,%s)', (код_установки, наименование_ПО, ФИО, IP_адрес, наименование_машины, тип_ПО, чекбокс))
         conn2.commit()
         flash('Запись успешно создана!')
         return redirect(url_for('support_install_software'))
@@ -827,15 +828,17 @@ def update_installation(id):
         IP_адрес = request.form['IP_адрес']
         наименование_машины = request.form['наименование_машины']
         тип_ПО = request.form['тип_ПО']
+        чекбокс = bool(request.form.get('чекбокс'))
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute(""" UPDATE Установка_ПО
                     SET наименование_ПО=%s,
                     ФИО=%s,
                     IP_адрес=%s,
                     наименование_машины=%s,
-                    тип_ПО=%s
+                    тип_ПО=%s,
+                    чекбокс=%s
                     WHERE код_установки=%s
-                    """, (наименование_ПО, ФИО, IP_адрес, наименование_машины, тип_ПО, id))
+                    """, (наименование_ПО, ФИО, IP_адрес, наименование_машины, тип_ПО, чекбокс, id))
         flash('Запись успешно обновлена!')
         conn2.commit()
         return redirect(url_for('support_install_software'))
