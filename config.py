@@ -64,7 +64,7 @@ def register():
         flash('Пожалуйста, заполните форму!')
     return render_template('register.html')
 
-@app.route('/login/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def login():
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
    
@@ -130,7 +130,7 @@ def logout():
    session.pop('username', None)
    return redirect(url_for('login'))
 
-@app.route('/')
+@app.route('/home')
 @role_required('admin', 'editor')
 def home():
     if 'loggedin' in session:

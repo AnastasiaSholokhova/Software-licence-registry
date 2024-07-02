@@ -2,7 +2,7 @@
 <html>
  <head>
   <meta charset="utf-8">
-  <title>Login</title>
+  <title>Вход</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
@@ -11,7 +11,7 @@
  </head>
  <body style="background-color:#ccc;">
   <div class="login-box" >
-  <div class="login-header">Login</div>
+  <div class="login-header">Вход</div>
   <div class="login-body">
     <p>Пожалуйста, введите имя пользователя и пароль.</p>
     <form class="form-group" action="{{ url_for('login') }}" method="post">
@@ -21,7 +21,7 @@
         <input type="password" class="form-control" name="password" placeholder="Password" id="password" required>
         <input type="checkbox" value="checked"><b>Запомнить</b>
         <a href={{url_for('reset_password') }}> Забыли пароль? </a>
-        <input type="submit" value="Login" class="form-control btn btn-success " name="">
+        <input type="submit" value="Войти" class="form-control btn btn-success" name="">
     </form>
     {% with messages = get_flashed_messages()  %}
     {% if messages %}
