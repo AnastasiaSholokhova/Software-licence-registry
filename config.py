@@ -1,11 +1,12 @@
 from flask import Flask, request, session, redirect, url_for, render_template, flash, Response
-import psycopg2 #pip install psycopg2 
+import psycopg2
 import psycopg2.extras
 import re 
 from werkzeug.security import generate_password_hash, check_password_hash
 import io
+from functools import wraps
 import xlwt
- 
+
 app = Flask(__name__)
 app.secret_key = 'anastasia-database'
  
@@ -15,12 +16,122 @@ DB_NAME2 = 'software_licences'
 DB_USER = "postgres"
 DB_PASS = "12345"
 
-
+"""app.config['MAIL_SERVER'] = "smtp.googlemail.com"
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = 'haramo8532@joeroc.com'
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+otp = randint(000000, 999999)"""
 
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)#подключение БД пользователей
 conn2 = psycopg2.connect(dbname=DB_NAME2, user=DB_USER, password=DB_PASS, host=DB_HOST)#подключение БД реестра лицензий
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
  
+    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
+        fullname = request.form['fullname']
+        username = request.form['username']
+        password = request.form['password']
+        email = request.form['email']
+        role = request.form['role']
+    
+        _hashed_password = generate_password_hash(password)
+        cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+        account = cursor.fetchone()
+
+        if account:
+            flash('Аккаунт уже зарегистрирован!')
+        elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
+            flash('Некорректный адрес электронной почты!')
+        elif not re.match(r'[A-Za-z0-9]+', username):
+            flash('Имя пользователя должно содержать только буквы и цифры!')
+        elif not username or not password or not email or not role:
+            flash('Пожалуйста, заполните форму!')
+        else:
+            cursor.execute("INSERT INTO users (fullname, username, password, email, role) VALUES (%s,%s,%s,%s,%s)", (fullname, username, _hashed_password, email, role))
+            conn.commit()
+            cursor.execute('SELECT LASTVAL() AS id;')
+            user_id = cursor.fetchone()
+            session['logedin'] = True
+            session['id'] = user_id
+            session['username'] = username
+            session['role'] = role
+            flash('Вы были успешно зарегистрированы!')
+            return redirect(url_for('login'))
+    elif request.method == 'POST':
+        flash('Пожалуйста, заполните форму!')
+    return render_template('register.html')
+
+@app.route('/login/', methods=['GET', 'POST'])
+def login():
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+   
+    if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+        username = request.form['username']
+        password = request.form['password']
+        
+        cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+        account = cursor.fetchone()
+ 
+        if account:
+            password_rs = account['password']
+            print(password_rs)
+            if check_password_hash(password_rs, password):
+                selected_role = account['role']
+                session['loggedin'] = True
+                session['id'] = account['id']
+                session['username'] = account['username']
+                session['role'] = selected_role
+                if selected_role == 'support':
+                    return redirect(url_for('home_support'))
+                elif selected_role == 'editor':
+                    return redirect(url_for('home_editor'))
+                else:
+                    return redirect(url_for('home'))
+            else:
+                flash('Неверное имя пользователя/пароль')
+        else:
+            flash('Неверное имя пользователя/пароль')
+ 
+    return render_template('login.html')
+
+def role_required(*roles):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if 'role' in session and session['role'] in roles:
+                return func(*args, **kwargs)
+            else:
+                flash('У вас нет доступа к этой странице!')
+                return redirect(url_for('login'))
+        return wrapper
+    return decorator
+
+"""def send_email(email, otp):
+    msg = Message("OTP", sender="mlstudent2003@gmail.com", recipients=[email])
+    msg.body = str(otp)
+    mail.send(msg)"""
+
+"""@app.route('/validate', methods=['POST', 'GET'])
+def validate():
+    user_otp = request.form['otp']
+    if otp==int(user_otp):
+        return "<h3>Электронная почта была успешно подтверждена!</h3>"
+    else:
+        return "<h3>Попробуйте еще раз.</h3"
+    return redirect(url_for('home'))"""
+
+@app.route('/logout')
+def logout():
+   session.pop('loggedin', None)
+   session.pop('id', None)
+   session.pop('username', None)
+   return redirect(url_for('login'))
+
 @app.route('/')
+@role_required('admin', 'editor')
 def home():
     if 'loggedin' in session:
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -28,6 +139,28 @@ def home():
         cur.execute(s) #Execute SQL
         list_licences = cur.fetchall()
         return render_template('home.html', username=session['username'], list_licences = list_licences)
+    return redirect(url_for('login'))
+
+@app.route('/home_support')
+@role_required('support')
+def home_support():
+    if 'loggedin' in session:
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        s = 'SELECT * FROM лицензии'
+        cur.execute(s)
+        list_licences = cur.fetchall()
+        return render_template('home_support.html', username=session['username'], list_licences = list_licences)
+    return redirect(url_for('login'))
+
+@app.route('/home_editor')
+@role_required('editor')
+def home_editor():
+    if 'loggedin' in session:
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        s = 'SELECT * FROM лицензии'
+        cur.execute(s)
+        list_licences = cur.fetchall()
+        return render_template('home_editor.html', username=session['username'], list_licences = list_licences)
     return redirect(url_for('login'))
  
     
@@ -41,13 +174,18 @@ def add_licence():
         начало_действия_лицензии = request.form['начало_действия_лицензии']
         окончание_действия_лицензии = request.form['окончание_действия_лицензии']
         срок_полезного_использования_мес = request.form['срок_полезного_использования_мес']
-        стоимость_за_единицу = request.form['стоимость_за_единицу']
-        итоговая_стоимость = request.form['итоговая_стоимость']
+        стоимость_за_единицу = float(request.form['стоимость_за_единицу'])
         заказчик_ПО = request.form['заказчик_ПО']
         признак_ПО = request.form['признак_ПО']
-        количество_ПО = request.form['количество_ПО']
+        количество_ПО = int(request.form['количество_ПО'])
         тип_ПО = request.form['тип_ПО']
-        cur.execute("INSERT INTO лицензии (номер_пп, наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, срок_полезного_использования_мес, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, тип_ПО) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (номер_пп, наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, срок_полезного_использования_мес, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, тип_ПО))
+        if признак_ПО == 'Новое':
+            итоговая_стоимость = стоимость_за_единицу * количество_ПО
+        elif признак_ПО == 'Техподдержка':
+            итоговая_стоимость = стоимость_за_единицу * количество_ПО * 1.2
+        else:
+            итоговая_стоимость = стоимость_за_единицу * количество_ПО
+        cur.execute("INSERT INTO лицензии (номер_пп, наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, срок_полезного_использования_мес, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, тип_ПО, срок_действия_лицензии) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, (%s - NOW())::interval)", (номер_пп, наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, срок_полезного_использования_мес, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, тип_ПО, окончание_действия_лицензии))
         conn2.commit()
         flash('Запись была успешно добавлена!')
         return redirect(url_for('home'))
@@ -103,72 +241,6 @@ def delete_licence(id):
     flash('Запись успешно удалена!')
     return redirect(url_for('home'))
                 
-@app.route('/login/', methods=['GET', 'POST'])
-def login():
-    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-   
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
-        username = request.form['username']
-        password = request.form['password']
-        print(password)
- 
-        cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
-        account = cursor.fetchone()
- 
-        if account:
-            password_rs = account['password']
-            print(password_rs)
-            if check_password_hash(password_rs, password):
-                session['loggedin'] = True
-                session['id'] = account['id']
-                session['username'] = account['username']
-                return redirect(url_for('home'))
-            else:
-                flash('Неверное имя пользователя/пароль')
-        else:
-            flash('Неверное имя пользователя/пароль')
- 
-    return render_template('login.html')
-  
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
- 
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
-        fullname = request.form['fullname']
-        username = request.form['username']
-        password = request.form['password']
-        email = request.form['email']
-    
-        _hashed_password = generate_password_hash(password)
-        cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
-        account = cursor.fetchone()
-        print(account)
-
-        if account:
-            flash('Аккаунт уже зарегистрирован!')
-        elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
-            flash('Некорректный адрес электронной почты!')
-        elif not re.match(r'[A-Za-z0-9]+', username):
-            flash('Имя пользователя должно содержать только буквы и цифры!')
-        elif not username or not password or not email:
-            flash('Пожалуйста, заполните форму!')
-        else:
-            cursor.execute("INSERT INTO users (fullname, username, password, email) VALUES (%s,%s,%s,%s)", (fullname, username, _hashed_password, email))
-            conn.commit()
-            flash('Вы были успешно зарегистрированы!')
-    elif request.method == 'POST':
-        flash('Пожалуйста, заполните форму!')
-    return render_template('register.html')
-   
-   
-@app.route('/logout')
-def logout():
-   session.pop('loggedin', None)
-   session.pop('id', None)
-   session.pop('username', None)
-   return redirect(url_for('login'))
-  
 @app.route('/profile')
 def profile(): 
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -180,6 +252,7 @@ def profile():
     return redirect(url_for('login'))
  
 @app.route('/software')
+@role_required('admin', 'editor')
 def software_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
@@ -187,6 +260,17 @@ def software_list():
         cur.execute(string)
         list_software = cur.fetchall()
         return render_template('software.html', list_software=list_software)
+    return redirect(url_for('login'))
+
+@app.route('/support_software')
+@role_required('support')
+def support_software_list():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if 'loggedin' in session:
+        string = 'SELECT * FROM Справочник_ПО'
+        cur.execute(string)
+        list_software = cur.fetchall()
+        return render_template('support_software.html', list_software=list_software)
     return redirect(url_for('login'))
 
 @app.route('/add_software', methods=['POST'])
@@ -281,6 +365,7 @@ def download_software_report():
     return Response(output_software, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=software_report.xls"})
 
 @app.route('/vendor')
+@role_required('admin', 'editor')
 def vendor_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
@@ -288,6 +373,17 @@ def vendor_list():
         cur.execute(string)
         list_vendor = cur.fetchall()
         return render_template('vendor.html', list_vendor=list_vendor)
+    return redirect(url_for('login'))
+
+@app.route('/support_vendor')
+@role_required('support')
+def support_vendor_list():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if 'loggedin' in session:
+        string='SELECT * FROM Справочник_производителей_ПО'
+        cur.execute(string)
+        list_vendor = cur.fetchall()
+        return render_template('support_vendor.html', list_vendor=list_vendor)
     return redirect(url_for('login'))
 
 @app.route('/add_vendor', methods=['POST'])
@@ -362,6 +458,7 @@ def download_vendor_report():
     return Response(output_vendor, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=vendor_report.xls"})
 
 @app.route('/customer')
+@role_required('admin', 'editor')
 def customer_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
@@ -369,6 +466,17 @@ def customer_list():
         cur.execute(string)
         list_customer = cur.fetchall()
         return render_template('customer.html', list_customer=list_customer)
+    return redirect(url_for('login'))
+
+@app.route('/support_customer')
+@role_required('support')
+def support_customer_list():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if 'loggedin' in session:
+        string='SELECT * FROM Справочник_заказчиков_ПО'
+        cur.execute(string)
+        list_customer = cur.fetchall()
+        return render_template('support_customer.html', list_customer=list_customer)
     return redirect(url_for('login'))
 
 @app.route('/add_customer', methods=['POST'])
@@ -444,6 +552,7 @@ def download_customer_report():
     return Response(output_customer, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=customer_report.xls"})
 
 @app.route('/licence')
+@role_required('admin', 'editor')
 def licence_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
@@ -451,6 +560,17 @@ def licence_list():
         cur.execute(string)
         list_licence = cur.fetchall()
         return render_template('licence.html', list_licence=list_licence)
+    return redirect(url_for('login'))
+
+@app.route('/support_licence')
+@role_required('support')
+def support_licence_list():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if 'loggedin' in session:
+        string='SELECT * FROM Справочник_лицензий'
+        cur.execute(string)
+        list_licence = cur.fetchall()
+        return render_template('support_licence.html', list_licence=list_licence)
     return redirect(url_for('login'))
     
 @app.route('/add_licence_to_list', methods=['POST'])
@@ -503,6 +623,7 @@ def delete_licence_from_list(id):
     return redirect(url_for('licence_list'))
 
 @app.route('/partners_list')
+@role_required('admin', 'editor')
 def partners_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
@@ -510,6 +631,17 @@ def partners_list():
         cur.execute(string)
         partner_list = cur.fetchall()
         return render_template('partner.html', partner_list=partner_list)
+    return redirect(url_for('login'))
+
+@app.route('/support_partners_list')
+@role_required('support')
+def support_partners_list():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if 'loggedin' in session:
+        string='SELECT * FROM Контрагенты'
+        cur.execute(string)
+        partner_list = cur.fetchall()
+        return render_template('support_partner.html', partner_list=partner_list)
     return redirect(url_for('login'))
 
 @app.route('/add_partner', methods=['POST'])
@@ -642,6 +774,79 @@ def download_report():
     output.seek(0)
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=total_report.xls"})
 
+@app.route('/support_install_software')
+@role_required('admin','support')
+def support_install_software():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if 'loggedin' in session:
+        string='SELECT * FROM Установка_ПО'
+        cur.execute(string)
+        list_installation = cur.fetchall()
+        return render_template('support_install.html', list_installation=list_installation)
+    return redirect(url_for('login'))
+
+@app.route('/install_software')
+@role_required('editor')
+def install_software():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if 'loggedin' in session:
+        string='SELECT * FROM Установка_ПО'
+        cur.execute(string)
+        list_installation = cur.fetchall()
+        return render_template('install.html', list_installation=list_installation)
+    return redirect(url_for('login'))
+
+@app.route('/add_installation', methods=['POST'])
+def add_installation():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        код_установки = request.form['код_установки']
+        наименование_ПО = request.form['наименование_ПО']
+        ФИО = request.form['ФИО']
+        IP_адрес = request.form['IP_адрес']
+        наименование_машины = request.form['наименование_машины']
+        тип_ПО = request.form['тип_ПО']
+        cur.execute('INSERT INTO Установка_ПО (код_установки, наименование_ПО, ФИО, IP_адрес, наименование_машины, тип_ПО) VALUES(%s,%s,%s,%s,%s,%s)', (код_установки, наименование_ПО, ФИО, IP_адрес, наименование_машины, тип_ПО))
+        conn2.commit()
+        flash('Запись успешно создана!')
+        return redirect(url_for('support_install_software'))
+    
+@app.route('/edit_installation/<id>', methods=['POST', 'GET'])
+def edit_installation(id):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Установка_ПО WHERE код_установки=%s', (id))
+    installations = cur.fetchall()
+    print(installations[0])
+    return render_template('edit_installation.html', installation = installations[0])
+
+@app.route('/update_installation/<id>', methods=['POST'])
+def update_installation(id):
+    if request.method == 'POST':
+        наименование_ПО = request.form['наименование_ПО']
+        ФИО = request.form['ФИО']
+        IP_адрес = request.form['IP_адрес']
+        наименование_машины = request.form['наименование_машины']
+        тип_ПО = request.form['тип_ПО']
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute(""" UPDATE Установка_ПО
+                    SET наименование_ПО=%s,
+                    ФИО=%s,
+                    IP_адрес=%s,
+                    наименование_машины=%s,
+                    тип_ПО=%s
+                    WHERE код_установки=%s
+                    """, (наименование_ПО, ФИО, IP_адрес, наименование_машины, тип_ПО, id))
+        flash('Запись успешно обновлена!')
+        conn2.commit()
+        return redirect(url_for('support_install_software'))
+    
+@app.route('/delete_installation/<string:id>', methods=['POST', 'GET'])
+def delete_installation(id):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('DELETE FROM Установка_ПО WHERE код_установки={0}'.format(id))
+    conn2.commit()
+    flash('Запись успешно удалена!')
+    return redirect(url_for('support_install_software'))
 
 @app.route('/user_change_password', methods = ['POST', 'GET'])
 def user_change_password():
@@ -728,6 +933,6 @@ def reset_password():
         conn.commit()
         return redirect(url_for('login'))
     return render_template('reset_password.html', title='Пользователь забыл пароль')
-        
+
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)

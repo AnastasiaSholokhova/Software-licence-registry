@@ -18,7 +18,7 @@
  <body class="loggedin">
  <nav class="site-header sticky-top py-1">
       <div class="container d-flex flex-column flex-md-row justify-content-between">
-  <a class="py-2 d-none d-md-inline-block" href="{{ url_for('home') }}"><i class="fas fa-home"></i> Домашняя страница</a>
+  <a class="py-2 d-none d-md-inline-block" href="{{ url_for('home_support') }}"><i class="fas fa-home"></i> Домашняя страница</a>
   <a class="py-2 d-none d-md-inline-block" href="{{ url_for('profile') }}"><i class="fas fa-user-circle"></i> Профиль</a>
   <a class="py-2 d-none d-md-inline-block" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Выход</a>
    </div>
@@ -30,31 +30,31 @@
           <div class="sidebar-sticky">
             <ul class="nav flex-column">
               <li class="nav-item">
-                <a class="nav-link" href="{{url_for('customer_list') }}">
+                <a class="nav-link" href="{{url_for('support_customer_list') }}">
                   <i class="fas fa-users"></i>
                   Покупатели
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{{url_for('licence_list') }}">
+                <a class="nav-link" href="{{url_for('support_licence_list') }}">
     <i class="fas fa-shopping-cart"></i>
                   Лицензии
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{{url_for('vendor_list') }}">
+                <a class="nav-link" href="{{url_for('support_vendor_list') }}">
                   <i class="fas fa-users"></i>
                   Вендоры
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{{url_for('software_list') }}">
+                <a class="nav-link" href="{{url_for('support_software_list') }}">
                   <i class="fas fa-download"></i>
                   ПО
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{{url_for('partners_list') }}">
+                <a class="nav-link" href="{{url_for('support_partners_list') }}">
                   <i class="fas fa-users"></i>
                   Контрагенты
                 </a>

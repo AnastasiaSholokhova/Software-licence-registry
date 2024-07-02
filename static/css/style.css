@@ -20,7 +20,7 @@ body {
  .login-header
  {
   text-align: center;
-  font-family: "vardhana",cursive;
+  font-family: "lucida console", monospace;
   font-size: 35px;
   background: linear-gradient(to bottom, #00bfff 0%, #5b6d7c 100%);
   color:#fff;
@@ -47,7 +47,7 @@ padding: .75rem 1.25rem;
  
 h1.title { 
 font-size: 50px;
-font-family: 'Passion One', cursive; 
+font-family: 'lucida console', monospace; 
 font-weight: 400; 
 }
  
@@ -110,6 +110,7 @@ span.input-group-addon i {
  
 .login-button{
 margin-top: 5px;
+text-align: center;
 }
  
 .login-register{
@@ -118,10 +119,27 @@ text-align: center;
 }
  
 .site-header {
-   background-color: rgba(0, 0, 0, .85);
-   -webkit-backdrop-filter: saturate(180%) blur(20px);
-   backdrop-filter: saturate(180%) blur(20px);
+  background-color: rgba(0, 0, 0, 0.85);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  padding: 15px; / Add padding for better appearance /
 }
+
 .site-header a { 
 color:#fff;
+}
+.pagination-page-info {
+    padding: .6em;
+    padding-left: 0;
+    width: 40em;
+    margin: .5em;
+    margin-left: 0;
+    font-size: 12px;
+}
+.pagination-page-info b {
+    color: black;
+    background: #6aa6ed;
+    padding-left: 2px;
+    padding: .1em .25em;
+    font-size: 150%;
 }

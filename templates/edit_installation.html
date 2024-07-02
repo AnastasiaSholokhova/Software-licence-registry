@@ -1,0 +1,32 @@
+{% extends "support_layout.html" %}
+{% block body %}
+  <div class="row">
+    <div class="col-md-10">
+      <div class="card card-body">
+        <form action="/update_installation/{{installation.код_установки}}" method="POST">
+          <div class="form-group">
+            <input type="text" name="наименование_ПО" value="{{installation.наименование_ПО}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <input type="text" name="ФИО" value="{{installation.ФИО}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <input type"text" name="IP_адрес" value="{{installation.IP_адрес}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <input type="text" name="наименование_машины" value="{{installation.наименование_машиины}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <input type="text" name="тип_ПО" value="{{installation.тип_ПО}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary btn-block">
+              Обновить
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
