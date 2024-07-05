@@ -8,20 +8,28 @@
             <input type="text" name="наименование_ПО" value="{{installation.наименование_ПО}}" class="form-control">
           </div>
           <div class="form-group">
+            <input type="text" name="тип_лицензии" value="{{installation.тип_лицензии}}" class="form-control">
+          </div>
+          <div class="form-group">
             <input type="text" name="ФИО" value="{{installation.ФИО}}" class="form-control">
           </div>
           <div class="form-group">
-            <input type"text" name="IP_адрес" value="{{installation.IP_адрес}}" class="form-control">
+            <input type"text" name="ip_адрес" value="{{installation.ip_адрес}}" class="form-control">
           </div>
           <div class="form-group">
             <input type="text" name="наименование_машины" value="{{installation.наименование_машиины}}" class="form-control">
           </div>
-          <div class="form-group">
-            <input type="text" name="тип_ПО" value="{{installation.тип_ПО}}" class="form-control">
+           <div class="form-group">
+            <label><input type="checkbox" name="чекбокс" {%if installation.checkbox %}checked{% endif %} class="form-control">ПО установлено?</label>
           </div>
           <div class="form-group">
-            <input type="checkbox" name="чекбокс" {%if installation.checkbox %}checked{% endif %} class="form-control">
-            <label for="чекбокс">ПО установлено?</label>
+            <input type="date" name="дата_установки_ПО" value="{{installation.дата_установки_ПО}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label><input type="checkbox" name="чекбокс_условно_бесплатное_ПО" {% if installation.checkbox %}checked{% endif %} class="form-control">ПО условно-бесплатное?</label>
+          </div>
+          <div class="form-group">
+            <input type="text" name="примечание" value="{{installation.примечание}}" class="form-control">
           </div>
           <div class="form-group">
             <button type="submit" class="btn btn-primary btn-block">

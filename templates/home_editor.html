@@ -3,7 +3,7 @@
 {% block title %}Домашняя страница{% endblock %}
   
 {% block content %}
-<p>Добро пожаловать, {{ username }}!</p>
+<div class="row"><h2>Добро пожаловать, {{ username }}!</h2></div>
 <div class="row"><h3>Реестр лицензий ПО</h3></div>
   <div class="row">
     <div class="col-md-4">
@@ -37,7 +37,7 @@
             <input type="date" class="form-control" name="окончание_действия_лицензии" placeholder="Окончание действия лицензии">
           </div>
           <div class="form-group">
-            <input type="number" class="form-control" name="срок_полезного_использования_мес" placeholder="Срок полезного использования(мес)">
+            <input type="number" class="form-control" name="счёт_списания" placeholder="Счёт списания">
           </div>
           <div class="form-group">
             <input type="number" class="form-control" name="стоимость_за_единицу" placeholder="Стоимость за единицу">
@@ -51,8 +51,12 @@
           <div class="form-group">
             <input type="number" class="form-control" name="количество_ПО" placeholder="Количество ПО">
           </div>
+          <div class="form-gorup">
+            <input type="checkbox" class="form-control" id="checkbox_pay" name="оплачено" placeholder="Оплачено">
+            <label for="checkbox_pay">ПО оплачено?</label>
+          </div>
           <div class="form-group">
-            <input type="text" class="form-control" name="тип_ПО" placeholder="Тип ПО">
+            <input type="text" class="form-control" name="примечание" placeholder="Примечание">
           </div>
           <button class="btn btn-primary btn-block">
             Сохранить
@@ -69,14 +73,16 @@
             <th>Вендор</th>
             <th>Начало действия лицензии</th>
             <th>Окончание действия лицензии</th>
-            <th>Срок полезного использования(мес)></th>
+            <th>Счёт списания</th>
             <th>Стоимость за единицу</th>
             <th>Итоговая стоимость</th>
             <th>Заказчик ПО</th>
             <th>Признак ПО</th>
             <th>Количество ПО</th>
             <th>Срок действия лицензии</th>
-            <th>Тип ПО</th>
+            <th>Оплачено</th>
+            <th>Остаток</th>
+            <th>Примечание</th>
             <th>Панель управления</th>
         </tr>
       </thead>
@@ -96,6 +102,8 @@
           <td>{{row[10]}}</td>
           <td>{{row[11]}}</td>
           <td>{{row[12]}}</td>
+          <td>{{row[13]}}</td>
+          <td>{{row[14]}}</td>
           <td width="70">
             <a href="/edit/{{row[0]}}" class="btn btn-secondary btn-sm">Редактировать</a>
             <a href="/delete/{{row[0]}}" class="btn btn-danger btn-delete btn-sm">Удалить</a>

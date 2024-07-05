@@ -119,18 +119,38 @@ justify-content: center;
 font-size: 11px;
 text-align: center;
 }
+
+#main {
+    background-color: #eee;
+    position: relative;
+    z-index: 1001;
+    width: 100%;
+  }
  
 .site-header {
   background-color: rgba(0, 0, 0, 0.85);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   backdrop-filter: saturate(180%) blur(20px);
   padding: 15px; / Add padding for better appearance /
+  position: relative; /  Относительное позиционирование /
+  top: 0; 
+  z-index: 100; 
+  left: 0; 
 }
 
 .site-header a { 
 color:#fff;
+width: 100%;
 }
 
+#stickyContent {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: #E0461B;
+  }
 .no-padding {
        padding: 0 !important;
 }

@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Подтверждение адреса электронной почты</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проверка OTP</title>
 </head>
 <body>
-<div class="form-group">
-        <label for="email" class="cols-sm-2 control-label">Ваша электронная почта</label>
-        <div class="cols-sm-10">
-          <div class="input-group">
-            <span class="input-group-addon"><i class="fa fa-envelope fa" aria-hidden="true"></i></span>
-            <input type="text" class="form-control" name="email" id="email"  placeholder="Введите вашу электронную почту"/>
-          </div>
-        </div>
-</div>
-<form action={{url_for('validate')}} method="POST">
-<h4>Одноразовый код был отправлен на ваш адрес электронной почты. Пожалуйста, проверьте почту для подтверждения.</h4>
-Введите одноразовый код подтверждения:<input-type="text", name="otp">
-<input type="submit", value="Submit">
-</form>
+    <h1>Проверка OTP</h1>
+    <p>Введите OTP, который вы получили на почту:</p>
+
+    <form method="POST" action="/validate">
+        <input type="hidden" name="email" value="{{ email }}">
+        <input type="text" name="otp" placeholder="OTP">
+        <button type="submit">Проверить</button>
+    </form>
+
+    {% if error %}
+        <h3>{{ error }}</h3>
+    {% endif %}
 </body>
 </html>

@@ -27,6 +27,9 @@
         <div class="form-group">
           <input type="text" class="form-control" name="договор" placeholder="Договор">
         </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="примечание" placeholder="Примечание">
+        </div>
         <button class="btn btn-primary btn-block">
           Сохранить
         </button>
@@ -40,6 +43,7 @@
           <th>Код контрагента</th>
           <th>Наименование контрагента</th>
           <th>Договор</th>
+          <th>Примечание</th>
           <th>Панель управления</th>
         </tr>
       </thead>
@@ -49,6 +53,7 @@
           <td>{{row[0]}}</td>
           <td>{{row[1]}}</td>
           <td>{{row[2]}}</td>
+          <td>{{row[3]}}</td>
           <td width="130">
             <a href="/edit_partner/{{row[0]}}" class="btn btn-secondary btn-sm">Редактировать</a>
             <a href="/delete_partner/{{row[0]}}" class="btn btn-danger btn-delete btn-sm">Удалить</a>

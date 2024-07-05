@@ -16,6 +16,7 @@
 
  </head>
  <body class="loggedin">
+ <div id="main" class="duplicate">
  <nav class="site-header sticky-top py-1">
       <div class="container d-flex flex-column flex-md-row justify-content-between">
   <a class="py-2 d-none d-md-inline-block" href="{{ url_for('home') }}"><i class="fas fa-home"></i> Домашняя страница</a>
@@ -23,12 +24,20 @@
   <a class="py-2 d-none d-md-inline-block" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Выход</a>
    </div>
     </nav>
+ </div>
+ <div id="stickyContent"></div>
    
  <div class="container-fluid">
       <div class="row">
         <nav class="col-md-2 d-none d-md-block bg-light sidebar">
           <div class="sidebar-sticky">
             <ul class="nav flex-column">
+                <li class="nav-item">
+                  <a class="nav link" href="{{url_for('number_licences') }}">
+                    <i class="fas fa-download"></i>
+                    Количество ПО
+                  </a>
+                </li>
               <li class="nav-item">
                 <a class="nav-link" href="{{url_for('customer_list') }}">
                   <i class="fas fa-users"></i>

@@ -17,13 +17,10 @@
             <input type="date" name="окончание_действия_лицензии" value="{{licence.окончание_действия_лицензии}}" class="form-control">
           </div>
           <div class="form-group">
-            <input type="number" name="срок_полезного_использования_мес" value="{{licence.срок_полезного_использования}}" class="form-control">
+            <input type="number" name="счёт_списания" value="{{licence.счёт_списания}}" class="form-control">
           </div>
           <div class="form-group">
             <input type="number" name="стоимость_за_единицу" value="{{licence.стоимость_за_единицу}}" class="form-control">
-          </div>
-          <div class="form-group">
-            <input type="number" name="итоговая_стоимость" value="{{licence.итоговая_стоимость}}" class="form-control">
           </div>
           <div class="form-group">
             <input type="text" name="заказчик_ПО" value="{{licence.заказчик_ПО}}" class="form-control">
@@ -35,7 +32,10 @@
             <input type="number" name="количество_ПО" value="{{licence.количество_ПО}}" class="form-control">
           </div>
           <div class="form-group">
-            <input type="text" name="тип_ПО" value="{{licence.тип_ПО}}" class="form-control">
+            <label><input type="checkbox" name="оплачено" {% if licence.checkbox %}checked{% endif %} class="form-control">Оплачена ли лицензия?</label>
+          </div>
+          <div class="form-group">
+            <input type="text" name="примечание" value="{{licence.примечание}}" class="form-control">
           </div>
           <div class="form-group">
             <button type="submit" class="btn btn-primary btn-block">

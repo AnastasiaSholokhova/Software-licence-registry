@@ -32,6 +32,9 @@
         <div class="form-group">
           <input type="url" class="form-control" name="ссылка_на_сайт_заказчика" placeholder="Ссылка на сайт заказчика">
         </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="примечание" placeholder="Примечание">
+        </div>
         <button class="btn btn-primary btn-block">
           Сохранить
         </button>
@@ -46,6 +49,7 @@
           <th>Заказчик ПО</th>
           <th>Описание заказчика</th>
           <th>Ссылка на сайт заказчика</th>
+          <th>Примечание</th>
           <th>Панель управления</th>
         </tr>
       </thead>
@@ -56,6 +60,7 @@
           <td>{{row[1]}}</td>
           <td>{{row[2]}}</td>
           <td>{{row[3]}}</td>
+          <td>{{row[4]}}</td>
           <td width="130">
             <a href="/edit_customer/{{row[0]}}" class="btn btn-secondary btn-sm">Редактировать</a>
             <a href="/delete_customer/{{row[0]}}" class="btn btn-danger btn-delete btn-sm">Удалить</a>

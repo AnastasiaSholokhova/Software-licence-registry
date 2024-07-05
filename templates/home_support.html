@@ -3,7 +3,7 @@
 {% block title %}Домашняя страница{% endblock %}
   
 {% block content %}
-<p>Добро пожаловать, {{ username }}!</p>
+<div class="row"><h2>Добро пожаловать, {{ username }}!</h2></div>
 <div class="row"><h3>Реестр лицензий ПО</h3></div>
     <div class="col-md-8">
       <table id="example" class="table table-striped table-bordered" style="width:65%">
@@ -14,14 +14,16 @@
             <th>Вендор</th>
             <th>Начало действия лицензии</th>
             <th>Окончание действия лицензии</th>
-            <th>Срок полезного использования(мес)></th>
+            <th>Счёт списания</th>
             <th>Стоимость за единицу</th>
             <th>Итоговая стоимость</th>
             <th>Заказчик ПО</th>
             <th>Признак ПО</th>
             <th>Количество ПО</th>
             <th>Срок действия лицензии</th>
-            <th>Тип ПО</th>
+            <th>Оплачено</th>
+            <th>Остаток</th>
+            <th>Примечание</th>
         </tr>
       </thead>
       <tbody>
@@ -40,6 +42,8 @@
           <td>{{row[10]}}</td>
           <td>{{row[11]}}</td>
           <td>{{row[12]}}</td>
+          <td>{{row[13]}}</td>
+          <td>{{row[14]}}</td>
         </tr>
         {% endfor %}
       </tbody>
