@@ -5,15 +5,19 @@
       <div class="card card-body">
         <form action="/update_number/{{number.номер_заявки}}" method="POST">
           <div class="form-group">
+            <label for="наименование_ПО"><b>Наименование ПО:</b></label>
             <input type="text" name="наименование_ПО" value="{{number.наименование_ПО}}" class="form-control">
           </div>
           <div class="form-group">
+            <label for="тип_лицензии"><b>Тип лицензии:</b></label>
             <input type="text" name="тип_лицензии" value="{{number.тип_лицензии}}" class="form-control">
           </div>
           <div class="form-group">
+            <label for="количество_лицензий_ПО"><b>Количество лицензий ПО:</b></label>
             <input type="number" name="количество_лицензий_ПО" value="{{number.количество_лицензий_ПО}}" class="form-control">
           </div>
           <div class="form-group">
+            <label for="примечание"><b>Примечание:</b></label>
             <input type="text" name="примечание" value="{{number.примечание}}" class="form-control">
           </div>
           <div class="form-group">

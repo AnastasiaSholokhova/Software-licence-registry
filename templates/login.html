@@ -16,11 +16,16 @@
     <p>Пожалуйста, введите имя пользователя и пароль.</p>
     <form class="form-group" action="{{ url_for('login') }}" method="post">
         <label>Имя пользователя</label>
-        <input type="text" class="form-control" name="username" placeholder="Username" id="username" required>
+        <input type="text" class="form-control" name="username" placeholder="Имя пользователя" id="username" required>
         <label>Пароль</label>
-        <input type="password" class="form-control" name="password" placeholder="Password" id="password" required>
+        <input type="password" class="form-control" name="password" placeholder="Пароль" id="password" required>
         <input type="checkbox" value="checked"><b>Запомнить</b>
         <a href={{url_for('reset_password') }}> Забыли пароль? </a>
+        <div style="margin-top: 10px;"><label for="login_method">Способ регистрации:</label>
+        <select class="form-control" id="login_method" name="login_method">
+          <option value="local">Локальный</option>
+          <option value="ad">Active Directory</option>
+        </select></div>
         <input type="submit" value="Войти" class="form-control btn btn-success" name="">
     </form>
     {% with messages = get_flashed_messages()  %}
@@ -38,5 +43,18 @@
     <p>Нет аккаунта <a href="{{ url_for('register') }}">Зарегистрироваться</a></p>
   </div>
  </div>
+ <script>
+    $(document).ready(function() {
+        $("#login_method").change(function() {
+            var method = $(this).val();
+            var loginLink = $("#loginLink");
+            if (method === "ad") {
+                loginLink.attr("href", "{{ url_for('login_ad') }}");
+            } else {
+                loginLink.attr("href", "{{ url_for('login') }}");
+            }
+        });
+    });
+  </script>
  </body>
 </html>

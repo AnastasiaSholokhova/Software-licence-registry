@@ -5,12 +5,15 @@
       <div class="card card-body">
         <form action="/update_partner/{{partner.код_контрагента}}" method="POST">
           <div class="form-group">
+            <label for="наименование_контрагента"><b>Наименование контрагента:</b></label>
             <input type="text" name="наименование_контрагента" value="{{partner.наименование_контрагента}}" class="form-control">
           </div>
           <div class="form-group">
+            <label for="договор"><b>Договор:</b></label>
             <input type="text" name="договор" value="{{partner.договор}}" class="form-control">
           </div>
           <div class="form-group">
+            <label for="примечание"><b>Примечание:</b></label>
             <input type="text" name="примечание" value="{{partner.примечание}}" class="form-control">
           </div>
           <div class="form-group">

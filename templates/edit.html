@@ -5,36 +5,45 @@
       <div class="card card-body">
         <form action="/update/{{licence.номер_пп}}" method="POST">
           <div class="form-group">
+            <label for="наименование_ПО"><b>Наименование ПО:</b></label>
             <input type="text" name="наименование_ПО" value="{{licence.наименование_ПО}}" class="form-control">
           </div>
           <div class="form-group">
+            <label for="вендор"><b>Вендор:</b></label>
             <input type="text" name="вендор" value="{{licence.вендор}}" class="form-control">
           </div>
           <div class="form-group">
+            <label for="начало_действия_лицензии"><b>Начало действия лицензии:</b></label>
             <input type="date" name="начало_действия_лицензии" value="{{licence.начало_действия_лицензии}}" class="form-control">
           </div>
           <div class="form-group">
-            <input type="date" name="окончание_действия_лицензии" value="{{licence.окончание_действия_лицензии}}" class="form-control">
-          </div>
-          <div class="form-group">
+            <label for="счёт_списания"><b>Счёт списания:</b></label>
             <input type="number" name="счёт_списания" value="{{licence.счёт_списания}}" class="form-control">
           </div>
           <div class="form-group">
+            <label for="стоимость_за_единицу"><b>Стоимость за единицу:</b></label>
             <input type="number" name="стоимость_за_единицу" value="{{licence.стоимость_за_единицу}}" class="form-control">
           </div>
           <div class="form-group">
+            <label for="заказчик_ПО"><b>Заказчик ПО:</b></label>
             <input type="text" name="заказчик_ПО" value="{{licence.заказчик_ПО}}" class="form-control">
           </div>
           <div class="form-group">
+            <label for="признак_ПО"><b>Признак ПО:</b></label>
             <input type="text" name="признак_ПО" value="{{licence.признак_ПО}}" class="form-control">
           </div>
           <div class="form-group">
+            <label for="количество_ПО"><b>Количество лицензий:</b></label>
             <input type="number" name="количество_ПО" value="{{licence.количество_ПО}}" class="form-control">
           </div>
           <div class="form-group">
-            <label><input type="checkbox" name="оплачено" {% if licence.checkbox %}checked{% endif %} class="form-control">Оплачена ли лицензия?</label>
+            <label for="оплачено">
+            <input type="checkbox" name="оплачено" {% if licence.checkbox %}checked{% endif %} class="form-control">
+            </label>
+            Лицензия оплачена?
           </div>
           <div class="form-group">
+            <label for="примечание"><b>Примечание:</b></label>
             <input type="text" name="примечание" value="{{licence.примечание}}" class="form-control">
           </div>
           <div class="form-group">

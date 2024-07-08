@@ -6,15 +6,16 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import io
 from functools import wraps
 import xlwt
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from waitress import serve
 from flask_mail import Mail
 from random import randint
 import smtplib
 from email.mime.text import MIMEText
+import os
 
 app = Flask(__name__)
-app.secret_key = 'anastasia-database'
+app.secret_key = os.urandom(24)
 mail = Mail(app)
 
 DB_HOST = "localhost"
@@ -32,6 +33,7 @@ app.config['MAIL_USE_SSL'] = False
 
 conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 conn2 = psycopg2.connect(dbname=DB_NAME2, user=DB_USER, password=DB_PASS, host=DB_HOST)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -104,6 +106,10 @@ def login():
  
     return render_template('login.html')
 
+@app.route('/login_ad', methods=['GET', 'POST'])
+def login_ad():
+    pass
+
 def role_required(*roles):
     def decorator(func):
         @wraps(func)
@@ -165,7 +171,6 @@ def add_licence():
         наименование_ПО = request.form['наименование_ПО']
         вендор = request.form['вендор']
         начало_действия_лицензии = request.form['начало_действия_лицензии']
-        окончание_действия_лицензии = request.form['окончание_действия_лицензии']
         счёт_списания = request.form['счёт_списания']
         стоимость_за_единицу = float(request.form['стоимость_за_единицу'])
         заказчик_ПО = request.form['заказчик_ПО']
@@ -179,6 +184,12 @@ def add_licence():
             итоговая_стоимость = стоимость_за_единицу * количество_ПО * 1.2
         else:
             итоговая_стоимость = стоимость_за_единицу * количество_ПО
+        if счёт_списания == '12':
+            начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
+            окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365)).strftime('%Y-%m-%d')
+        elif счёт_списания == '36':
+            начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
+            окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365 * 3)).strftime('%Y-%m-%d')
         if оплачено:
             остаток = 0
         elif счёт_списания == '12' and not оплачено:
@@ -218,7 +229,6 @@ def update_licence(id):
         наименование_ПО = request.form['наименование_ПО']
         вендор = request.form['вендор']
         начало_действия_лицензии = request.form['начало_действия_лицензии']
-        окончание_действия_лицензии = request.form['окончание_действия_лицензии']
         счёт_списания = request.form['счёт_списания']
         стоимость_за_единицу = float(request.form['стоимость_за_единицу'])
         заказчик_ПО = request.form['заказчик_ПО']
@@ -232,6 +242,12 @@ def update_licence(id):
             итоговая_стоимость = стоимость_за_единицу * количество_ПО * 1.2
         else:
             итоговая_стоимость = стоимость_за_единицу * количество_ПО
+        if счёт_списания == '12':
+            начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
+            окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365)).strftime('%Y-%m-%d')
+        elif счёт_списания == '36':
+            начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
+            окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365 * 3)).strftime('%Y-%m-%d')
         if оплачено:
             остаток = 0
         elif счёт_списания == '12' and not оплачено:
@@ -1119,7 +1135,7 @@ def user_change_password():
                         return redirect(url_for('profile'))
                 else:
                     flash('Введен некорректный адрес электронной почты!')
-                    return redirect(url_for('usser_change_password'))
+                    return redirect(url_for('user_change_password'))
                 
         return render_template('change_password.html', title="Поменять пароль")
 

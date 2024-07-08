@@ -39,14 +39,19 @@
           <input type="text" class="form-control" name="наименование_машины" placeholder="Наименование машины">
         </div>
         <div class="form-group">
-            <label><input type="checkbox" class="form-control" id="чекбокс" name="чекбокс">ПО установлено?</label>
+            <label for="чекбокс">
+            <input type="checkbox" class="form-control" id="чекбокс" name="чекбокс">
+            </label>
+            ПО установлено?
         </div>
         <div class="form-group">
-          <input type="date" class="form-control" name="дата_установки_ПО" placeholder="Дата устновки ПО">
+          <input type="date" class="form-control" name="дата_установки_ПО" placeholder="Дата установки ПО">
         </div>
         <div class="form-group">
+          <label for="checkbox_po">
           <input type="checkbox"  class="form-control" id="checkbox_po" name="чекбокс_условно_бесплатное_ПО"/>
-          <label for="checkbox_po">ПО условно-бесплатное?</label>
+          </label>
+          ПО условно-бесплатное?
         </div>
         <div class="form-group">
           <input type="text" class="form-control" name="примечание" placeholder="Примечание">
@@ -67,7 +72,7 @@
           <th>ФИО</th>
           <th>IP адрес</th>
           <th>Наименование машины</th>
-          <th>Чекбокс</th>
+          <th>Чекбокс установлено ли ПО</th>
           <th>Общее количество</th>
           <th>Число установленных лицензий</th>
           <th>Дата установки ПО</th>
