@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+{% block body %}
+  <div class="row">
+    <div class="col-md-10">
+      <div class="card card-body">
+        <form action="/admin_update_installation/{{installation.код_установки}}" method="POST">
+          <div class="form-group">
+            <label for="наименование_ПО"><b>Наименование ПО:</b></label>
+            <input type="text" name="наименование_ПО" value="{{installation.наименование_ПО}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="тип_лицензии"><b>Тип лицензии:</b></value>
+            <input type="text" name="тип_лицензии" value="{{installation.тип_лицензии}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="ФИО"><b>ФИО:</b></label>
+            <input type="text" name="ФИО" value="{{installation.ФИО}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="ip_адрес"><b>IP адрес:</b></label>
+            <input type"text" name="ip_адрес" value="{{installation.ip_адрес}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="наименование_машины"><b>Наименование машины:</b></label>
+            <input type="text" name="наименование_машины" value="{{installation.наименование_машиины}}" class="form-control">
+          </div>
+           <div class="form-group">
+            <label><input type="checkbox" name="чекбокс" {%if installation.checkbox %}checked{% endif %} class="form-control">ПО установлено?</label>
+          </div>
+          <div class="form-group">
+            <label for="дата_установки_ПО"><b>Дата установки ПО:</b></label>
+            <input type="date" name="дата_установки_ПО" value="{{installation.дата_установки_ПО}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label><input type="checkbox" name="чекбокс_условно_бесплатное_ПО" {% if installation.checkbox %}checked{% endif %} class="form-control">
+            </label>
+            ПО условно-бесплатное?
+          </div>
+          <div class="form-group">
+            <label for="примечание"><b>Примечание:</b></label>
+            <input type="text" name="примечание" value="{{installation.примечание}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary btn-block">
+              Обновить
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+

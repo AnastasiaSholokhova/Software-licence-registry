@@ -1,0 +1,26 @@
+{% extends 'support_layout.html' %}
+  
+{% block title %}Profile{% endblock %}
+  
+{% block content %}
+<h1>Профиль</h1>
+<div>
+    <p>Детали аккаунта представлены ниже:</p>
+    <table>
+        <tr>
+            <td>Имя:</td>
+            <td>{{ account['fullname'] }}</td>
+        </tr>
+  <tr>
+            <td>Имя пользователя:</td>
+            <td>{{ account['username'] }}</td>
+        </tr>
+        <tr>
+            <td>Электронная почта:</td>
+            <td>{{ account['email'] }}</td>
+        </tr>
+    </table>
+    <a href="{{url_for('support_change_password') }}" class="btn btn-secondary btn-sm">Поменять пароль</a>
+    <a href="{{url_for('support_change_email') }}" class="btn btn-secondary btn-sm">Поменять адрес электронной почты</a>
+</div>
+{% endblock %}

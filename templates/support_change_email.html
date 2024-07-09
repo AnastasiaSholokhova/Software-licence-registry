@@ -30,7 +30,7 @@
             {% endwith %}
             <div class="card">
                 <div class="card-body">
-                    <form action="{{ url_for('user_change_email', email=email) }}" method="POST">
+                    <form action="{{ url_for('support_change_email', email=email) }}" method="POST">
                         <div class="my-2">
                             <label for=""><b>Введите ваш новый адрес электронной почты</b></label>
                             <input type="text" name="new_email" id="new_email" class="form-control my-1">

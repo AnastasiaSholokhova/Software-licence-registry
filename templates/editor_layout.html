@@ -18,8 +18,8 @@
  <body class="loggedin">
  <nav class="site-header sticky-top py-1">
       <div class="container d-flex flex-column flex-md-row justify-content-between">
-  <a class="py-2 d-none d-md-inline-block" href="{{ url_for('home') }}"><i class="fas fa-home"></i><b>Домашняя страница</b></a>
-  <a class="py-2 d-none d-md-inline-block" href="{{ url_for('profile') }}"><i class="fas fa-user-circle"></i><b>Профиль</b></a>
+  <a class="py-2 d-none d-md-inline-block" href="{{ url_for('home_editor') }}"><i class="fas fa-home"></i><b>Домашняя страница</b></a>
+  <a class="py-2 d-none d-md-inline-block" href="{{ url_for('editor_profile') }}"><i class="fas fa-user-circle"></i><b>Профиль</b></a>
   <a class="py-2 d-none d-md-inline-block" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i><b>Выход</b></a>
    </div>
     </nav>
@@ -30,7 +30,7 @@
           <div class="sidebar-sticky">
             <ul class="nav flex-column">
               <li class="nav-item">
-                  <a class="nav-link" href="{{url_for('view_number_licences') }}">
+                  <a class="nav-link" href="{{url_for('editor_view_number_licences') }}">
                     <i class="fas fa-download"></i>
                     Количество ПО
                   </a>
