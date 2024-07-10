@@ -1,9 +1,9 @@
 {% extends 'support_layout.html' %}
   
-{% block title %}Справочник установленного ПО{% endblock %}
+{% block title %}Справочник установленного ПО {{ software }}{% endblock %}
   
 {% block content %}
-<div class="row"><h3>Справочник установленного ПО</h3></div>
+<div class="row"><h3>Справочник установленного ПО {{ software }}</h3></div>
 <div class="row">
   <div class="col-md-4">
     {% with messages = get_flashed_messages() %}
@@ -29,7 +29,6 @@
           <th>Наименование машины</th>
           <th>Дата установки ПО</th>
           <th>Наименование ПО</th>
-          <th>Панель управления</th>
         </tr>
       </thead>
       <tbody>
@@ -41,14 +40,15 @@
           <td>{{row[3]}}</td>
           <td>{{row[4]}}</td>
           <td>{{row[5]}}</td>
-          <td width="130">
-            <a href={{url_for('download_soft_report', software=row[5])}} class="btn btn-secondary btn-sm">Сгенерировать отчет</a>
-          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    <div class="col-md-12">
+       <button id="generate-report-button" data-software="YourSoftwareName">Сгенерировать отчёт</button>
+    </div>
         <script>
+        
     $(document).ready(function(){
         $('#soft_table').DataTable({
       "aLengthMenu": [[3, 5, 10, 25, -1], [3, 5, 10, 25, "All"]],
@@ -60,5 +60,22 @@
   </div>
 </div>
 </div>
+<script>
+  $(document).ready(function() {
+    $("#generate-report-button").click(function() {
+      var selectedSoftware = $("#soft_table").DataTable().row('.selected').data()[5];
+      if (!selectedSoftware) {
+        alert("Пожалуйста, выберите ряд для генерации таблицы.");
+        return;
+      }
+      var downloadUrl = "/download/soft_report/excel/" + selectedSoftware;
+          window.location.href = downloadUrl;
+        });
+        $('#soft_table').on('click', 'tbody tr', function() {
+          $(this).siblings().removeClass('selected');
+          $(this).addClass('selected');
+        });
+      });
+</script>
 {% endblock %}
 

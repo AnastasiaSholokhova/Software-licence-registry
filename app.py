@@ -39,11 +39,12 @@ conn2 = psycopg2.connect(dbname=DB_NAME2, user=DB_USER, password=DB_PASS, host=D
 def register():
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
  
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
+    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form and 'phone_number' in request.form:
         fullname = request.form['fullname']
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
+        phone_number = request.form['phone_number']
         role = request.form['role']
     
         _hashed_password = generate_password_hash(password)
@@ -59,14 +60,16 @@ def register():
             flash('Некорректный адрес электронной почты!')
         elif not re.match(r'[A-Za-z0-9]+', username):
             flash('Имя пользователя должно содержать только буквы и цифры!')
-        elif not username or not password or not email or not role:
+        elif not re.match(r"^(?:\+?(?:[0-9] ?){6,14}[0-9])$", phone_number):
+            flash('Некорректный номер телефона!')
+        elif not username or not password or not email or not phone_number or not role:
             flash('Пожалуйста, заполните форму!')
         else:
-            cursor.execute("INSERT INTO users (fullname, username, password, email, role) VALUES (%s,%s,%s,%s,%s)", (fullname, username, _hashed_password, email, role))
+            cursor.execute("INSERT INTO users (fullname, username, password, email, phone_number, role) VALUES (%s,%s,%s,%s,%s,%s)", (fullname, username, _hashed_password, email, phone_number, role))
             conn.commit()
             cursor.execute('SELECT LASTVAL() AS id;')
             user_id = cursor.fetchone()
-            session['logedin'] = True
+            session['loggedin'] = True
             session['id'] = user_id
             session['username'] = username
             session['role'] = role
@@ -892,12 +895,15 @@ def admin_install_software():
     return redirect(url_for('login'))
 
 @app.route('/install_software')
+@role_required('editor')
 def install_software():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    string='SELECT * FROM Установка_ПО'
-    cur.execute(string)
-    list_installation = cur.fetchall()
-    return render_template('install.html', list_installation=list_installation)
+    if 'loggedin' in session:
+        string='SELECT * FROM Установка_ПО'
+        cur.execute(string)
+        list_installation = cur.fetchall()
+        return render_template('install.html', list_installation=list_installation)
+    return redirect(url_for('login'))
 
 @app.route('/admin_add_installation', methods=['POST'])
 def admin_add_installation():
@@ -1164,10 +1170,12 @@ def view_number_licences():
 @role_required('editor')
 def editor_view_number_licences():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    string = ('SELECT * FROM Учет_лицензий')
-    cur.execute(string)
-    list_number = cur.fetchall()
-    return render_template('editor_number.html', list_number=list_number)
+    if 'loggedin' in session:
+        string = ('SELECT * FROM Учет_лицензий')
+        cur.execute(string)
+        list_number = cur.fetchall()
+        return render_template('editor_number.html', list_number=list_number)
+    return redirect(url_for('login'))
 
 @app.route('/add_number', methods=['POST'])
 def add_number():
@@ -1437,13 +1445,17 @@ def editor_change_email():
                     return redirect(url_for('editor_change_email'))
         return render_template('editor_change_email.html', title='Поменять адрес электронной почты')
 
-@app.route('/profile_reset_pasword', methods=['POST', 'GET'])
+@app.route('/profile_reset_password', methods=['POST', 'GET'])
 def profile_reset_password():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
         email = request.form.get('email')
         user_otp = request.form.get('otp')
-        cur.execute('SELECT * FROM users WHERE email=%s', (email,))
+        current_email = session.get('email')
+        if email != current_email:
+            flash('Введенный адрес электронной почты не совпадает с предыдущим!')
+            return render_template('profile_reset_password.html')
+        cur.execute('SELECT * FROM users WHERE email=%s', (session['email'],))
         user = cur.fetchone()
         if not user:
             flash('Неправильный адрес электронной почты! Пожалуйста, попробуйте еще раз.')
@@ -1454,7 +1466,7 @@ def profile_reset_password():
                 return redirect(url_for('profile_change_password', email=email))
             else:
                 flash('Неверный код подтверждения!')
-                return render_template('reset_password.html', email=email)
+                return render_template('profile_reset_password.html', email=email)
         else:
             otp = randint(000000, 999999)
             send_email(email, otp)
@@ -1462,6 +1474,83 @@ def profile_reset_password():
             flash('Код подтверждения отправлен вам на адрес электронной почты!')
             return render_template('profile_reset_password.html', email=email)
     return render_template('profile_reset_password.html', title='Пользователь забыл пароль')
+
+@app.route('/profile_support_reset_password', methods=['POST', 'GET'])
+def profile_support_reset_password():
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user_otp = request.form.get('otp')
+        current_email = session.get('email')
+        if email != current_email:
+            flash('Введенный адрес электронной почты не совпадает с предыдущим!')
+            return render_template('profile_support_reset_password.html')
+        cur.execute('SELECT * FROM users WHERE email=%s', (session['email'],))
+        user = cur.fetchone()
+        if not user:
+            flash('Неправильный адрес электронной почты! Пожалуйста, попробуйте еще раз.')
+            return render_template('profile_support_reset_password.html') 
+        if user_otp:
+            otp = session.get('otp')
+            if otp == int(user_otp):
+                return redirect(url_for('profile_support_change_password', email=email))
+            else:
+                flash('Неверный код подтверждения!')
+                return render_template('profile_support_reset_password.html', email=email)
+        else:
+            otp = randint(000000, 999999)
+            send_email(email, otp)
+            session['otp'] = otp
+            flash('Код подтверждения отправлен вам на адрес электронной почты!')
+            return render_template('profile_support_reset_password.html', email=email)
+    return render_template('profile_support_reset_password.html', title='Пользователь забыл пароль')
+
+@app.route('/profile_editor_reset_password', methods=['POST', 'GET'])
+def profile_editor_reset_password():
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method=='POST':
+        email = request.form.get('email')
+        user_otp = request.form.get('otp')
+        current_email = session.get('email')
+        if email != current_email:
+            flash('Введенный адрес электронной почты не совпадает с предыдущим!')
+            return render_template('profile_editor_reset_password.html')
+        cur.execute('SELECT * FROM users WHERE email=%s', (session['email'],))
+        user = cur.fetchone()
+        if not user:
+            flash('Неправильный адрес электронной почты! Пожалуйста, попробуйте еще раз. ')
+            return render_template('profile_editor_reset_password.html')
+        if user_otp:
+            otp = session.get('otp')
+            if otp == int(user_otp):
+                return redirect(url_for('profile_editor_change_password', email=email))
+            else:
+                flash('Неверный код подтверждения!')
+                return render_template('profile_editor_reset_password.html', email=email)
+        else:
+            otp = randint(000000, 999999)
+            send_email(email, otp)
+            session['otp'] = otp
+            flash('Код подтверждения отправлен вам на адрес электронной почты!')
+            return render_template('profile_editor_reset_password.html', email=email)
+    return render_template('profile_editor_reset_password.html', title='Пользователь забыл пароль ')
+
+@app.route('/reset_email', methods=['POST', 'GET'])
+def reset_email():
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    if request.method == 'POST':
+        phone_number = request.form.get('phone_number')
+        cur.execute('SELECT * FROM users WHERE phone_number=%s', (phone_number,))
+        user = cur.fetchone()
+        
+        if not user:
+            flash('Неправильный номер телефона! Пожалуйста, попробуйте еще раз.')
+            return render_template('reset_email.html')
+        else:
+            return redirect(url_for('change_password_email', phone_number=phone_number))
+    return render_template('reset_email.html', title='Пользователь забыл адрес электронной почты')
+    
 
 @app.route('/reset_password', methods=['POST', 'GET'])
 def reset_password():
@@ -1504,12 +1593,36 @@ def send_email(email, otp):
         smtp.starttls()
         smtp.login('Analstasia.Sholokhova@yandex.ru', 'xyanueciccoxachh')
         smtp.send_message(msg)
+        
+@app.route('/change_password_email/<phone_number>', methods=['POST', 'GET'])
+def change_password_email(phone_number):
+    cur= conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT password FROM users WHERE phone_number=%s', (phone_number,))
+    user = cur.fetchone()
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        if check_password_hash(user['password'], new_password):
+            flash('Новый пароль совпадает с текущим!')
+            return redirect(url_for('change_password_email', phone_number=phone_number))
+        _hashed_password = generate_password_hash(new_password)
+        cur.execute("""UPDATE users
+                    SET password=%s
+                    WHERE phone_number=%s""", (_hashed_password, phone_number))
+        flash('Пароль успешно обновлен!')
+        conn.commit()
+        return redirect(url_for('login'))
+    return render_template('change_password_email.html', phone_number=phone_number, title='Изменить пароль')
 
 @app.route('/change_password/<email>', methods=['POST', 'GET'])
 def change_password(email):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT password FROM users WHERE email=%s', (email,))
+    user = cur.fetchone()
     if request.method == 'POST':
         new_password = request.form.get('new_password')
+        if check_password_hash(user['password'], new_password):
+            flash('Новый пароль совпадает с текущим паролем!')
+            return redirect(url_for('change_password', email=email))
         _hashed_password = generate_password_hash(new_password)
         cur.execute("""UPDATE users
                     SET password=%s
@@ -1522,16 +1635,59 @@ def change_password(email):
 @app.route('/profile_change_password/<email>', methods=['POST', 'GET'])
 def profile_change_password(email):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT password FROM users WHERE email=%s", (email,))
+    user = cur.fetchone()
     if request.method == 'POST':
         new_password = request.form.get('new_password')
+        if check_password_hash(user['password'], new_password):
+            flash('Новый пароль совпадает с текущим паролем!')
+            return redirect(url_for('profile_change_password', email=email))
         _hashed_password = generate_password_hash(new_password)
         cur.execute("""UPDATE users
                     SET password=%s
                     WHERE email=%s""", (_hashed_password, email))
         flash('Пароль успешно обновлен!')
         conn.commit()
-        return redirect(url_for('profile'))#добавить руты
-    return render_template('success_change_password.html', email=email, title='Изменить пароль')#работает?
+        return redirect(url_for('profile'))
+    return render_template('success_change_password.html', email=email, title='Изменить пароль')
+
+@app.route('/profile_support_change_password/<email>', methods=['POST', 'GET'])
+def profile_support_change_password(email):
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT password FROM users WHERE email=%s", (email,))
+    user = cur.fetchone()
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        if check_password_hash(user['password'], new_password):
+            flash('Новый пароль совпадает с текущим паролем!')
+            return redirect(url_for('profile_support_change_password', email=email))
+        _hashed_password = generate_password_hash(new_password)
+        cur.execute("""UPDATE users
+                    SET password=%s
+                    WHERE email=%s""", (_hashed_password, email))
+        flash('Пароль успешно обновлен!')
+        conn.commit()
+        return redirect(url_for('support_profile'))
+    return render_template('success_support_change_password.html', email=email, title='Изменить пароль')
+
+@app.route('/profile_editor_change_password/<email>', methods=['POST', 'GET'])
+def profile_editor_change_password(email):
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT( password FROM users WHERE email=%s', (email,))
+    user = cur.fetchone()
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        if check_password_hash(user['password'], new_password):
+            flash('Новый пароль совпадает с текущим паролем!')
+            return redirect(url_for('profile_editor_change_password', email=email))
+        _hashed_password = generate_password_hash(new_password)
+        cur.execute("""UPDATE users
+                    SET password=%s
+                    WHERE email=%s""", (_hashed_password, email))
+        flash('Пароль успешно обновлен!')
+        conn.commit()
+        return redirect(url_for('editor_profile'))
+    return render_template('success_editor_change_password.html', email=email, title='Изменить пароль')
 
 
 @app.route('/page/<software>')
@@ -1544,7 +1700,11 @@ def show_installation_details(software):
 @app.route('/support_page/<software>')
 def support_show_installation_details(software):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT код_установки, ФИО, ip_адрес, наименование_машины, дата_установки_ПО, наименование_ПО FROM Установка_ПО WHERE наименование_ПО=%s", (software,))
+    cur.execute("""
+            SELECT код_установки, ФИО, ip_адрес, наименование_машины, дата_установки_ПО, наименование_ПО
+            FROM Установка_ПО 
+            WHERE наименование_ПО = %s
+        """, (software,))
     list_installation = cur.fetchall()
     return render_template('support_software_description.html', list_installation=list_installation)
 
@@ -1552,7 +1712,7 @@ def support_show_installation_details(software):
 @app.route('/download/soft_report/excel/<software>')
 def download_soft_report(software):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT код_установки, ФИО, ip_адрес, наименование_машины, дата_установки_ПО, наименование_ПО FROM Установка_ПО WHERE наименование_ПО=%s', (software,))
+    cur.execute('SELECT код_установки, ФИО, ip_адрес, наименование_машины, дата_установки_ПО, наименование_ПО FROM Установка_ПО WHERE наименование_ПО=%s')
     result = cur.fetchall()
     output = io.BytesIO()
     workbook = xlwt.Workbook()

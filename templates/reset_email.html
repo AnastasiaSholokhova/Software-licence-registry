@@ -23,18 +23,11 @@
         </div>
         {% endif %}
         {% endwith %}
-        <form method="POST" action="/reset_password">
+        <form method="POST" action="/reset_email">
             <div class="form-group">
-                <label for="email">Адрес электронной почты:</label>
-                <input type="email" id="email" name="email" value="{{ email }}" required>
+                <label for="email">Номер телефона:</label>
+                <input type="text" id="phone_number" name="phone_number" value="{{ phone_number }}" required>
             </div>
-            <a href = "{{url_for('reset_email')}}">Забыли адрес электронной почты?</a>
-            {% if email %}
-            <div class="form-group">
-                <label for="otp">Код подтверждения:</label>
-                <input type="text" id="otp" name="otp" required>
-            </div>
-            {% endif %}
             <button type="submit">Отправить</button>
         </form>
     </div>

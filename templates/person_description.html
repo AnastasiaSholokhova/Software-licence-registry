@@ -29,7 +29,6 @@
           <th>Наименование машины</th>
           <th>Дата установки ПО</th>
           <th>ФИО</th>
-          <th>Панель управления</th>
         </tr>
       </thead>
       <tbody>
@@ -41,13 +40,13 @@
           <td>{{row[3]}}</td>
           <td>{{row[4]}}</td>
           <td>{{row[5]}}</td>
-          <td width="130">
-            <a href={{url_for('download_inst_report', pername=row[5])}} class="btn btn-secondary btn-sm">Сгенерировать отчёт</a>
-          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    <div class="col-md-12">
+      <button class="btn btn-secondary btn-sm" id="generate-report-button">Сгенерировать отчет</button>
+    </div>
         <script>
     $(document).ready(function(){
         $('#inst_table').DataTable({
@@ -60,4 +59,21 @@
   </div>
 </div>
 </div>
+<script>
+  $(document).ready(function() {
+    $("#generate-report-button").click(function() {
+      var selectedPerson = $("#inst_table").DataTable().row('.selected').data()[5];
+      if (!selectedPerson) {
+        alert("Пожалуйста, выберите ряд для генерации таблицы.");
+        return;
+      }
+      var downloadUrl = "/download/inst_report/excel/" + selectedPerson;
+          window.location.href = downloadUrl;
+        });
+        $('#inst_table').on('click', 'tbody tr', function() {
+          $(this).siblings().removeClass('selected');
+          $(this).addClass('selected');
+        });
+      });
+</script>
 {% endblock %}
