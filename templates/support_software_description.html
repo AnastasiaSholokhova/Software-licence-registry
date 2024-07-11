@@ -28,7 +28,6 @@
           <th>IP адрес</th>
           <th>Наименование машины</th>
           <th>Дата установки ПО</th>
-          <th>Наименование ПО</th>
         </tr>
       </thead>
       <tbody>
@@ -39,14 +38,11 @@
           <td>{{row[2]}}</td>
           <td>{{row[3]}}</td>
           <td>{{row[4]}}</td>
-          <td>{{row[5]}}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-    <div class="col-md-12">
-       <button id="generate-report-button" data-software="YourSoftwareName">Сгенерировать отчёт</button>
-    </div>
+       <a href="/download/soft_report/excel/{{ software }}">Скачать отчет</a>
         <script>
         
     $(document).ready(function(){
@@ -60,22 +56,5 @@
   </div>
 </div>
 </div>
-<script>
-  $(document).ready(function() {
-    $("#generate-report-button").click(function() {
-      var selectedSoftware = $("#soft_table").DataTable().row('.selected').data()[5];
-      if (!selectedSoftware) {
-        alert("Пожалуйста, выберите ряд для генерации таблицы.");
-        return;
-      }
-      var downloadUrl = "/download/soft_report/excel/" + selectedSoftware;
-          window.location.href = downloadUrl;
-        });
-        $('#soft_table').on('click', 'tbody tr', function() {
-          $(this).siblings().removeClass('selected');
-          $(this).addClass('selected');
-        });
-      });
-</script>
 {% endblock %}
 

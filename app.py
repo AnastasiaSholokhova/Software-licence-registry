@@ -103,7 +103,7 @@ def login():
                 if selected_role == 'support':
                     return redirect(url_for('home_support'))
                 elif selected_role == 'editor':
-                    return redirect(url_for('home_editor'))
+                    return redirect(url_for('home'))
                 else:
                     return redirect(url_for('home'))
             else:
@@ -137,7 +137,7 @@ def logout():
    return redirect(url_for('login'))
 
 @app.route('/home')
-@role_required('admin')
+@role_required('admin', 'editor')
 def home():
     if 'loggedin' in session:
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -156,17 +156,6 @@ def home_support():
         cur.execute(s)
         list_licences = cur.fetchall()
         return render_template('home_support.html', username=session['username'], list_licences = list_licences)
-    return redirect(url_for('login'))
-
-@app.route('/home_editor')
-@role_required('editor')
-def home_editor():
-    if 'loggedin' in session:
-        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        s = 'SELECT * FROM лицензии'
-        cur.execute(s)
-        list_licences = cur.fetchall()
-        return render_template('home_editor.html', username=session['username'], list_licences = list_licences)
     return redirect(url_for('login'))
  
     
@@ -873,37 +862,31 @@ def download_report():
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=total_report.xls"})
 
 @app.route('/support_install_software')
-@role_required('admin','support')
+@role_required('support')
 def support_install_software():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    if 'loggedin' in session:
-        string='SELECT * FROM Установка_ПО'
-        cur.execute(string)
-        list_installation = cur.fetchall()
-        return render_template('support_install.html', list_installation=list_installation)
-    return redirect(url_for('login'))
+    string='SELECT код_установки, наименование_ПО, тип_лицензии, чекбокс, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание FROM Установка_ПО'
+    cur.execute(string)
+    list_installation = cur.fetchall()
+    return render_template('support_install.html', list_installation=list_installation)
 
 @app.route('/admin_install_software')
-@role_required('admin')
+@role_required('editor')
 def admin_install_software():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    if 'loggedin' in session:
-        string='SELECT * FROM Установка_ПО'
-        cur.execute(string)
-        list_installation = cur.fetchall()
-        return render_template('admin_install.html', list_installation=list_installation)
-    return redirect(url_for('login'))
+    string='SELECT * FROM Установка_ПО'
+    cur.execute(string)
+    list_installation = cur.fetchall()
+    return render_template('admin_install.html', list_installation=list_installation)
 
 @app.route('/install_software')
-@role_required('editor')
+@role_required('admin')
 def install_software():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    if 'loggedin' in session:
-        string='SELECT * FROM Установка_ПО'
-        cur.execute(string)
-        list_installation = cur.fetchall()
-        return render_template('install.html', list_installation=list_installation)
-    return redirect(url_for('login'))
+    string='SELECT код_установки, наименование_ПО, тип_лицензии, чекбокс, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание FROM Установка_ПО'
+    cur.execute(string)
+    list_installation = cur.fetchall()
+    return render_template('install.html', list_installation=list_installation)
 
 @app.route('/admin_add_installation', methods=['POST'])
 def admin_add_installation():
@@ -916,7 +899,17 @@ def admin_add_installation():
         ip_адрес = request.form['ip_адрес']
         наименование_машины = request.form['наименование_машины']
         чекбокс = bool(request.form.get('чекбокс'))
-        дата_установки_ПО = request.form['дата_установки_ПО']
+        дата_установки_ПО = request.form.get('дата_установки_ПО')
+        if not чекбокс:
+            дата_установки_ПО = None
+        if not дата_установки_ПО:
+            дата_установки_ПО = None
+        else:
+            try:
+                дата_установки_ПО = datetime.strptime(дата_установки_ПО, '%Y-%m-%d').date()
+            except ValueError:
+                flash('Некорректный формат даты!', 'warning')
+                return redirect(url_for('install_software'))
         чекбокс_условно_бесплатное_ПО = bool(request.form.get('чекбокс_условно_бесплатное_ПО'))
         примечание = request.form['примечание']
         cur.execute("""SELECT количество_лицензий_ПО FROM Учет_лицензий
@@ -929,16 +922,26 @@ def admin_add_installation():
             общее_количество = 0  
         cur.execute("""SELECT COUNT(*) AS count FROM Установка_ПО WHERE 
                     наименование_ПО=%s AND тип_лицензии=%s""", (наименование_ПО, тип_лицензии)) 
-        existing_count = cur.fetchone()['count']
-        число_установленных_лицензий = existing_count + 1
+
+        число_установленных_лицензий = cur.fetchone()['count']
+
+        if чекбокс:
+            число_установленных_лицензий += 1
+        
+        if чекбокс and дата_установки_ПО is None:
+            flash('Введите дату установки ПО!')
+            return redirect(url_for('install_software'))
+        if дата_установки_ПО and дата_установки_ПО > datetime.now().date():
+           flash('Дата установки ПО не может быть больше текущей даты!', 'warning')
+           return redirect(url_for('install_software'))
         if not чекбокс_условно_бесплатное_ПО and число_установленных_лицензий > общее_количество:
            flash('Превышено количество доступных лицензий!', 'warning')
-           return redirect(url_for('support_install_software'))
+           return redirect(url_for('install_software'))
         else:
             cur.execute('INSERT INTO Установка_ПО (код_установки, наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (код_установки, наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание))
             conn2.commit()
             flash('Запись успешно создана!')
-            return redirect(url_for('admin_install_software'))
+            return redirect(url_for('install_software'))
         
 @app.route('/add_installation', methods=['POST'])
 def add_installation():
@@ -951,21 +954,36 @@ def add_installation():
         ip_адрес = request.form['ip_адрес']
         наименование_машины = request.form['наименование_машины']
         чекбокс = bool(request.form.get('чекбокс'))
-        дата_установки_ПО = request.form['дата_установки_ПО']
+        дата_установки_ПО = request.form.get('дата_установки_ПО')
+        if not чекбокс:
+            дата_установки_ПО = None
+        else:
+            try:
+                дата_установки_ПО = datetime.strptime(дата_установки_ПО, '%Y-%m-%d').date()
+            except ValueError:
+                flash('Введен некорректный формат даты', 'warning')
+                return redirect(url_for('support_install_software'))
         чекбокс_условно_бесплатное_ПО = bool(request.form.get('чекбокс_условно_бесплатное_ПО'))
         примечание = request.form['примечание']
         cur.execute("""SELECT количество_лицензий_ПО FROM Учет_лицензий
                     WHERE наименование_ПО=%s AND тип_лицензии=%s""", (наименование_ПО, тип_лицензии))
         licence_data = cur.fetchone()
-
+    
         if licence_data:
             общее_количество = licence_data['количество_лицензий_ПО']
         else:
             общее_количество = 0  
         cur.execute("""SELECT COUNT(*) AS count FROM Установка_ПО WHERE 
                     наименование_ПО=%s AND тип_лицензии=%s""", (наименование_ПО, тип_лицензии)) 
-        existing_count = cur.fetchone()['count']
-        число_установленных_лицензий = existing_count + 1
+        число_установленных_лицензий = 0
+        if чекбокс:
+            число_установленных_лицензий += 1
+        if чекбокс and дата_установки_ПО is None:
+            flash('Введите дату установки ПО!')
+            return redirect(url_for('support_install_software'))
+        if дата_установки_ПО and дата_установки_ПО > datetime.now().date():
+           flash('Дата установки ПО не может быть больше текущей даты!', 'warning')
+           return redirect(url_for('support_install_software'))
         if not чекбокс_условно_бесплатное_ПО and число_установленных_лицензий > общее_количество:
            flash('Превышено количество доступных лицензий!', 'warning')
            return redirect(url_for('support_install_software'))
@@ -993,6 +1011,7 @@ def admin_edit_installation(id):
 
 @app.route('/update_installation/<id>', methods=['POST'])
 def update_installation(id):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
         наименование_ПО = request.form['наименование_ПО']
         тип_лицензии = request.form['тип_лицензии']
@@ -1003,8 +1022,6 @@ def update_installation(id):
         дата_установки_ПО = request.form['дата_установки_ПО']
         чекбокс_условно_бесплатное_ПО = bool(request.form.get('чекбокс_условно_бесплатное_ПО'))
         примечание = request.form['примечание']
-        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
         cur.execute("""SELECT число_установленных_лицензий FROM Установка_ПО WHERE код_установки=%s AND наименование_ПО=%s""", (id,наименование_ПО))
         installation_data = cur.fetchone()
         число_установленных_лицензий = installation_data['число_установленных_лицензий'] if installation_data else 0
@@ -1017,7 +1034,20 @@ def update_installation(id):
             общее_количество = licence_data['количество_лицензий_ПО']
         else:
             общее_количество = 0 
-
+        if not чекбокс and число_установленных_лицензий > 0:
+            число_установленных_лицензий -= 1
+        elif чекбокс and число_установленных_лицензий == 0:
+            число_установленных_лицензий += 1
+        if not чекбокс: 
+            дата_установки_ПО = None
+        if чекбокс:
+            if not дата_установки_ПО:
+                flash('Пожалуйста, введите дату установки ПО!')
+                return redirect(url_for('edit_installation', id=id))
+        if чекбокс:
+            if дата_установки_ПО > datetime.now().strftime('%Y-%m-%d'):
+                flash('Дата установки ПО должна быть меньше или равна текущей дате!')
+                return redirect(url_for('edit_installation', id=id))
         cur.execute(""" UPDATE Установка_ПО
                     SET наименование_ПО=%s,
                     тип_лицензии=%s,
@@ -1031,7 +1061,7 @@ def update_installation(id):
                     чекбокс_условно_бесплатное_ПО=%s,
                     примечание=%s
                     WHERE код_установки=%s
-                    """, (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, 
+                    """, (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины,
                            чекбокс, общее_количество, 
                            число_установленных_лицензий, дата_установки_ПО, 
                            чекбокс_условно_бесплатное_ПО, примечание, id))
@@ -1066,6 +1096,20 @@ def admin_update_installation(id):
             общее_количество = licence_data['количество_лицензий_ПО']
         else:
             общее_количество = 0 
+        if not чекбокс and число_установленных_лицензий > 0:
+            число_установленных_лицензий -= 1
+        elif чекбокс and число_установленных_лицензий == 0:
+            число_установленных_лицензий += 1
+        if not чекбокс: 
+            дата_установки_ПО = None
+        if чекбокс:
+            if not дата_установки_ПО:
+                flash('Пожалуйста, введите дату установки ПО!')
+                return redirect(url_for('admin_edit_installation', id=id))
+        if чекбокс:
+            if дата_установки_ПО > datetime.now().strftime('%Y-%m-%d'):
+                flash('Дата установки ПО должна быть меньше или равна текущей дате!')
+                return redirect(url_for('admin_edit_installation', id=id))
 
         cur.execute(""" UPDATE Установка_ПО
                     SET наименование_ПО=%s,
@@ -1080,30 +1124,71 @@ def admin_update_installation(id):
                     чекбокс_условно_бесплатное_ПО=%s,
                     примечание=%s
                     WHERE код_установки=%s
-                    """, (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, 
+                    """, (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины,
                            чекбокс, общее_количество, 
                            число_установленных_лицензий, дата_установки_ПО, 
                            чекбокс_условно_бесплатное_ПО, примечание, id))
 
         flash('Запись успешно обновлена!')
         conn2.commit()
-        return redirect(url_for('admin_install_software'))
+        return redirect(url_for('install_software'))
     
 @app.route('/delete_installation/<string:id>', methods=['POST', 'GET'])
 def delete_installation(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM Установка_ПО WHERE код_установки={0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удалена!')
+    cur.execute('SELECT наименование_ПО, тип_лицензии FROM Установка_ПО WHERE код_установки=%s', (id,))
+    installation_info = cur.fetchone()
+    if installation_info:
+        наименование_ПО = installation_info['наименование_ПО']
+        тип_лицензии = installation_info['тип_лицензии']
+        cur.execute('DELETE FROM Установка_ПО WHERE код_установки={0}'.format(id))
+        conn2.commit()
+        cur.execute('SELECT COUNT(*) AS count FROM Установка_ПО WHERE наименование_ПО=%s AND тип_лицензии=%s;', (наименование_ПО, тип_лицензии,))
+        count_remaining = cur.fetchone()['count']
+        if count_remaining > 0:
+            cur.execute(
+                """
+                UPDATE Установка_ПО
+                SET число_установленных_лицензий = число_установленных_лицензий - 1 
+                WHERE наименование_ПО=%s AND тип_лицензии=%s;
+                """,
+                (наименование_ПО, тип_лицензии),
+            )
+            conn2.commit()
+            flash('Запись успешно удалена!')
+        else:
+            flash('Запись не найдена!')
+
     return redirect(url_for('support_install_software'))
+    
 
 @app.route('/admin_delete_installation/<string:id>', methods=['POST', 'GET'])
 def admin_delete_installation(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM Установка_ПО WHERE код_установки={0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удщалена!')
-    return redirect(url_for('admin_install_software'))
+    cur.execute('SELECT наименование_ПО, тип_лицензии FROM Установка_ПО WHERE код_установки=%s', (id,))
+    installation_info = cur.fetchone()
+    if installation_info:
+        наименование_ПО = installation_info['наименование_ПО']
+        тип_лицензии = installation_info['тип_лицензии']
+        cur.execute('DELETE FROM Установка_ПО WHERE код_установки={0}'.format(id))
+        conn2.commit()
+        cur.execute('SELECT COUNT(*) AS count FROM Установка_ПО WHERE наименование_ПО=%s AND тип_лицензии=%s;', (наименование_ПО, тип_лицензии,))
+        count_remaining = cur.fetchone()['count']
+        if count_remaining > 0:
+            cur.execute(
+                """
+                UPDATE Установка_ПО
+                SET число_установленных_лицензий = число_установленных_лицензий - 1 
+                WHERE наименование_ПО=%s AND тип_лицензии=%s;
+                """,
+                (наименование_ПО, тип_лицензии),
+            )
+            conn2.commit()
+            flash('Запись успешно удалена!')
+        else:
+            flash('Запись не найдена!')
+
+    return redirect(url_for('install_software'))
 
 @app.route('/download/software_install_report/excel')
 def download_software_install_report():
@@ -1145,7 +1230,7 @@ def download_software_install_report():
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=software_installation_report.xls"})
 
 @app.route('/number_licences')
-@role_required('admin')
+@role_required('admin', 'editor')
 def number_licences():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
@@ -1164,17 +1249,6 @@ def view_number_licences():
         cur.execute(string)
         list_number = cur.fetchall()
         return render_template('support_number.html', list_number=list_number)
-    return redirect(url_for('login'))
-
-@app.route('/editor_view_number_licences')
-@role_required('editor')
-def editor_view_number_licences():
-    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    if 'loggedin' in session:
-        string = ('SELECT * FROM Учет_лицензий')
-        cur.execute(string)
-        list_number = cur.fetchall()
-        return render_template('editor_number.html', list_number=list_number)
     return redirect(url_for('login'))
 
 @app.route('/add_number', methods=['POST'])
@@ -1693,26 +1767,26 @@ def profile_editor_change_password(email):
 @app.route('/page/<software>')
 def show_installation_details(software):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT код_установки, ФИО, ip_адрес, наименование_машины, дата_установки_ПО, наименование_ПО FROM Установка_ПО WHERE наименование_ПО=%s", (software,))
+    cur.execute("SELECT код_установки, ФИО, ip_адрес, наименование_машины, дата_установки_ПО FROM Установка_ПО WHERE наименование_ПО=%s", (software,))
     list_installation = cur.fetchall()
-    return render_template('software_description.html', list_installation=list_installation)
+    return render_template('software_description.html', list_installation=list_installation, software=software)
 
 @app.route('/support_page/<software>')
 def support_show_installation_details(software):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("""
-            SELECT код_установки, ФИО, ip_адрес, наименование_машины, дата_установки_ПО, наименование_ПО
+            SELECT код_установки, ФИО, ip_адрес, наименование_машины, дата_установки_ПО
             FROM Установка_ПО 
             WHERE наименование_ПО = %s
         """, (software,))
     list_installation = cur.fetchall()
-    return render_template('support_software_description.html', list_installation=list_installation)
+    return render_template('support_software_description.html', list_installation=list_installation, software=software)
 
 
 @app.route('/download/soft_report/excel/<software>')
 def download_soft_report(software):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT код_установки, ФИО, ip_адрес, наименование_машины, дата_установки_ПО, наименование_ПО FROM Установка_ПО WHERE наименование_ПО=%s')
+    cur.execute('SELECT код_установки, ФИО, ip_адрес, наименование_машины, дата_установки_ПО FROM Установка_ПО WHERE наименование_ПО=%s', (software,))
     result = cur.fetchall()
     output = io.BytesIO()
     workbook = xlwt.Workbook()
@@ -1722,7 +1796,6 @@ def download_soft_report(software):
     sh.write(0, 2, 'IP адрес')
     sh.write(0, 3, 'Наименование машины')
     sh.write(0, 4, 'Дата установки ПО')
-    sh.write(0, 5, 'Наименование ПО')
     idx = 0
     for row in result:
         sh.write(idx+1, 0, str(row['код_установки']))
@@ -1730,52 +1803,10 @@ def download_soft_report(software):
         sh.write(idx+1, 2, row['ip_адрес'])
         sh.write(idx+1, 3, row['наименование_машины'])
         sh.write(idx+1, 4, row['дата_установки_ПО'])
-        sh.write(idx+1, 5, row['наименование_ПО'])
         idx += 1
     workbook.save(output)
     output.seek(0)
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=soft_report.xls"})
-
-@app.route('/page_person/<pername>')
-def show_person_details(pername):
-    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT код_установки, наименование_ПО, ip_адрес, наименование_машины, дата_установки_ПО, ФИО FROM Установка_ПО WHERE ФИО=%s", (pername,))
-    list_people = cur.fetchall()
-    return render_template('person_description.html', list_people=list_people)
-
-@app.route('/support_page_person/<pername>')
-def support_show_person_details(pername):
-    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT код_установки, наименование_ПО, ip_адрес, наименование_машины, дата_установки_ПО, ФИО FROM Установка_ПО WHERE ФИО=%s", (pername,))
-    list_people = cur.fetchall()
-    return render_template('support_person_description.html', list_people=list_people)
-
-@app.route('/download/inst_report/excel/<pername>')
-def download_inst_report(pername):
-    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT код_установки, наименование_ПО, ip_адрес, наименование_машины, дата_установки_ПО, ФИО FROM Установка_ПО WHERE ФИО=%s", (pername,))
-    result = cur.fetchall()
-    output = io.BytesIO()
-    workbook = xlwt.Workbook()
-    sh = workbook.add_sheet('Отчет')
-    sh.write(0, 0, 'Код установки')
-    sh.write(0, 1, 'Наименование ПО')
-    sh.write(0, 2, 'IP адрес')
-    sh.write(0, 3, 'Наименование машины')
-    sh.write(0, 4, 'Дата установки ПО')
-    sh.write(0, 5, 'ФИО')
-    idx = 0
-    for row in result:
-        sh.write(idx+1, 0, str(row['код_установки']))
-        sh.write(idx+1, 1, row['наименование_ПО'])
-        sh.write(idx+1, 2, row['ip_адрес'])
-        sh.write(idx+1, 3, row['наименование_машины'])
-        sh.write(idx+1, 4, row['дата_установки_ПО'])
-        sh.write(idx+1, 5, row['ФИО'])
-        idx += 1
-    workbook.save(output)
-    output.seek(0)
-    return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=inst_report.xls"})
 
 if __name__ == "__main__":
     serve(app, host="127.0.0.1", port=5000)
