@@ -1,7 +1,19 @@
 {% extends "layout.html" %}
 {% block body %}
   <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-12">
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">x</span>
+        </button>
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
       <div class="card card-body">
         <form action="/update_software/{{software.код_ПО}}" method="POST">
           <div class="form-group">
@@ -26,7 +38,10 @@
           </div>
           <div class="form-group">
             <label for="признак_ПО"><b>Признак ПО:</b></label>
-            <input type="text" name="признак_ПО" value="{{software.признак_ПО}}" class="form-control">
+            <select class="form-control" name="признак_ПО">
+              <option value="Новое">Новое</option>
+              <option value="Техподдержка">Техподдержка</option>
+            </select>
           </div>
           <div class="form-group">
             <label for="примечание"><b>Примечание:</b></label>

@@ -1,7 +1,19 @@
 {% extends "layout.html" %}
 {% block body %}
   <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-12">
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">x</span>
+        </button>
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
       <div class="card card-body">
         <form action="/update/{{licence.номер_пп}}" method="POST">
           <div class="form-group">
@@ -18,7 +30,10 @@
           </div>
           <div class="form-group">
             <label for="счёт_списания"><b>Счёт списания:</b></label>
-            <input type="number" name="счёт_списания" value="{{licence.счёт_списания}}" class="form-control">
+            <select class="form-control" name="счёт_списания">
+              <option value="12">12</option>
+              <option value="36">36</option>
+            </select>
           </div>
           <div class="form-group">
             <label for="стоимость_за_единицу"><b>Стоимость за единицу:</b></label>
@@ -30,7 +45,10 @@
           </div>
           <div class="form-group">
             <label for="признак_ПО"><b>Признак ПО:</b></label>
-            <input type="text" name="признак_ПО" value="{{licence.признак_ПО}}" class="form-control">
+            <select class="form-control" name="признак_ПО">
+              <option value="Новое">Новое</option>
+              <option value="Техподдержка">Техподдержка</option>
+            </select>
           </div>
           <div class="form-group">
             <label for="количество_ПО"><b>Количество лицензий:</b></label>

@@ -1,7 +1,19 @@
 {% extends "support_layout.html" %}
 {% block body %}
   <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-12">
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">x</span>
+        </button>
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
       <div class="card card-body">
         <form action="/update_installation/{{installation.код_установки}}" method="POST">
           <div class="form-group">
@@ -10,7 +22,11 @@
           </div>
           <div class="form-group">
             <label for="тип_лицензии"><b>Тип лицензии:</b></label>
-            <input type="text" name="тип_лицензии" value="{{installation.тип_лицензии}}" class="form-control">
+            <select class="form-control" name="тип_лицензии">
+              <option value="Сетевая">Сетевая</option>
+              <option value="Локальная">Локальная</option>
+              <option value="Условно-бесплатная">Условно-бесплатная</option>
+            </select>
           </div>
           <div class="form-group">
             <label for="ФИО"><b>ФИО:</b></label>
@@ -18,7 +34,7 @@
           </div>
           <div class="form-group">
             <label for="ip_адрес"><b>IP адрес:</b></label>
-            <input type="tet" name="ip_адрес" value="{{installation.ip_адрес}}" class="form-control">
+            <input type="text" name="ip_адрес" value="{{installation.ip_адрес}}" class="form-control">
            </div>
            <div class="form-group">
              <label for="наименование_машины"><b>Наименование машины:</b></label>

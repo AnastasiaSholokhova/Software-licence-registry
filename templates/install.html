@@ -27,7 +27,12 @@
           <input type="text" class="form-control" name="наименование_ПО" placeholder="Наименование ПО">
         </div>
         <div class="form-group">
-          <input type="text" class="form-control" name="тип_лицензии" placeholder="Тип лицензии">
+          <p>Тип лицензии:</p>
+          <select class="form-control" name="тип_лицензии">
+            <option value="Сетевая">Сетевая</option>
+            <option value="Локальная">Локальная</option>
+            <option value="Условно-бесплатная">Условно-бесплатная</option>
+          </select>
         </div>
         <div class="form-group">
           <input type="text" class="form-control" name="ФИО" placeholder="ФИО">
@@ -45,6 +50,7 @@
             ПО установлено?
         </div>
         <div class="form-group">
+          <p>Дата установки ПО:</p>
           <input type="date" class="form-control" name="дата_установки_ПО" placeholder="Дата установки ПО">
         </div>
         <div class="form-group">
@@ -82,7 +88,7 @@
         <tr>
           <td>{{row[0]}}</td>
           <td class="name-link" data-name="{{row[1]}}">
-                <a target="_blank" href="/support_page/{{row[1]}}">
+                <a target="_blank" href="/page/{{row[1]}}">
                   {{row[1]}}
                 </a>
           </td>

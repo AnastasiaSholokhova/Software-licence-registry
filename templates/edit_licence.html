@@ -1,7 +1,19 @@
 {% extends "layout.html" %}
 {% block body %}
   <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-12">
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">x</span>
+        </button>
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
       <div class="card card-body">
         <form action="/update_licence/{{lice.код_лицензии}}" method="POST">
           <div class="form-group">
@@ -18,7 +30,7 @@
           </div>
           <div class="form-group">
             <label for="версия_лицензии"><b>Версия лицензии:</b></label>
-            <input type="number" name="версия_лицензии" vlaue="{{lice.версия_лицензии}}" class="form-control">
+            <input type="number" name="версия_лицензии" value="{{lice.версия_лицензии}}" class="form-control">
           </div>
           <div class="form-group">
             <label for="примечание"><b>Примечание:</b></label>

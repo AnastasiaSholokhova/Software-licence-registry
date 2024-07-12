@@ -142,7 +142,7 @@ def home():
     if 'loggedin' in session:
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
         s = 'SELECT * FROM лицензии'
-        cur.execute(s) #Execute SQL
+        cur.execute(s)
         list_licences = cur.fetchall()
         return render_template('home.html', username=session['username'], list_licences = list_licences)
     return redirect(url_for('login'))
@@ -346,7 +346,7 @@ def add_software():
         ссылка_на_сайт_ПО = request.form['ссылка_на_сайт_ПО']
         вендор = request.form['вендор']
         стоимость_за_единицу = request.form['стоимость_за_единицу']
-        признак_ПО = request.form['признак_ПО']
+        признак_ПО = request.form.get('признак_ПО')
         примечание = request.form['примечание']
         cur.execute("INSERT INTO Справочник_ПО (код_ПО, наименование_ПО, описание_ПО, ссылка_на_сайт_ПО, вендор, стоимость_за_единицу, признак_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)", (код_ПО, наименование_ПО, описание_ПО, ссылка_на_сайт_ПО, вендор, стоимость_за_единицу, признак_ПО, примечание))
         conn2.commit()
@@ -674,7 +674,7 @@ def update_licence_list(id):
     if request.method == 'POST':
         наименование_лицензии = request.form['наименование_лицензии']
         тип_лицензии = request.form['тип_лицензии']
-        счёт_списания = request.form['счёт_списания']
+        счёт_списания = request.form.get('счёт_списания')
         версия_лицензии = request.form['версия_лицензии']
         примечание = request.form['примечание']
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -894,7 +894,7 @@ def admin_add_installation():
     if request.method == 'POST':
         код_установки = request.form['код_установки']
         наименование_ПО = request.form['наименование_ПО']
-        тип_лицензии = request.form['тип_лицензии']
+        тип_лицензии = request.form.get('тип_лицензии')
         ФИО = request.form['ФИО']
         ip_адрес = request.form['ip_адрес']
         наименование_машины = request.form['наименование_машины']
@@ -912,6 +912,8 @@ def admin_add_installation():
                 return redirect(url_for('install_software'))
         чекбокс_условно_бесплатное_ПО = bool(request.form.get('чекбокс_условно_бесплатное_ПО'))
         примечание = request.form['примечание']
+        if чекбокс_условно_бесплатное_ПО:
+            тип_лицензии = 'Условно-бесплатная'
         cur.execute("""SELECT количество_лицензий_ПО FROM Учет_лицензий
                     WHERE наименование_ПО=%s AND тип_лицензии=%s""", (наименование_ПО, тип_лицензии))
         licence_data = cur.fetchone()
@@ -949,7 +951,7 @@ def add_installation():
     if request.method == 'POST':
         код_установки = request.form['код_установки']
         наименование_ПО = request.form['наименование_ПО']
-        тип_лицензии = request.form['тип_лицензии']
+        тип_лицензии = request.form.get('тип_лицензии')
         ФИО = request.form['ФИО']
         ip_адрес = request.form['ip_адрес']
         наименование_машины = request.form['наименование_машины']
@@ -1011,7 +1013,6 @@ def admin_edit_installation(id):
 
 @app.route('/update_installation/<id>', methods=['POST'])
 def update_installation(id):
-    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
         наименование_ПО = request.form['наименование_ПО']
         тип_лицензии = request.form['тип_лицензии']
@@ -1021,7 +1022,11 @@ def update_installation(id):
         чекбокс = bool(request.form.get('чекбокс'))
         дата_установки_ПО = request.form['дата_установки_ПО']
         чекбокс_условно_бесплатное_ПО = bool(request.form.get('чекбокс_условно_бесплатное_ПО'))
+        if чекбокс_условно_бесплатное_ПО:
+            тип_лицензии = 'Условно-бесплатная'
         примечание = request.form['примечание']
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
         cur.execute("""SELECT число_установленных_лицензий FROM Установка_ПО WHERE код_установки=%s AND наименование_ПО=%s""", (id,наименование_ПО))
         installation_data = cur.fetchone()
         число_установленных_лицензий = installation_data['число_установленных_лицензий'] if installation_data else 0
@@ -1048,6 +1053,7 @@ def update_installation(id):
             if дата_установки_ПО > datetime.now().strftime('%Y-%m-%d'):
                 flash('Дата установки ПО должна быть меньше или равна текущей дате!')
                 return redirect(url_for('edit_installation', id=id))
+
         cur.execute(""" UPDATE Установка_ПО
                     SET наименование_ПО=%s,
                     тип_лицензии=%s,
@@ -1062,7 +1068,7 @@ def update_installation(id):
                     примечание=%s
                     WHERE код_установки=%s
                     """, (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины,
-                           чекбокс, общее_количество, 
+                           чекбокс, общее_количество,
                            число_установленных_лицензий, дата_установки_ПО, 
                            чекбокс_условно_бесплатное_ПО, примечание, id))
 
@@ -1081,6 +1087,8 @@ def admin_update_installation(id):
         чекбокс = bool(request.form.get('чекбокс'))
         дата_установки_ПО = request.form['дата_установки_ПО']
         чекбокс_условно_бесплатное_ПО = bool(request.form.get('чекбокс_условно_бесплатное_ПО'))
+        if чекбокс_условно_бесплатное_ПО:
+            тип_лицензии = 'Условно-бесплатная'
         примечание = request.form['примечание']
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -1125,7 +1133,7 @@ def admin_update_installation(id):
                     примечание=%s
                     WHERE код_установки=%s
                     """, (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины,
-                           чекбокс, общее_количество, 
+                           чекбокс, общее_количество,
                            число_установленных_лицензий, дата_установки_ПО, 
                            чекбокс_условно_бесплатное_ПО, примечание, id))
 
@@ -1141,26 +1149,25 @@ def delete_installation(id):
     if installation_info:
         наименование_ПО = installation_info['наименование_ПО']
         тип_лицензии = installation_info['тип_лицензии']
+
+        cur.execute(
+            """
+            UPDATE Установка_ПО
+            SET число_установленных_лицензий = число_установленных_лицензий - 1 
+            WHERE наименование_ПО=%s AND тип_лицензии=%s;
+            """,
+            (наименование_ПО, тип_лицензии),
+        )
+        conn2.commit()
+
         cur.execute('DELETE FROM Установка_ПО WHERE код_установки={0}'.format(id))
         conn2.commit()
-        cur.execute('SELECT COUNT(*) AS count FROM Установка_ПО WHERE наименование_ПО=%s AND тип_лицензии=%s;', (наименование_ПО, тип_лицензии,))
-        count_remaining = cur.fetchone()['count']
-        if count_remaining > 0:
-            cur.execute(
-                """
-                UPDATE Установка_ПО
-                SET число_установленных_лицензий = число_установленных_лицензий - 1 
-                WHERE наименование_ПО=%s AND тип_лицензии=%s;
-                """,
-                (наименование_ПО, тип_лицензии),
-            )
-            conn2.commit()
-            flash('Запись успешно удалена!')
-        else:
-            flash('Запись не найдена!')
+
+        flash('Запись успешно удалена!')
+    else:
+        flash('Запись не найдена!')
 
     return redirect(url_for('support_install_software'))
-    
 
 @app.route('/admin_delete_installation/<string:id>', methods=['POST', 'GET'])
 def admin_delete_installation(id):
@@ -1170,23 +1177,22 @@ def admin_delete_installation(id):
     if installation_info:
         наименование_ПО = installation_info['наименование_ПО']
         тип_лицензии = installation_info['тип_лицензии']
+
+        cur.execute(
+            """
+            UPDATE Установка_ПО
+            SET число_установленных_лицензий = число_установленных_лицензий - 1 
+            WHERE наименование_ПО=%s AND тип_лицензии=%s;
+            """,
+            (наименование_ПО, тип_лицензии),
+        )
+        conn2.commit()
         cur.execute('DELETE FROM Установка_ПО WHERE код_установки={0}'.format(id))
         conn2.commit()
-        cur.execute('SELECT COUNT(*) AS count FROM Установка_ПО WHERE наименование_ПО=%s AND тип_лицензии=%s;', (наименование_ПО, тип_лицензии,))
-        count_remaining = cur.fetchone()['count']
-        if count_remaining > 0:
-            cur.execute(
-                """
-                UPDATE Установка_ПО
-                SET число_установленных_лицензий = число_установленных_лицензий - 1 
-                WHERE наименование_ПО=%s AND тип_лицензии=%s;
-                """,
-                (наименование_ПО, тип_лицензии),
-            )
-            conn2.commit()
-            flash('Запись успешно удалена!')
-        else:
-            flash('Запись не найдена!')
+
+        flash('Запись успешно удалена!')
+    else:
+        flash('Запись не найдена!')
 
     return redirect(url_for('install_software'))
 
@@ -1257,7 +1263,7 @@ def add_number():
     if request.method == 'POST':
         номер_заявки = request.form['номер_заявки']
         наименование_ПО = request.form['наименование_ПО']
-        тип_лицензии = request.form['тип_лицензии']
+        тип_лицензии = request.form.get('тип_лицензии')
         количество_лицензий_ПО = request.form['количество_лицензий_ПО']
         примечание = request.form['примечание']
         cur.execute('INSERT INTO Учет_лицензий (номер_заявки, наименование_ПО, тип_лицензии, количество_лицензий_ПО, примечание) VALUES(%s,%s,%s,%s,%s)', (номер_заявки, наименование_ПО, тип_лицензии, количество_лицензий_ПО, примечание))
@@ -1277,7 +1283,7 @@ def edit_number(id):
 def update_number(id):
     if request.method == 'POST':
         наименование_ПО = request.form['наименование_ПО']
-        тип_лицензии = request.form['тип_лицензии']
+        тип_лицензии = request.form.get('тип_лицензии')
         количество_лицензий_ПО = request.form['количество_лицензий_ПО']
         примечание = request.form['примечание']
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
