@@ -1,0 +1,32 @@
+{% extends "editor_layout.html" %}
+{% block body %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card card-body">
+        <form action="/editor_update_customer/{{customer.код_заказчика}}" method="POST">
+          <div class="form-group">
+            <label for="заказчик_ПО"><b>Заказчик ПО:</b></label>
+            <input type="text" name="заказчик_ПО" value="{{customer.заказчик_ПО}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="описание_заказчика"><b>Описание заказчика:</b></label>
+            <input type="text" name="описание_заказчика" value="{{customer.описание_заказчика}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="ссылка_на_сайт_заказчика"><b>Ссылка на сайт заказчика:</b></label>
+            <input type="url" name="ссылка_на_сайт_заказчика" value="{{customer.ссылка_на_сайт_заказчика}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="примечание"><b>Примечание:</b></label>
+            <input type="text" name="примечание" value="{{customer.примечание}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary btn-block">
+              Обновить
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

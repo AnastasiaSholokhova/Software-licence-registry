@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends 'editor_layout.html' %}
   
 {% block title %}Справочник ПО{% endblock %}
   
@@ -19,7 +19,7 @@
     {% endif %}
     {% endwith %}
     <div class="card card-body">
-      <form action="{{url_for('add_software')}}" method="POST">
+      <form action="{{url_for('editor_add_software')}}" method="POST">
         <div class="form-group">
           <input type="number" class="form-control" name="код_ПО" placeholder="Код ПО">
         </div>
@@ -81,8 +81,8 @@
           <td>{{row[6]}}</td>
           <td>{{row[7]}}</td>
           <td width="130">
-            <a href="/edit_software/{{row[0]}}" class="btn btn-secondary btn-sm">Редактировать</a>
-            <a href="/delete_software/{{row[0]}}" class="btn btn-danger btn-delete btn-sm">Удалить</a>
+            <a href="/editor_edit_software/{{row[0]}}" class="btn btn-secondary btn-sm">Редактировать</a>
+            <a href="/editor_delete_software/{{row[0]}}" class="btn btn-danger btn-delete btn-sm">Удалить</a>
           </td>
         </tr>
         {% endfor %}

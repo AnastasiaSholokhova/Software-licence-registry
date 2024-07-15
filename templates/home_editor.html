@@ -20,7 +20,7 @@
       {% endif %}
       {% endwith %}
       <div class="card card-body">
-        <form action="{{url_for('add_licence')}}" method="POST">
+        <form action="{{url_for('editor_add_licence')}}" method="POST">
           <div class="form-group">
             <input type="number" class="form-control" name="номер_пп" placeholder="Номер пп">
           </div>
@@ -113,8 +113,8 @@
           <td>{{row[13]}}</td>
           <td>{{row[14]}}</td>
           <td width="70">
-            <a href="/edit/{{row[0]}}" class="btn btn-secondary btn-sm">Редактировать</a>
-            <a href="/delete/{{row[0]}}" class="btn btn-danger btn-delete btn-sm">Удалить</a>
+            <a href="/editor_edit/{{row[0]}}" class="btn btn-secondary btn-sm">Редактировать</a>
+            <a href="/editor_delete/{{row[0]}}" class="btn btn-danger btn-delete btn-sm">Удалить</a>
           </td>
         </tr>
         {% endfor %}

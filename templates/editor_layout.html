@@ -18,7 +18,7 @@
  <body class="loggedin">
  <nav class="site-header sticky-top py-1">
       <div class="container d-flex flex-column flex-md-row justify-content-between">
-  <a class="py-2 d-none d-md-inline-block" href="{{ url_for('home') }}"><i class="fas fa-home"></i><b>Домашняя страница</b></a>
+  <a class="py-2 d-none d-md-inline-block" href="{{ url_for('home_editor') }}"><i class="fas fa-home"></i><b>Домашняя страница</b></a>
   <a class="py-2 d-none d-md-inline-block" href="{{ url_for('editor_profile') }}"><i class="fas fa-user-circle"></i><b>Профиль</b></a>
   <a class="py-2 d-none d-md-inline-block" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i><b>Выход</b></a>
    </div>
@@ -30,43 +30,43 @@
           <div class="sidebar-sticky">
             <ul class="nav flex-column">
               <li class="nav-item">
-                  <a class="nav-link" href="{{url_for('view_number_licences') }}">
+                  <a class="nav-link" href="{{url_for('editor_number_licences') }}">
                     <i class="fas fa-download"></i>
                     Количество ПО
                   </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{{url_for('customer_list') }}">
+                <a class="nav-link" href="{{url_for('editor_customer_list') }}">
                   <i class="fas fa-users"></i>
                   Покупатели
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{{url_for('licence_list') }}">
+                <a class="nav-link" href="{{url_for('editor_licence_list') }}">
     <i class="fas fa-shopping-cart"></i>
                   Лицензии
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{{url_for('vendor_list') }}">
+                <a class="nav-link" href="{{url_for('editor_vendor_list') }}">
                   <i class="fas fa-users"></i>
                   Вендоры
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{{url_for('software_list') }}">
+                <a class="nav-link" href="{{url_for('editor_software_list') }}">
                   <i class="fas fa-download"></i>
                   ПО
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{{url_for('partners_list') }}">
+                <a class="nav-link" href="{{url_for('editor_partners_list') }}">
                   <i class="fas fa-users"></i>
                   Контрагенты
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{{url_for('admin_install_software') }}">
+                <a class="nav-link" href="{{url_for('editor_installation_software') }}">
                   <i class="fas fa-download"></i>
                   Установленное ПО
                 </a>

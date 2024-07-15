@@ -1,9 +1,9 @@
-{% extends 'support_layout.html' %}
+{% extends 'editor_layout.html' %}
   
-{% block title %}Справочник установленного ПО {{ software }}{% endblock %}
+{% block title %}Реестр установленного ПО{% endblock %}
   
 {% block content %}
-<div class="row"><h3>Справочник установленного ПО {{ software }}</h3></div>
+<div class="row"><h3>Реестр установленного ПО</h3></div>
 <div class="row">
   <div class="col-md-4">
     {% with messages = get_flashed_messages() %}
@@ -20,15 +20,17 @@
     {% endwith %}
   </div>
   <div class="col-md-8">
-    <table id="soft_table" table class="table table-striped table-bordered" style="width:70%">
+    <table id="install_table" table class="table table-striped table-bordered" style="width:70%">
       <thead>
         <tr>
           <th>Код установки</th>
-          <th>ФИО</th>
-          <th>IP адрес</th>
-          <th>Наименование машины</th>
-          <th>Дата установки ПО</th>
+          <th>Наименование ПО</th>
           <th>Тип лицензии</th>
+          <th>Чекбокс установлено ли ПО</th>
+          <th>Число установленных лицензий</th>
+          <th>Дата установки ПО</th>
+          <th>Чекбокс условно-бесплатное ПО</th>
+          <th>Примечание</th>
         </tr>
       </thead>
       <tbody>
@@ -40,23 +42,23 @@
           <td>{{row[3]}}</td>
           <td>{{row[4]}}</td>
           <td>{{row[5]}}</td>
+          <td>{{row[6]}}</td>
+          <td>{{row[7]}}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-       <a href="/download/soft_report/excel/{{ software }}">Скачать отчет</a>
         <script>
-        
     $(document).ready(function(){
-        $('#soft_table').DataTable({
+        $('#install_table').DataTable({
       "aLengthMenu": [[3, 5, 10, 25, -1], [3, 5, 10, 25, "All"]],
       "iDisplayLength": -1
       }
      );
-     });
+    });
     </script>
   </div>
 </div>
+<a href="{{url_for('download_software_install_report')}}">Сгенерировать журнал установки ПО</a>
 </div>
 {% endblock %}
-
