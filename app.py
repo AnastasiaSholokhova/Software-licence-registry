@@ -92,7 +92,6 @@ def login():
  
         if account:
             password_rs = account['password']
-            print(password_rs)
             if check_password_hash(password_rs, password):
                 selected_role = account['role']
                 session['loggedin'] = True
@@ -278,7 +277,6 @@ def get_licence(id):
     cur.execute('SELECT * FROM лицензии WHERE номер_пп = %s', (id))
     data = cur.fetchall()
     cur.close()
-    print(data[0])
     return render_template('edit.html', licence = data[0])
 
 @app.route('/editor_edit/<id>', methods=['POST', 'GET'])
@@ -287,7 +285,6 @@ def editor_get_licence(id):
     cur.execute('SELECT * FROM лицензии WHERE номер_пп=%s', (id,))
     data = cur.fetchall()
     cur.close()
-    print(data[0])
     return render_template('editor_edit.html', licence=data[0])
 
 @app.route('/update/<id>', methods=['POST'])
@@ -525,7 +522,6 @@ def edit_software(id):
     cur.execute('SELECT * FROM Справочник_ПО WHERE код_ПО=%s', (id))
     get_software = cur.fetchall()
     cur.close()
-    print(get_software[0])
     return render_template('edit_software.html', software=get_software[0])
 
 @app.route('/editor_edit_software/<id>', methods=['POST', 'GET'])
@@ -534,7 +530,6 @@ def editor_edit_software(id):
     cur.execute('SELECT * FROM Справочник_ПО WHERE код_ПО=%s', (id))
     get_software = cur.fetchall()
     cur.close()
-    print(get_software[0])
     return render_template('editor_edit_software.html', software=get_software[0])
 
 @app.route('/update_software/<id>', methods=['POST'])
@@ -704,7 +699,6 @@ def edit_vendor(id):
     cur.execute('SELECT * FROM Справочник_производителей_ПО WHERE код_производителя=%s', (id))
     vendors = cur.fetchall()
     cur.close()
-    print(vendors[0])
     return render_template('edit_vendor.html', vendor = vendors[0])
 
 @app.route('/editor_edit_vendor/<id>', methods=['POST', 'GET'])
@@ -713,7 +707,6 @@ def editor_edit_vendor(id):
     cur.execute('SELECT * FROM Справочник_производителей_ПО WHERE код_производителя=%s', (id))
     vendors = cur.fetchall()
     cur.close()
-    print(vendors[0])
     return render_template('editor_edit_vendor.html', vendor = vendors[0])
 
 @app.route('/update_vendor/<id>', methods=['POST'])
@@ -865,7 +858,6 @@ def edit_customer(id):
     cur.execute('SELECT * FROM Справочник_заказчиков_ПО WHERE код_заказчика=%s', (id))
     customers = cur.fetchall()
     cur.close()
-    print(customers[0])
     return render_template('edit_customer.html', customer=customers[0])
 
 @app.route('/editor_edit_customer/<id>', methods=['POST', 'GET'])
@@ -874,7 +866,6 @@ def editor_edit_customer(id):
     cur.execute('SELECT * FROM Справочник_заказчиков_ПО WHERE код_заказчика=%s', (id))
     customers = cur.fetchall()
     cur.close()
-    print(customers[0])
     return render_template('editor_edit_customer.html', customer=customers[0])
 
 @app.route('/update_customer/<id>', methods=['POST'])
@@ -1026,7 +1017,6 @@ def edit_licence(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute('SELECT * FROM Справочник_лицензий WHERE код_лицензии=%s', (id))
     lic = cur.fetchall()
-    print(lic[0])
     return render_template('edit_licence.html', lice = lic[0])
 
 @app.route('/editor_edit_licence/<id>', methods=['POST', 'GET'])
@@ -1034,7 +1024,6 @@ def editor_edit_licence(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute('SELECT * FROM Справочник_лицензий WHERE код_лицензии=%s', (id))
     lic = cur.fetchall()
-    print(lic[0])
     return render_template('editor_edit_licence.html', lice = lic[0])
 
 @app.route('/update_licence/<id>', methods=['POST'])
@@ -1159,7 +1148,6 @@ def edit_partner(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute('SELECT * FROM Контрагенты WHERE код_контрагента=%s', (id))
     partners = cur.fetchall()
-    print(partners[0])
     return render_template('edit_partner.html', partner = partners[0])
 
 @app.route('/editor_edit_partner/<id>', methods=['POST', 'GET'])
@@ -1167,7 +1155,6 @@ def editor_edit_partner(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute('SELECT * FROM Контрагенты WHERE код_контрагента=%s', (id))
     partners=cur.fetchall()
-    print(partners[0])
     return render_template('editor_edit_partner.html', partner=partners[0])
 
 @app.route('/update_partner/<id>', methods=['POST'])
@@ -1456,7 +1443,6 @@ def edit_installation(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute('SELECT * FROM Установка_ПО WHERE код_установки=%s', (id))
     installations = cur.fetchall()
-    print(installations[0])
     return render_template('edit_installation.html', installation = installations[0])
 
 @app.route('/admin_edit_installation/<id>', methods=['POST', 'GET'])
@@ -1464,10 +1450,9 @@ def admin_edit_installation(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT * FROM Установка_ПО WHERE код_установки=%s", (id))
     installations = cur.fetchall()
-    print(installations[0])
     return render_template('admin_edit_installation.html', installation = installations[0])
 
-#все очень странно
+
 @app.route('/update_installation/<id>', methods=['POST'])
 def update_installation(id):
     if request.method == 'POST':
@@ -1483,38 +1468,170 @@ def update_installation(id):
             тип_лицензии = 'Условно-бесплатная'
         примечание = request.form['примечание']
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        #число установленных лицензий
-        cur.execute("""SELECT наименование_ПО, тип_лицензии, число_установленных_лицензий 
+        cur.execute("""SELECT наименование_ПО, тип_лицензии, число_установленных_лицензий , чекбокс
                     FROM Установка_ПО WHERE код_установки=%s""", (id,))
-        installation_data = cur.fetchone()
-
+        installation_data = cur.fetchone() #данные из бд
+        
         if not installation_data:
             flash('Установка с указанным ID не найдена!')
-            return redirect(url_for('support_install_software'))
-
-        #общее количество лицензий
+            return redirect(url_for('edit_installation', (id,)))
+        
         cur.execute("""SELECT количество_лицензий_ПО FROM Учет_лицензий
                     WHERE наименование_ПО=%s AND тип_лицензии=%s""", (наименование_ПО, тип_лицензии))
-        new_licence_data = cur.fetchone()
+        new_licence_data = cur.fetchone() #общее количество лицензий ПО
 
         if new_licence_data:
             общее_количество = new_licence_data['количество_лицензий_ПО']
         else:
             общее_количество = 0
-        if installation_data['тип_лицензии'] != тип_лицензии:
-        # Обновляем запись с предыдущим типом лицензии, уменьшая число лицензий на 1
-            cur.execute(""" UPDATE Установка_ПО
-                        SET число_установленных_лицензий = число_установленных_лицензий - 1
-                        WHERE наименование_ПО=%s AND тип_лицензии=%s
-                        """, (наименование_ПО, installation_data['тип_лицензии']))    
-            cur.execute(""" UPDATE Установка_ПО
-                        SET число_установленных_лицензий = число_установленных_лицензий - 1
-                        WHERE наименование_ПО=%s AND тип_лицензии=%s
-                        """, (наименование_ПО, тип_лицензии))
-    
+        
+        if installation_data['чекбокс'] != чекбокс:
+            if чекбокс: #False to True
+                if installation_data['тип_лицензии'] != тип_лицензии:
+                    if installation_data['число_установленных_лицензий'] >0:
+                        cur.execute(""" UPDATE Установка_ПО
+                                    SET число_установленных_лицензий = число_установленных_лицензий - 1
+                                    WHERE наименование_ПО=%s AND тип_лицензии=%s
+                                    """, (наименование_ПО, installation_data['тип_лицензии']))    
+                        cur.execute(""" UPDATE Установка_ПО
+                                    SET число_установленных_лицензий = число_установленных_лицензий + 1
+                                    WHERE наименование_ПО=%s AND тип_лицензии=%s
+                                    """, (наименование_ПО, тип_лицензии))
+                        cur.execute("SELECT MAX(код_установки) FROM Установка_ПО")
+                        max_id = cur.fetchone()[0]
+
+                        new_id = max_id + 1
+
+                        cur.execute("""
+                             INSERT INTO Установка_ПО (код_установки, наименование_ПО, тип_лицензии, число_установленных_лицензий)
+                             VALUES (%s, %s, %s, 1)
+                         """, (new_id, наименование_ПО, тип_лицензии))
+                        flash('Запись успешно обновлена!')
+                        conn2.commit()
+                        return redirect(url_for('support_install_software'))
+                    else:
+                        cur.execute("""UPDATE Установка_ПО
+                                    SET число_установленных_лицензий = 0
+                                    WHERE наименование_ПО=%s AND тип_лицензии=%s;""", (наименование_ПО, installation_data['тип_лицензии']))
+                        cur.execute("""UPDATE Установка_ПО
+                                    SET число_установленных_лицензий = число_установленных_лицензий + 1
+                                    WHERE наименование_ПО=%s AND тип_лицензии=%s;""", (наименование_ПО, тип_лицензии))
+                        cur.execute("SELECT MAX(код_установки) FROM Установка_ПО")
+                        max_id = cur.fetchone()[0]
+
+                        new_id = max_id + 1
+
+                        cur.execute("""
+                             INSERT INTO Установка_ПО (код_установки, наименование_ПО, тип_лицензии, число_установленных_лицензий)
+                             VALUES (%s, %s, %s, 1)
+                         """, (new_id, наименование_ПО, тип_лицензии))
+                        flash('Запись успешно обновлена!')
+                        conn2.commit()
+                        return redirect(url_for('support_install_software'))
+                    
+                cur.execute(""" UPDATE Установка_ПО
+                            SET наименование_ПО=%s,
+                            тип_лицензии=%s,
+                            ФИО=%s,
+                            ip_адрес=%s,
+                            наименование_машины=%s,
+                            чекбокс=%s,
+                            общее_количество=%s,
+                            дата_установки_ПО=%s,
+                            чекбокс_условно_бесплатное_ПО=%s,
+                            примечание=%s
+                            WHERE код_установки=%s
+                            """, (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины,
+                                   чекбокс, общее_количество,
+                                   дата_установки_ПО, 
+                                   чекбокс_условно_бесплатное_ПО, примечание, id))
+
+                flash('Запись успешно обновлена!')
+                conn2.commit()
+                return redirect(url_for('support_install_software'))
+            else: #True to False
+                if installation_data['число_установленных_лицензий'] > 0:
+                    cur.execute("""UPDATE Установка_ПО SET число_установленных_лицензий = число_установленных_лицензий - 1
+                                WHERE наименование_ПО=%s AND тип_лицензии=%s;""", (наименование_ПО, тип_лицензии))
+                    flash('Запись успешно обновлена!')
+                    conn2.commit()
+                    return redirect(url_for('support_install_software'))
+                else:
+                    cur.execute("""UPDATE Установка_ПО SET число_установленных_лицензий = 0
+                                WHERE наименование_ПО=%s AND тип_лицензии=%s;""", (наименование_ПО, тип_лицензии))
+                    flash('Запись успешно обновлена!')
+                    conn2.commit()
+                    return redirect(url_for('support_install_software'))
+
+        if not чекбокс:
+            дата_установки_ПО = None
+            cur.execute("""UPDATE Установка_ПО
+                        SET число_установленных_лицензий = число_установленных_лицензий WHERE наименование_ПО=%s AND 
+                        тип_лицензии=%s;""", (наименование_ПО, installation_data['тип_лицензии']))
             flash('Запись успешно обновлена!')
             conn2.commit()
             return redirect(url_for('support_install_software'))
+        else:
+            try:
+                дата_установки_ПО = datetime.strptime(дата_установки_ПО, '%Y-%m-%d').date()
+            except ValueError:
+                flash('Введен некорректный формат даты', 'warning')
+                return redirect(url_for('edit_installation', (id,)))
+            
+        if чекбокс and дата_установки_ПО is None:
+            flash('Введите дату установки ПО!')
+            return redirect(url_for('edit_installation', (id,)))
+        if дата_установки_ПО and дата_установки_ПО > datetime.now().date():
+           flash('Дата установки ПО не может быть больше текущей даты!', 'warning')
+           return redirect(url_for('edit_installation', (id,)))
+        
+       
+        if installation_data['тип_лицензии'] != тип_лицензии:
+            if installation_data['число_установленных_лицензий'] > 0:
+                cur.execute(""" UPDATE Установка_ПО
+                            SET число_установленных_лицензий = число_установленных_лицензий - 1
+                            WHERE наименование_ПО=%s AND тип_лицензии=%s
+                            """, (наименование_ПО, installation_data['тип_лицензии']))    
+                cur.execute(""" UPDATE Установка_ПО
+                            SET число_установленных_лицензий = число_установленных_лицензий + 1
+                            WHERE наименование_ПО=%s AND тип_лицензии=%s
+                            """, (наименование_ПО, тип_лицензии))
+                cur.execute("SELECT MAX(код_установки) FROM Установка_ПО")
+                max_id = cur.fetchone()[0]
+
+                new_id = max_id + 1
+
+                cur.execute("""
+                     INSERT INTO Установка_ПО (код_установки, наименование_ПО, тип_лицензии, число_установленных_лицензий)
+                     VALUES (%s, %s, %s, 1)
+                 """, (new_id, наименование_ПО, тип_лицензии))
+        
+                flash('Запись успешно обновлена!')
+                conn2.commit()
+                return redirect(url_for('support_install_software'))
+            else:
+                cur.execute(""" UPDATE Установка_ПО
+                            SET число_установленных_лицензий = 0
+                            WHERE наименование_ПО=%s AND тип_лицензии=%s
+                            """, (наименование_ПО, installation_data['тип_лицензии']))    
+                cur.execute(""" UPDATE Установка_ПО
+                            SET число_установленных_лицензий = число_установленных_лицензий + 1
+                            WHERE наименование_ПО=%s AND тип_лицензии=%s
+                            """, (наименование_ПО, тип_лицензии))
+                cur.execute("SELECT MAX(код_установки) FROM Установка_ПО")
+                max_id = cur.fetchone()[0]
+
+                new_id = max_id + 1
+
+                cur.execute("""
+                     INSERT INTO Установка_ПО (код_установки, наименование_ПО, тип_лицензии, число_установленных_лицензий)
+                     VALUES (%s, %s, %s, 1)
+                 """, (new_id, наименование_ПО, тип_лицензии))
+        
+                flash('Запись успешно обновлена!')
+                conn2.commit()
+                return redirect(url_for('support_install_software'))
+            
         cur.execute(""" UPDATE Установка_ПО
                     SET наименование_ПО=%s,
                     тип_лицензии=%s,
@@ -1551,33 +1668,173 @@ def admin_update_installation(id):
             тип_лицензии = 'Условно-бесплатная'
         примечание = request.form['примечание']
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        #число установленных лицензий
-        cur.execute("""SELECT наименование_ПО, тип_лицензии, число_установленных_лицензий 
+        cur.execute("""SELECT наименование_ПО, тип_лицензии, число_установленных_лицензий , чекбокс
                     FROM Установка_ПО WHERE код_установки=%s""", (id,))
-        installation_data = cur.fetchone()
-
+        installation_data = cur.fetchone() #данные из бд
+        
         if not installation_data:
             flash('Установка с указанным ID не найдена!')
-            return redirect(url_for('admin_edit_software'))
-        #общее количество лицензий
+            return redirect(url_for('admin_edit_installation', (id,)))
+        
         cur.execute("""SELECT количество_лицензий_ПО FROM Учет_лицензий
                     WHERE наименование_ПО=%s AND тип_лицензии=%s""", (наименование_ПО, тип_лицензии))
-        new_licence_data = cur.fetchone()
-
-        if installation_data['тип_лицензии'] != тип_лицензии: 
-            cur.execute("""UPDATE Установка_ПО 
-                        SET число_установленных_лицензий = число_установленных_лицензий - 1
-                        WHERE наименование_ПО=%s AND тип_лицензии=%s""", (id, installation_data['тип_лицензии']))
-
-            cur.execute("""UPDATE Установка_ПО 
-                        SET число_установленных_лицензий = число_установленных_лицензий + 1
-                        WHERE наименование_ПО=%s AND тип_лицензии=%s""", (id, тип_лицензии))
+        new_licence_data = cur.fetchone() #общее количество лицензий ПО
 
         if new_licence_data:
             общее_количество = new_licence_data['количество_лицензий_ПО']
         else:
             общее_количество = 0
+        
+        if installation_data['чекбокс'] != чекбокс:
+            if чекбокс: #False to True
+                if installation_data['тип_лицензии'] != тип_лицензии:
+                    if installation_data['число_установленных_лицензий'] >0:
+                        cur.execute(""" UPDATE Установка_ПО
+                                    SET число_установленных_лицензий = число_установленных_лицензий - 1
+                                    WHERE наименование_ПО=%s AND тип_лицензии=%s
+                                    """, (наименование_ПО, installation_data['тип_лицензии']))    
+                        cur.execute(""" UPDATE Установка_ПО
+                                    SET число_установленных_лицензий = число_установленных_лицензий + 1
+                                    WHERE наименование_ПО=%s AND тип_лицензии=%s
+                                    """, (наименование_ПО, тип_лицензии))
+                        cur.execute("SELECT MAX(код_установки) FROM Установка_ПО")
+                        max_id = cur.fetchone()[0]
 
+                        new_id = max_id + 1
+
+                        cur.execute("""
+                             INSERT INTO Установка_ПО (код_установки, наименование_ПО, тип_лицензии, число_установленных_лицензий)
+                             VALUES (%s, %s, %s, 1)
+                         """, (new_id, наименование_ПО, тип_лицензии))
+                        flash('Запись успешно обновлена!')
+                        conn2.commit()
+                        return redirect(url_for('install_software'))
+                    else:
+                        cur.execute("""UPDATE Установка_ПО
+                                    SET число_установленных_лицензий = 0
+                                    WHERE наименование_ПО=%s AND тип_лицензии=%s;""", (наименование_ПО, installation_data['тип_лицензии']))
+                        cur.execute("""UPDATE Установка_ПО
+                                    SET число_установленных_лицензий = число_установленных_лицензий + 1
+                                    WHERE наименование_ПО=%s AND тип_лицензии=%s;""", (наименование_ПО, тип_лицензии))
+                        cur.execute("SELECT MAX(код_установки) FROM Установка_ПО")
+                        max_id = cur.fetchone()[0]
+
+                        new_id = max_id + 1
+
+                        cur.execute("""
+                             INSERT INTO Установка_ПО (код_установки, наименование_ПО, тип_лицензии, число_установленных_лицензий)
+                             VALUES (%s, %s, %s, 1)
+                         """, (new_id, наименование_ПО, тип_лицензии))
+                        flash('Запись успешно обновлена!')
+                        conn2.commit()
+                        return redirect(url_for('install_software'))
+                    
+                cur.execute(""" UPDATE Установка_ПО
+                            SET наименование_ПО=%s,
+                            тип_лицензии=%s,
+                            ФИО=%s,
+                            ip_адрес=%s,
+                            наименование_машины=%s,
+                            чекбокс=%s,
+                            общее_количество=%s,
+                            дата_установки_ПО=%s,
+                            чекбокс_условно_бесплатное_ПО=%s,
+                            примечание=%s
+                            WHERE код_установки=%s
+                            """, (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины,
+                                   чекбокс, общее_количество,
+                                   дата_установки_ПО, 
+                                   чекбокс_условно_бесплатное_ПО, примечание, id))
+
+                flash('Запись успешно обновлена!')
+                conn2.commit()
+                return redirect(url_for('install_software'))
+            else: #True to False
+                if installation_data['число_установленных_лицензий'] > 0:
+                    cur.execute("""UPDATE Установка_ПО SET число_установленных_лицензий = число_установленных_лицензий - 1
+                                WHERE наименование_ПО=%s AND тип_лицензии=%s;""", (наименование_ПО, тип_лицензии))
+                    flash('Запись успешно обновлена!')
+                    conn2.commit()
+                    return redirect(url_for('install_software'))
+                else:
+                    cur.execute("""UPDATE Установка_ПО SET число_установленных_лицензий = 0
+                                WHERE наименование_ПО=%s AND тип_лицензии=%s;""", (наименование_ПО, тип_лицензии))
+                    flash('Запись успешно обновлена!')
+                    conn2.commit()
+                    return redirect(url_for('install_software'))
+
+        if not чекбокс:
+            дата_установки_ПО = None
+            cur.execute("""UPDATE Установка_ПО
+                        SET число_установленных_лицензий = число_установленных_лицензий WHERE наименование_ПО=%s AND 
+                        тип_лицензии=%s;""", (наименование_ПО, installation_data['тип_лицензии']))
+            flash('Запись успешно обновлена!')
+            conn2.commit()
+            return redirect(url_for('install_software'))
+        else:
+            try:
+                дата_установки_ПО = datetime.strptime(дата_установки_ПО, '%Y-%m-%d').date()
+            except ValueError:
+                flash('Введен некорректный формат даты', 'warning')
+                return redirect(url_for('admin_edit_installation', (id,)))
+            
+        if чекбокс and дата_установки_ПО is None:
+            flash('Введите дату установки ПО!')
+            return redirect(url_for('edit_installation', (id,)))
+        if дата_установки_ПО and дата_установки_ПО > datetime.now().date():
+           flash('Дата установки ПО не может быть больше текущей даты!', 'warning')
+           return redirect(url_for('admin_edit_installation', (id,)))
+        
+       
+        if installation_data['тип_лицензии'] != тип_лицензии:
+            if installation_data['число_установленных_лицензий'] > 0:
+                cur.execute(""" UPDATE Установка_ПО
+                            SET число_установленных_лицензий = число_установленных_лицензий - 1
+                            WHERE наименование_ПО=%s AND тип_лицензии=%s
+                            """, (наименование_ПО, installation_data['тип_лицензии']))    
+                cur.execute(""" UPDATE Установка_ПО
+                            SET число_установленных_лицензий = число_установленных_лицензий + 1
+                            WHERE наименование_ПО=%s AND тип_лицензии=%s
+                            """, (наименование_ПО, тип_лицензии))
+                            
+                cur.execute("SELECT MAX(код_установки) FROM Установка_ПО")
+                max_id = cur.fetchone()[0]
+
+                new_id = max_id + 1
+
+                cur.execute("""
+                    INSERT INTO Установка_ПО (код_установки, наименование_ПО, тип_лицензии, число_установленных_лицензий)
+                    VALUES (%s, %s, %s, 1)
+                """, (new_id, наименование_ПО, тип_лицензии))
+                flash('Запись успешно обновлена!')
+                conn2.commit()
+                return redirect(url_for('install_software'))
+            else:
+                cur.execute(""" UPDATE Установка_ПО
+                            SET число_установленных_лицензий = 0
+                            WHERE наименование_ПО=%s AND тип_лицензии=%s
+                            """, (наименование_ПО, installation_data['тип_лицензии']))    
+                cur.execute(""" UPDATE Установка_ПО
+                            SET число_установленных_лицензий = число_установленных_лицензий + 1
+                            WHERE наименование_ПО=%s AND тип_лицензии=%s
+                            """, (наименование_ПО, тип_лицензии))
+                cur.execute("SELECT MAX(код_установки) FROM Установка_ПО")
+                max_id = cur.fetchone()[0]
+
+                new_id = max_id + 1
+
+                cur.execute("""
+                     INSERT INTO Установка_ПО (код_установки, наименование_ПО, тип_лицензии, число_установленных_лицензий)
+                     VALUES (%s, %s, %s, 1)
+                 """, (new_id, наименование_ПО, тип_лицензии))
+                flash('Запись успешно обновлена!')
+                conn2.commit()
+                return redirect(url_for('install_software'))
+        
+                flash('Запись успешно обновлена!')
+                conn2.commit()
+                return redirect(url_for('install_software'))
+            
         cur.execute(""" UPDATE Установка_ПО
                     SET наименование_ПО=%s,
                     тип_лицензии=%s,
@@ -1761,7 +2018,6 @@ def edit_number(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute('SELECT * FROM Учет_лицензий WHERE номер_заявки=%s', (id))
     numbers = cur.fetchall()
-    print(numbers[0])
     return render_template('edit_number.html', number = numbers[0])
 
 @app.route('/update_number/<id>', methods=['POST'])
