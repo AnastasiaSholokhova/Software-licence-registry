@@ -168,7 +168,6 @@ def home_editor():
         return render_template('home_editor.html', username=session['username'], list_licences = list_licences)
     return redirect(url_for('login'))
  
-    
 @app.route('/add_licence', methods=['POST'])
 def add_licence():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -178,47 +177,61 @@ def add_licence():
         вендор = request.form['вендор']
         начало_действия_лицензии = request.form['начало_действия_лицензии']
         счёт_списания = request.form['счёт_списания']
-        стоимость_за_единицу = float(request.form['стоимость_за_единицу'])
         заказчик_ПО = request.form['заказчик_ПО']
         признак_ПО = request.form['признак_ПО']
         количество_ПО = int(request.form['количество_ПО'])
         оплачено = bool(request.form.get('оплачено'))
         примечание = request.form['примечание']
-        if признак_ПО == 'Новое':
-            итоговая_стоимость = стоимость_за_единицу * количество_ПО
-        elif признак_ПО == 'Техподдержка':
-            итоговая_стоимость = стоимость_за_единицу * количество_ПО * 1.2
-        else:
-            итоговая_стоимость = стоимость_за_единицу * количество_ПО
-        if счёт_списания == '12':
-            начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
-            окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365)).strftime('%Y-%m-%d')
-        elif счёт_списания == '36':
-            начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
-            окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365 * 3)).strftime('%Y-%m-%d')
-        if оплачено:
-            остаток = 0
-        elif счёт_списания == '12' and not оплачено:
-            остаток = итоговая_стоимость
-        elif счёт_списания == '36' and not оплачено:
-            окончание_действия_лицензии_date = datetime.strptime(окончание_действия_лицензии, '%Y-%m-%d').date()
-            срок_действия_мес = (окончание_действия_лицензии_date - date.today()).days / 30
-            мес_стоимость = итоговая_стоимость / 36
-            остаток = round(мес_стоимость * срок_действия_мес, 2)
-        else:
-            остаток = 0
-        cur.execute(
-            "INSERT INTO лицензии (номер_пп, наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, срок_действия_лицензии, оплачено, остаток, примечание) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval, %s, %s, %s)",
-            (
-                номер_пп, наименование_ПО, вендор, начало_действия_лицензии, 
-                окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, 
-                итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, 
-                окончание_действия_лицензии, оплачено, остаток, примечание
+        cur.execute('SELECT 1 FROM Справочник_ПО WHERE наименование_ПО=%s AND признак_ПО=%s', (наименование_ПО, признак_ПО))
+        lic_exists = cur.fetchone()
+        if lic_exists:
+            cur.execute('SELECT стоимость_за_единицу FROM Справочник_ПО WHERE наименование_ПО=%s AND признак_ПО=%s',(наименование_ПО, признак_ПО,))
+            inst = cur.fetchone()
+            стоимость_за_единицу = inst['стоимость_за_единицу']
+            if not количество_ПО:
+                flash('Пожалуйста, введите количество ПО!')
+                return redirect(url_for('home'))
+            if not начало_действия_лицензии:
+                flash('Пожалуйста, заполните все поля формы!')
+                return redirect(url_for('home'))
+            if признак_ПО == 'Новое':
+                итоговая_стоимость = стоимость_за_единицу * количество_ПО
+            elif признак_ПО == 'Техподдержка':
+                итоговая_стоимость = стоимость_за_единицу * количество_ПО * 1.2
+            else:
+                итоговая_стоимость = стоимость_за_единицу * количество_ПО
+            if счёт_списания == '12':
+                начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
+                окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365)).strftime('%Y-%m-%d')
+            elif счёт_списания == '36':
+                начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
+                окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365 * 3)).strftime('%Y-%m-%d')
+            if оплачено:
+                остаток = 0
+            elif счёт_списания == '12' and not оплачено:
+                остаток = итоговая_стоимость
+            elif счёт_списания == '36' and not оплачено:
+                окончание_действия_лицензии_date = datetime.strptime(окончание_действия_лицензии, '%Y-%m-%d').date()
+                срок_действия_мес = (окончание_действия_лицензии_date - date.today()).days / 30
+                мес_стоимость = итоговая_стоимость / 36
+                остаток = round(мес_стоимость * срок_действия_мес, 2)
+            else:
+                остаток = 0
+            cur.execute(
+                "INSERT INTO лицензии (номер_пп, наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, срок_действия_лицензии, оплачено, остаток, примечание) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval, %s, %s, %s)",
+                (
+                    номер_пп, наименование_ПО, вендор, начало_действия_лицензии, 
+                    окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, 
+                    итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, 
+                    окончание_действия_лицензии, оплачено, остаток, примечание
+                )
             )
-        )
-        conn2.commit()
-        flash('Запись была успешно добавлена!')
-        return redirect(url_for('home'))
+            conn2.commit()
+            flash('Запись была успешно добавлена!')
+            return redirect(url_for('home'))
+        else:
+            flash('Такого ПО не существует в справочнике ПО')
+            return redirect(url_for('home'))
 
 @app.route('/editor_add_licence', methods=['POST'])
 def editor_add_licence():
@@ -229,52 +242,66 @@ def editor_add_licence():
         вендор = request.form['вендор']
         начало_действия_лицензии = request.form['начало_действия_лицензии']
         счёт_списания = request.form['счёт_списания']
-        стоимость_за_единицу = float(request.form['стоимость_за_единицу'])
         заказчик_ПО = request.form['заказчик_ПО']
         признак_ПО = request.form['признак_ПО']
         количество_ПО = int(request.form['количество_ПО'])
         оплачено = bool(request.form.get('оплачено'))
         примечание = request.form['примечание']
-        if признак_ПО == 'Новое':
-            итоговая_стоимость = стоимость_за_единицу * количество_ПО
-        elif признак_ПО == 'Техподдержка':
-            итоговая_стоимость = стоимость_за_единицу * количество_ПО * 1.2
-        else:
-            итоговая_стоимость = стоимость_за_единицу * количество_ПО
-        if счёт_списания == '12':
-            начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
-            окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365)).strftime('%Y-%m-%d')
-        elif счёт_списания == '36':
-            начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
-            окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365 * 3)).strftime('%Y-%m-%d')
-        if оплачено:
-            остаток = 0
-        elif счёт_списания == '12' and not оплачено:
-            остаток = итоговая_стоимость
-        elif счёт_списания == '36' and not оплачено:
-            окончание_действия_лицензии_date = datetime.strptime(окончание_действия_лицензии, '%Y-%m-%d').date()
-            срок_действия_мес = (окончание_действия_лицензии_date - date.today()).days / 30
-            мес_стоимость = итоговая_стоимость / 36
-            остаток = round(мес_стоимость * срок_действия_мес, 2)
-        else:
-            остаток = 0
-        cur.execute(
-            "INSERT INTO лицензии (номер_пп, наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, срок_действия_лицензии, оплачено, остаток, примечание) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval, %s, %s, %s)",
-            (
-                номер_пп, наименование_ПО, вендор, начало_действия_лицензии, 
-                окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, 
-                итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, 
-                окончание_действия_лицензии, оплачено, остаток, примечание
+        cur.execute('SELECT 1 FROM Справочник_ПО WHERE наименование_ПО=%s AND признак_ПО=%s', (наименование_ПО, признак_ПО,))
+        lic_exists = cur.fetchone()
+        if lic_exists:
+            cur.execute('SELECT стоимость_за_единицу FROM Справочник_ПО WHERE наименование_ПО=%s AND признак_ПО=%s;', (наименование_ПО, признак_ПО,))
+            lic = cur.fetchone()
+            стоимость_за_единицу = lic['стоимость_за_единицу']
+            if not количество_ПО:
+                flash('Пожалуйста, введите количество ПО!')
+                return redirect(url_for('home_editor'))
+            if not начало_действия_лицензии:
+                flash('Пожалуйста, заполните все поля формы!')
+                return(redirect(url_for('home_editor')))
+            if признак_ПО == 'Новое':
+                итоговая_стоимость = стоимость_за_единицу * количество_ПО
+            elif признак_ПО == 'Техподдержка':
+                итоговая_стоимость = стоимость_за_единицу * количество_ПО * 1.2
+            else:
+                итоговая_стоимость = стоимость_за_единицу * количество_ПО
+            if счёт_списания == '12':
+                начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
+                окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365)).strftime('%Y-%m-%d')
+            elif счёт_списания == '36':
+                начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
+                окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365 * 3)).strftime('%Y-%m-%d')
+            if оплачено:
+                остаток = 0
+            elif счёт_списания == '12' and not оплачено:
+                остаток = итоговая_стоимость
+            elif счёт_списания == '36' and not оплачено:
+                окончание_действия_лицензии_date = datetime.strptime(окончание_действия_лицензии, '%Y-%m-%d').date()
+                срок_действия_мес = (окончание_действия_лицензии_date - date.today()).days / 30
+                мес_стоимость = итоговая_стоимость / 36
+                остаток = round(мес_стоимость * срок_действия_мес, 2)
+            else:
+                остаток = 0
+            cur.execute(
+                "INSERT INTO лицензии (номер_пп, наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, срок_действия_лицензии, оплачено, остаток, примечание) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval, %s, %s, %s)",
+                (
+                    номер_пп, наименование_ПО, вендор, начало_действия_лицензии, 
+                    окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, 
+                    итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, 
+                    окончание_действия_лицензии, оплачено, остаток, примечание
+                )
             )
-        )
-        conn2.commit()
-        flash('Запись была успешно добавлена!')
-        return redirect(url_for('home_editor'))
+            conn2.commit()
+            flash('Запись была успешно добавлена!')
+            return redirect(url_for('home_editor'))
+        else:
+            flash('Такого ПО нет в справочнике ПО!')
+            return redirect(url_for('home_editor'))
     
 @app.route('/edit/<id>', methods=['POST', 'GET'])
 def get_licence(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM лицензии WHERE номер_пп = %s', (id))
+    cur.execute('SELECT * FROM лицензии WHERE номер_пп = %s', (id,))
     data = cur.fetchall()
     cur.close()
     return render_template('edit.html', licence = data[0])
@@ -289,121 +316,147 @@ def editor_get_licence(id):
 
 @app.route('/update/<id>', methods=['POST'])
 def update_licence(id):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
         наименование_ПО = request.form['наименование_ПО']
         вендор = request.form['вендор']
         начало_действия_лицензии = request.form['начало_действия_лицензии']
         счёт_списания = request.form['счёт_списания']
-        стоимость_за_единицу = float(request.form['стоимость_за_единицу'])
         заказчик_ПО = request.form['заказчик_ПО']
         признак_ПО = request.form['признак_ПО']
         количество_ПО = int(request.form['количество_ПО'])
         оплачено = bool(request.form.get('оплачено'))
         примечание = request.form['примечание']
-        if признак_ПО == 'Новое':
-            итоговая_стоимость = стоимость_за_единицу * количество_ПО
-        elif признак_ПО == 'Техподдержка':
-            итоговая_стоимость = стоимость_за_единицу * количество_ПО * 1.2
+        cur.execute('SELECT 1 FROM Справочник_ПО WHERE наименование_ПО=%s AND признак_ПО=%s;', (наименование_ПО, признак_ПО))
+        lic_exists = cur.fetchone()
+        if lic_exists:
+            cur.execute('SELECT стоимость_за_единицу FROM Справочник_ПО WHERE наименование_ПО=%s AND признак_ПО=%s;', 
+                        (наименование_ПО, признак_ПО,))
+            lic = cur.fetchone()
+            стоимость_за_единицу = lic['стоимость_за_единицу']
+            if not количество_ПО:
+                flash('Пожалуйста, введите количество ПО!')
+                return redirect(url_for('edit'))
+            if признак_ПО == 'Новое':
+                итоговая_стоимость = стоимость_за_единицу * количество_ПО
+            elif признак_ПО == 'Техподдержка':
+                итоговая_стоимость = стоимость_за_единицу * количество_ПО * 1.2
+            else:
+                итоговая_стоимость = стоимость_за_единицу * количество_ПО
+            if счёт_списания == '12':
+                начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
+                окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365)).strftime('%Y-%m-%d')
+            elif счёт_списания == '36':
+                начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
+                окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365 * 3)).strftime('%Y-%m-%d')
+            if оплачено:
+                остаток = 0
+            elif счёт_списания == '12' and not оплачено:
+                остаток = итоговая_стоимость
+            elif счёт_списания == '36' and not оплачено:
+                окончание_действия_лицензии_date = datetime.strptime(окончание_действия_лицензии, '%Y-%m-%d').date()
+                срок_действия_мес = (окончание_действия_лицензии_date - date.today()).days / 30
+                мес_стоимость = итоговая_стоимость / 36
+                остаток = round(мес_стоимость * срок_действия_мес, 2)
+            else:
+                остаток = 0
+            cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(""" UPDATE лицензии
+                        SET
+                        наименование_ПО=%s,
+                        вендор=%s,
+                        начало_действия_лицензии=%s,
+                        окончание_действия_лицензии=%s,
+                        счёт_списания=%s,
+                        стоимость_за_единицу=%s,
+                        итоговая_стоимость=%s,
+                        заказчик_ПО=%s,
+                        признак_ПО=%s,
+                        количество_ПО=%s,
+                        срок_действия_лицензии=(to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval,
+                        оплачено=%s,
+                        остаток=%s,
+                        примечание=%s
+                        WHERE номер_пп=%s
+                        """, (наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, окончание_действия_лицензии, оплачено, остаток, примечание, id))
+            flash("Запись успешно обновлена!")
+            conn2.commit()
+            return redirect(url_for('home'))
         else:
-            итоговая_стоимость = стоимость_за_единицу * количество_ПО
-        if счёт_списания == '12':
-            начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
-            окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365)).strftime('%Y-%m-%d')
-        elif счёт_списания == '36':
-            начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
-            окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365 * 3)).strftime('%Y-%m-%d')
-        if оплачено:
-            остаток = 0
-        elif счёт_списания == '12' and not оплачено:
-            остаток = итоговая_стоимость
-        elif счёт_списания == '36' and not оплачено:
-            окончание_действия_лицензии_date = datetime.strptime(окончание_действия_лицензии, '%Y-%m-%d').date()
-            срок_действия_мес = (окончание_действия_лицензии_date - date.today()).days / 30
-            мес_стоимость = итоговая_стоимость / 36
-            остаток = round(мес_стоимость * срок_действия_мес, 2)
-        else:
-            остаток = 0
-        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute(""" UPDATE лицензии
-                    SET
-                    наименование_ПО=%s,
-                    вендор=%s,
-                    начало_действия_лицензии=%s,
-                    окончание_действия_лицензии=%s,
-                    счёт_списания=%s,
-                    стоимость_за_единицу=%s,
-                    итоговая_стоимость=%s,
-                    заказчик_ПО=%s,
-                    признак_ПО=%s,
-                    количество_ПО=%s,
-                    срок_действия_лицензии=(to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval,
-                    оплачено=%s,
-                    остаток=%s,
-                    примечание=%s
-                    WHERE номер_пп=%s
-                    """, (наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, окончание_действия_лицензии, оплачено, остаток, примечание, id))
-        flash("Запись успешно обновлена!")
-        conn2.commit()
-        return redirect(url_for('home'))
+            flash('Такого ПО нет в справочнике ПО!')
+            return redirect(url_for('get_licence', id=id))
     
 @app.route('/editor_update/<id>', methods=['POST'])
 def editor_update_licence(id):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
         наименование_ПО = request.form['наименование_ПО']
         вендор = request.form['вендор']
         начало_действия_лицензии = request.form['начало_действия_лицензии']
         счёт_списания = request.form['счёт_списания']
-        стоимость_за_единицу = float(request.form['стоимость_за_единицу'])
         заказчик_ПО = request.form['заказчик_ПО']
         признак_ПО = request.form['признак_ПО']
         количество_ПО = int(request.form['количество_ПО'])
         оплачено = bool(request.form.get('оплачено'))
         примечание = request.form['примечание']
-        if признак_ПО == 'Новое':
-            итоговая_стоимость = стоимость_за_единицу * количество_ПО
-        elif признак_ПО == 'Техподдержка':
-            итоговая_стоимость = стоимость_за_единицу * количество_ПО * 1.2
+        cur.execute('SELECT 1 FROM Справочник_ПО WHERE наименование_ПО=%s AND признак_ПО=%s;', (наименование_ПО, признак_ПО,))
+        lic_exists = cur.fetchone()
+        if lic_exists:
+            cur.execute('SELECT стоимость_за_единицу FROM Справочник_ПО WHERE наименование_ПО=%s AND признак_ПО=%s;',
+                        (наименование_ПО, признак_ПО,))
+            lic = cur.fetchone()
+            стоимость_за_единицу = lic['стоимость_за_единицу']
+            if not количество_ПО:
+                flash('Пожалуйста, введите количество ПО!')
+                return redirect(url_for('editor_edit'))
+            if признак_ПО == 'Новое':
+                итоговая_стоимость = стоимость_за_единицу * количество_ПО
+            elif признак_ПО == 'Техподдержка':
+                итоговая_стоимость = стоимость_за_единицу * количество_ПО * 1.2
+            else:
+                итоговая_стоимость = стоимость_за_единицу * количество_ПО
+            if счёт_списания == '12':
+                начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
+                окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365)).strftime('%Y-%m-%d')
+            elif счёт_списания == '36':
+                начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
+                окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365 * 3)).strftime('%Y-%m-%d')
+            if оплачено:
+                остаток = 0
+            elif счёт_списания == '12' and not оплачено:
+                остаток = итоговая_стоимость
+            elif счёт_списания == '36' and not оплачено:
+                окончание_действия_лицензии_date = datetime.strptime(окончание_действия_лицензии, '%Y-%m-%d').date()
+                срок_действия_мес = (окончание_действия_лицензии_date - date.today()).days / 30
+                мес_стоимость = итоговая_стоимость / 36
+                остаток = round(мес_стоимость * срок_действия_мес, 2)
+            else:
+                остаток = 0
+            cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(""" UPDATE лицензии
+                        SET
+                        наименование_ПО=%s,
+                        вендор=%s,
+                        начало_действия_лицензии=%s,
+                        окончание_действия_лицензии=%s,
+                        счёт_списания=%s,
+                        стоимость_за_единицу=%s,
+                        итоговая_стоимость=%s,
+                        заказчик_ПО=%s,
+                        признак_ПО=%s,
+                        количество_ПО=%s,
+                        срок_действия_лицензии=(to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval,
+                        оплачено=%s,
+                        остаток=%s,
+                        примечание=%s
+                        WHERE номер_пп=%s
+                        """, (наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, окончание_действия_лицензии, оплачено, остаток, примечание, id))
+            flash("Запись успешно обновлена!")
+            conn2.commit()
+            return redirect(url_for('home_editor'))
         else:
-            итоговая_стоимость = стоимость_за_единицу * количество_ПО
-        if счёт_списания == '12':
-            начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
-            окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365)).strftime('%Y-%m-%d')
-        elif счёт_списания == '36':
-            начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
-            окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365 * 3)).strftime('%Y-%m-%d')
-        if оплачено:
-            остаток = 0
-        elif счёт_списания == '12' and not оплачено:
-            остаток = итоговая_стоимость
-        elif счёт_списания == '36' and not оплачено:
-            окончание_действия_лицензии_date = datetime.strptime(окончание_действия_лицензии, '%Y-%m-%d').date()
-            срок_действия_мес = (окончание_действия_лицензии_date - date.today()).days / 30
-            мес_стоимость = итоговая_стоимость / 36
-            остаток = round(мес_стоимость * срок_действия_мес, 2)
-        else:
-            остаток = 0
-        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute(""" UPDATE лицензии
-                    SET
-                    наименование_ПО=%s,
-                    вендор=%s,
-                    начало_действия_лицензии=%s,
-                    окончание_действия_лицензии=%s,
-                    счёт_списания=%s,
-                    стоимость_за_единицу=%s,
-                    итоговая_стоимость=%s,
-                    заказчик_ПО=%s,
-                    признак_ПО=%s,
-                    количество_ПО=%s,
-                    срок_действия_лицензии=(to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval,
-                    оплачено=%s,
-                    остаток=%s,
-                    примечание=%s
-                    WHERE номер_пп=%s
-                    """, (наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, окончание_действия_лицензии, оплачено, остаток, примечание, id))
-        flash("Запись успешно обновлена!")
-        conn2.commit()
-        return redirect(url_for('home_editor'))
+            flash('Такого ПО нет в справочнике ПО!')
+            return redirect(url_for('editor_get_licence', id=id))
     
 @app.route('/delete/<string:id>', methods=['POST', 'GET'])
 def delete_licence(id):
@@ -494,6 +547,11 @@ def add_software():
         стоимость_за_единицу = request.form['стоимость_за_единицу']
         признак_ПО = request.form.get('признак_ПО')
         примечание = request.form['примечание']
+        cur.execute('SELECT наименование_ПО, признак_ПО FROM Справочник_ПО WHERE наименование_ПО=%s AND признак_ПО=%s', (наименование_ПО, признак_ПО))
+        soft = cur.fetchone()
+        if soft:
+            flash('Запись с такими данными уже существует!')
+            return redirect(url_for('software_list'))
         cur.execute("INSERT INTO Справочник_ПО (код_ПО, наименование_ПО, описание_ПО, ссылка_на_сайт_ПО, вендор, стоимость_за_единицу, признак_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)", (код_ПО, наименование_ПО, описание_ПО, ссылка_на_сайт_ПО, вендор, стоимость_за_единицу, признак_ПО, примечание))
         conn2.commit()
         flash('Запись успешно создана!')
@@ -511,6 +569,11 @@ def editor_add_software():
         стоимость_за_единицу = request.form['стоимость_за_единицу']
         признак_ПО = request.form.get('признак_ПО')
         примечание = request.form['примечание']
+        cur.execute('SELECT наименование_ПО, признак_ПО FROM Справочник_ПО WHERE наименование_ПО=%s AND признак_ПО=%s;', (наименование_ПО, признак_ПО,))
+        soft = cur.fetchone()
+        if soft:
+            flash('Запись с такими данными уже существует!')
+            return redirect(url_for('editor_software_list'))
         cur.execute("INSERT INTO Справочник_ПО (код_ПО, наименование_ПО, описание_ПО, ссылка_на_сайт_ПО, вендор, стоимость_за_единицу, признак_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)", (код_ПО, наименование_ПО, описание_ПО, ссылка_на_сайт_ПО, вендор, стоимость_за_единицу, признак_ПО, примечание))
         conn2.commit()
         flash('Запись успешно создана!')
@@ -519,7 +582,7 @@ def editor_add_software():
 @app.route('/edit_software/<id>', methods=['POST', 'GET'])
 def edit_software(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Справочник_ПО WHERE код_ПО=%s', (id))
+    cur.execute('SELECT * FROM Справочник_ПО WHERE код_ПО=%s', (id,))
     get_software = cur.fetchall()
     cur.close()
     return render_template('edit_software.html', software=get_software[0])
@@ -527,7 +590,7 @@ def edit_software(id):
 @app.route('/editor_edit_software/<id>', methods=['POST', 'GET'])
 def editor_edit_software(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Справочник_ПО WHERE код_ПО=%s', (id))
+    cur.execute('SELECT * FROM Справочник_ПО WHERE код_ПО=%s', (id,))
     get_software = cur.fetchall()
     cur.close()
     return render_template('editor_edit_software.html', software=get_software[0])
@@ -696,7 +759,7 @@ def editor_add_vendor():
 @app.route('/edit_vendor/<id>', methods=['POST', 'GET'])
 def edit_vendor(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Справочник_производителей_ПО WHERE код_производителя=%s', (id))
+    cur.execute('SELECT * FROM Справочник_производителей_ПО WHERE код_производителя=%s', (id,))
     vendors = cur.fetchall()
     cur.close()
     return render_template('edit_vendor.html', vendor = vendors[0])
@@ -704,7 +767,7 @@ def edit_vendor(id):
 @app.route('/editor_edit_vendor/<id>', methods=['POST', 'GET'])
 def editor_edit_vendor(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Справочник_производителей_ПО WHERE код_производителя=%s', (id))
+    cur.execute('SELECT * FROM Справочник_производителей_ПО WHERE код_производителя=%s', (id,))
     vendors = cur.fetchall()
     cur.close()
     return render_template('editor_edit_vendor.html', vendor = vendors[0])
@@ -855,7 +918,7 @@ def editor_add_customer():
 @app.route('/edit_customer/<id>', methods=['POST','GET'])
 def edit_customer(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Справочник_заказчиков_ПО WHERE код_заказчика=%s', (id))
+    cur.execute('SELECT * FROM Справочник_заказчиков_ПО WHERE код_заказчика=%s', (id,))
     customers = cur.fetchall()
     cur.close()
     return render_template('edit_customer.html', customer=customers[0])
@@ -863,7 +926,7 @@ def edit_customer(id):
 @app.route('/editor_edit_customer/<id>', methods=['POST', 'GET'])
 def editor_edit_customer(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Справочник_заказчиков_ПО WHERE код_заказчика=%s', (id))
+    cur.execute('SELECT * FROM Справочник_заказчиков_ПО WHERE код_заказчика=%s', (id,))
     customers = cur.fetchall()
     cur.close()
     return render_template('editor_edit_customer.html', customer=customers[0])
@@ -1146,14 +1209,14 @@ def editor_add_partner():
 @app.route('/edit_partner/<id>', methods=['POST', 'GET'])
 def edit_partner(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Контрагенты WHERE код_контрагента=%s', (id))
+    cur.execute('SELECT * FROM Контрагенты WHERE код_контрагента=%s', (id,))
     partners = cur.fetchall()
     return render_template('edit_partner.html', partner = partners[0])
 
 @app.route('/editor_edit_partner/<id>', methods=['POST', 'GET'])
 def editor_edit_partner(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Контрагенты WHERE код_контрагента=%s', (id))
+    cur.execute('SELECT * FROM Контрагенты WHERE код_контрагента=%s', (id,))
     partners=cur.fetchall()
     return render_template('editor_edit_partner.html', partner=partners[0])
 
@@ -1441,14 +1504,14 @@ def add_installation():
 @app.route('/edit_installation/<id>', methods=['POST', 'GET'])
 def edit_installation(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Установка_ПО WHERE код_установки=%s', (id))
+    cur.execute('SELECT * FROM Установка_ПО WHERE код_установки=%s', (id,))
     installations = cur.fetchall()
     return render_template('edit_installation.html', installation = installations[0])
 
 @app.route('/admin_edit_installation/<id>', methods=['POST', 'GET'])
 def admin_edit_installation(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT * FROM Установка_ПО WHERE код_установки=%s", (id))
+    cur.execute("SELECT * FROM Установка_ПО WHERE код_установки=%s", (id,))
     installations = cur.fetchall()
     return render_template('admin_edit_installation.html', installation = installations[0])
 
@@ -1474,7 +1537,7 @@ def update_installation(id):
         
         if not installation_data:
             flash('Установка с указанным ID не найдена!')
-            return redirect(url_for('edit_installation', (id,)))
+            return redirect(url_for('edit_installation', id=id))
         
         cur.execute("""SELECT количество_лицензий_ПО FROM Учет_лицензий
                     WHERE наименование_ПО=%s AND тип_лицензии=%s""", (наименование_ПО, тип_лицензии))
@@ -1488,6 +1551,12 @@ def update_installation(id):
         if installation_data['чекбокс'] != чекбокс:
             if чекбокс: #False to True
                 if installation_data['тип_лицензии'] != тип_лицензии:
+                    cur.execute("""SELECT COUNT(*) AS count FROM Установка_ПО WHERE 
+                  наименование_ПО=%s AND тип_лицензии=%s""", (наименование_ПО, тип_лицензии)) 
+                    число_установленных_лицензий = cur.fetchone()['count']
+                    if число_установленных_лицензий + 1 > общее_количество:
+                        flash('Превышено допустимое количество лицензий!')
+                        return redirect(url_for('edit_installation', id=id))
                     if installation_data['число_установленных_лицензий'] >0:
                         cur.execute(""" UPDATE Установка_ПО
                                     SET число_установленных_лицензий = число_установленных_лицензий - 1
@@ -1576,17 +1645,23 @@ def update_installation(id):
                 дата_установки_ПО = datetime.strptime(дата_установки_ПО, '%Y-%m-%d').date()
             except ValueError:
                 flash('Введен некорректный формат даты', 'warning')
-                return redirect(url_for('edit_installation', (id,)))
+                return redirect(url_for('edit_installation', id=id))
             
         if чекбокс and дата_установки_ПО is None:
             flash('Введите дату установки ПО!')
-            return redirect(url_for('edit_installation', (id,)))
+            return redirect(url_for('edit_installation', id=id))
         if дата_установки_ПО and дата_установки_ПО > datetime.now().date():
            flash('Дата установки ПО не может быть больше текущей даты!', 'warning')
-           return redirect(url_for('edit_installation', (id,)))
+           return redirect(url_for('edit_installation', id=id))
         
        
         if installation_data['тип_лицензии'] != тип_лицензии:
+            cur.execute("""SELECT COUNT(*) AS count FROM Установка_ПО WHERE 
+          наименование_ПО=%s AND тип_лицензии=%s""", (наименование_ПО, тип_лицензии)) 
+            число_установленных_лицензий = cur.fetchone()['count']
+            if число_установленных_лицензий + 1 > общее_количество:
+                flash('Превышено допустимое количество лицензий!')
+                return redirect(url_for('edit_installation', id=id))
             if installation_data['число_установленных_лицензий'] > 0:
                 cur.execute(""" UPDATE Установка_ПО
                             SET число_установленных_лицензий = число_установленных_лицензий - 1
@@ -1605,7 +1680,6 @@ def update_installation(id):
                      INSERT INTO Установка_ПО (код_установки, наименование_ПО, тип_лицензии, число_установленных_лицензий)
                      VALUES (%s, %s, %s, 1)
                  """, (new_id, наименование_ПО, тип_лицензии))
-        
                 flash('Запись успешно обновлена!')
                 conn2.commit()
                 return redirect(url_for('support_install_software'))
@@ -1627,7 +1701,6 @@ def update_installation(id):
                      INSERT INTO Установка_ПО (код_установки, наименование_ПО, тип_лицензии, число_установленных_лицензий)
                      VALUES (%s, %s, %s, 1)
                  """, (new_id, наименование_ПО, тип_лицензии))
-        
                 flash('Запись успешно обновлена!')
                 conn2.commit()
                 return redirect(url_for('support_install_software'))
@@ -1674,7 +1747,7 @@ def admin_update_installation(id):
         
         if not installation_data:
             flash('Установка с указанным ID не найдена!')
-            return redirect(url_for('admin_edit_installation', (id,)))
+            return redirect(url_for('admin_edit_installation', id=id))
         
         cur.execute("""SELECT количество_лицензий_ПО FROM Учет_лицензий
                     WHERE наименование_ПО=%s AND тип_лицензии=%s""", (наименование_ПО, тип_лицензии))
@@ -1688,7 +1761,13 @@ def admin_update_installation(id):
         if installation_data['чекбокс'] != чекбокс:
             if чекбокс: #False to True
                 if installation_data['тип_лицензии'] != тип_лицензии:
-                    if installation_data['число_установленных_лицензий'] >0:
+                    cur.execute("""SELECT COUNT(*) AS count FROM Установка_ПО WHERE 
+                  наименование_ПО=%s AND тип_лицензии=%s""", (наименование_ПО, тип_лицензии)) 
+                    число_установленных_лицензий = cur.fetchone()['count']
+                    if число_установленных_лицензий + 1 > общее_количество:
+                        flash('Превышено допустимое количество лицензий!')
+                        return redirect(url_for('admin_edit_installation', id=id))
+                    if installation_data['число_установленных_лицензий'] > 0:
                         cur.execute(""" UPDATE Установка_ПО
                                     SET число_установленных_лицензий = число_установленных_лицензий - 1
                                     WHERE наименование_ПО=%s AND тип_лицензии=%s
@@ -1776,17 +1855,23 @@ def admin_update_installation(id):
                 дата_установки_ПО = datetime.strptime(дата_установки_ПО, '%Y-%m-%d').date()
             except ValueError:
                 flash('Введен некорректный формат даты', 'warning')
-                return redirect(url_for('admin_edit_installation', (id,)))
+                return redirect(url_for('admin_edit_installation', id=id))
             
         if чекбокс and дата_установки_ПО is None:
             flash('Введите дату установки ПО!')
             return redirect(url_for('edit_installation', (id,)))
         if дата_установки_ПО and дата_установки_ПО > datetime.now().date():
            flash('Дата установки ПО не может быть больше текущей даты!', 'warning')
-           return redirect(url_for('admin_edit_installation', (id,)))
+           return redirect(url_for('admin_edit_installation', id=id))
         
        
         if installation_data['тип_лицензии'] != тип_лицензии:
+            cur.execute("""SELECT COUNT(*) AS count FROM Установка_ПО WHERE 
+          наименование_ПО=%s AND тип_лицензии=%s""", (наименование_ПО, тип_лицензии)) 
+            число_установленных_лицензий = cur.fetchone()['count']
+            if число_установленных_лицензий + 1 > общее_количество:
+                flash('Превышено допустимое количество лицензий!')
+                return redirect(url_for('admin_edit_installation', id=id))
             if installation_data['число_установленных_лицензий'] > 0:
                 cur.execute(""" UPDATE Установка_ПО
                             SET число_установленных_лицензий = число_установленных_лицензий - 1
@@ -1796,7 +1881,6 @@ def admin_update_installation(id):
                             SET число_установленных_лицензий = число_установленных_лицензий + 1
                             WHERE наименование_ПО=%s AND тип_лицензии=%s
                             """, (наименование_ПО, тип_лицензии))
-                            
                 cur.execute("SELECT MAX(код_установки) FROM Установка_ПО")
                 max_id = cur.fetchone()[0]
 
@@ -2016,7 +2100,7 @@ def add_number():
 @app.route('/edit_number/<id>', methods=['POST', 'GET'])
 def edit_number(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Учет_лицензий WHERE номер_заявки=%s', (id))
+    cur.execute('SELECT * FROM Учет_лицензий WHERE номер_заявки=%s', (id,))
     numbers = cur.fetchall()
     return render_template('edit_number.html', number = numbers[0])
 
