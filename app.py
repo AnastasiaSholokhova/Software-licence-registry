@@ -18,11 +18,13 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 mail = Mail(app)
 
-DB_HOST = "localhost"
-DB_NAME = "Users"
-DB_NAME2 = 'software_licences'
-DB_USER = "postgres"
-DB_PASS = "12345"
+PGHOST = "localhost"
+PGDATABASE = "Users"
+PGDATABASE2 = 'software_licences'
+PGUSER = "postgres"
+PGPASSWORD = "12345"
+
+
 
 app.config['MAIL_SERVER'] = 'smtp.yandex.ru'
 app.config['MAIL_PORT'] = 587
@@ -31,8 +33,8 @@ app.config['MAIL_PASSWORD'] = 'xyanueciccoxachh'
 app.config['MAIL_USE_TLS'] = 1
 app.config['MAIL_USE_SSL'] = False
 
-conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-conn2 = psycopg2.connect(dbname=DB_NAME2, user=DB_USER, password=DB_PASS, host=DB_HOST)
+conn = psycopg2.connect(dbname=PGDATABASE, user=PGUSER, password=PGPASSWORD, host=PGHOST)
+conn2 = psycopg2.connect(dbname=PGDATABASE2, user=PGUSER, password=PGPASSWORD, host=PGHOST)
 
 
 @app.route('/register', methods=['GET', 'POST'])
