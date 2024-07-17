@@ -2641,4 +2641,4 @@ def download_soft_report(software):
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=soft_report.xls"})
 
 if __name__ == "__main__":
-    serve(app, host="127.0.0.1", port=5000)
+    serve(app, host="0.0.0.0", port=5000)
