@@ -13,6 +13,7 @@ from random import randint
 import smtplib
 from email.mime.text import MIMEText
 import os
+import openpyxl
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -2641,6 +2642,67 @@ def download_soft_report(software):
     output.seek(0)
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=soft_report.xls"})
 
+@app.route('/upload_data', methods=['POST', 'GET'])
+def upload_data():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        file = request.files['file']
+        if file:
+            if file.filename.endswith("xlsx"):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                data = []
+                for row in sheet.iter_rows(values_only=True):
+                    if len(row) == 15: 
+                        data.append(row)
+                    else:
+                        flash('Неправильный формат файла')
+                        return redirect(url_for('home'))
+                for row in data:
+                    print(row)
+                    cur.execute(
+                        "INSERT INTO лицензии (номер_пп, наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, срок_действия_лицензии, оплачено, остаток, примечание) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval, %s, %s, %s)",
+                        (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14])
+                    )
+                conn2.commit()
+                flash('Файл успешно загружен!')
+            else:
+                flash('Неверный тип файла')
+                return redirect(url_for('home'))
+        else:
+            flash('Файл не выбран!')
+            return redirect(url_for('home'))
+        return render_template('home.html')
+    else:
+        return render_template('home.html')
+
+@app.route('/upload_licence', methods=['POST', 'GET'])
+def upload_licence():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        file = request.files['file']
+        if file:
+            if file.filename.endswith("xlsx"):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                data = []
+                for row in sheet.iter_rows(values_only=True, max_row=1):#костыль
+                    data.append(row)
+                    print(data)
+                for row in data:
+                    cur.execute('INSERT INTO Справочник_лицензий (код_лицензии, наименование_лицензии, тип_лицензии, счёт_списания, версия_лицензии, примечание) VALUES(%s,%s,%s,%s,%s,%s)', (row[0], row[1], row[2], row[3], row[4], row[5]))
+                conn2.commit()
+                flash('Файл успешно загружен!')
+            else:
+                flash('Неверный тип файла')
+                return redirect(url_for('licence_list'))
+        else:
+            flash('Файл не выбран!')
+            return redirect(url_for('licence_list'))
+        return render_template('licence.html')
+    else:
+        return render_template('licence.html')
+    
 if __name__ == "__main__":
     serve(app, host="127.0.0.1", port=5000)
 
