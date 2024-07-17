@@ -81,5 +81,10 @@
   </div>
 </div>
 <a href="{{url_for('download_customer_report')}}">Сгенерировать справочник заказчиков</a>
+<form action="#" method="POST" enctype="multipart/form-data">
+  <input type="file" name="file" accept=".xlsx">
+    <button type="submit">Загрезить файл</button>
+  </input>
+</form>
 </div>
 {% endblock %}

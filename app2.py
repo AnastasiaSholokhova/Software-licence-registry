@@ -2652,20 +2652,20 @@ def upload_data():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True):
+                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
                     if len(row) == 15: 
                         data.append(row)
                     else:
                         flash('Неправильный формат файла')
                         return redirect(url_for('home'))
                 for row in data:
-                    print(row)
                     cur.execute(
                         "INSERT INTO лицензии (номер_пп, наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, срок_действия_лицензии, оплачено, остаток, примечание) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval, %s, %s, %s)",
                         (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14])
                     )
                 conn2.commit()
                 flash('Файл успешно загружен!')
+                return redirect(url_for('home'))
             else:
                 flash('Неверный тип файла')
                 return redirect(url_for('home'))
@@ -2686,13 +2686,13 @@ def upload_licence():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=1):#костыль
+                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):#костыль
                     data.append(row)
-                    print(data)
                 for row in data:
                     cur.execute('INSERT INTO Справочник_лицензий (код_лицензии, наименование_лицензии, тип_лицензии, счёт_списания, версия_лицензии, примечание) VALUES(%s,%s,%s,%s,%s,%s)', (row[0], row[1], row[2], row[3], row[4], row[5]))
                 conn2.commit()
                 flash('Файл успешно загружен!')
+                return redirect(url_for('licence_list'))
             else:
                 flash('Неверный тип файла')
                 return redirect(url_for('licence_list'))
