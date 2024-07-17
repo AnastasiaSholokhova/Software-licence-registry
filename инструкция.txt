@@ -1,2 +1,7 @@
 Запуск приложения:
 waitress-serve --host 127.0.0.1 --port 5000 app:app
+Приложения: 
+1. app.py - подключение к облачной базе данных через поле DATABASE_URL. Хост- 0.0.0.0
+Ссылка на подключение: 
+software-licence-registry-production-63b4.up.railway.app
+2. app2.py - подключение к локальной базе данных postgresql. Переменные окружения в начале кода. Хост - 127.0.0.1
