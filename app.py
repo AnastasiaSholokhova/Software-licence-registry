@@ -18,7 +18,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 mail = Mail(app)
 
-PGHOST = "localhost"
+PGHOST = "monorail.proxy.rlwy.net"
 PGDATABASE = "Users"
 PGDATABASE2 = 'software_licences'
 PGUSER = "postgres"
