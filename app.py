@@ -18,11 +18,8 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 mail = Mail(app)
 
-PGHOST = "monorail.proxy.rlwy.net"
-PGDATABASE = "Users"
-PGDATABASE2 = 'software_licences'
-PGUSER = "postgres"
-PGPASSWORD = "12345"
+DATABASE_URL = "postgresql://postgres:XQxUlhHceLGYULtBXwFIhsmzrYBjlVDJ@viaduct.proxy.rlwy.net:48461/railway"
+DATABASE_URL2 = ""
 
 
 
@@ -33,8 +30,8 @@ app.config['MAIL_PASSWORD'] = 'xyanueciccoxachh'
 app.config['MAIL_USE_TLS'] = 1
 app.config['MAIL_USE_SSL'] = False
 
-conn = psycopg2.connect(dbname=PGDATABASE, user=PGUSER, password=PGPASSWORD, host=PGHOST)
-conn2 = psycopg2.connect(dbname=PGDATABASE2, user=PGUSER, password=PGPASSWORD, host=PGHOST)
+conn = psycopg2.connect(DATABASE_URL, sslmode = "require")
+conn2 = psycopg2.connect(DATABASE_URL2, sslmode="require")
 
 
 @app.route('/register', methods=['GET', 'POST'])
