@@ -1356,7 +1356,7 @@ def download_report():
         sh.write(idx+1, 8, row['заказчик_ПО'])
         sh.write(idx+1, 9, row['признак_ПО'])
         sh.write(idx+1, 10, row['количество_ПО'])
-        sh.write(idx+1, 11, row['срок_действия_лицензии'])
+        sh.write(idx+1, 11, str(row['срок_действия_лицензии']))
         sh.write(idx+1, 12, row['оплачено'])
         sh.write(idx+1, 13, row['остаток'])
         sh.write(idx+1, 14, row['примечание'])
