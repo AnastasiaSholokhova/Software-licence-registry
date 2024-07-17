@@ -22,11 +22,19 @@
           </div>
           <div class="form-group">
             <label for="тип_лицензии"><b>Тип лицензии:</b></label>
-            <input type="text" name="тип_лицензии" value="{{lice.тип_лицензии}}" class="form-control">
+              <select class="form-control" name="тип_лицензии">
+                <option value="Сетевая">Сетевая</option>
+                <option value="Локальная">Локальная</option>
+                <option value="Условно-бесплатная">Условно-бесплатная</option>
+              </select>
           </div>
           <div class="form-group">
             <label for="счёт_списания"><b>Счёт списания:</b></label>
-            <input type="number" name="счёт_списания" value="{{lice.счёт_списания}}" class="form-control">
+              <select class="form-control" name="счёт_списания">
+                <option value="Сетевая">Сетевая</option>
+                <option value="Локальная">Локальная</option>
+                <option value="Условно-бесплатная">Условно-бесплатная</option>
+              </select>
           </div>
           <div class="form-group">
             <label for="версия_лицензии"><b>Версия лицензии:</b></label>
