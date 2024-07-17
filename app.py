@@ -18,8 +18,8 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 mail = Mail(app)
 
-DATABASE_URL = "postgresql://postgres:XQxUlhHceLGYULtBXwFIhsmzrYBjlVDJ@viaduct.proxy.rlwy.net:48461/railway"
-DATABASE_URL2 = ""
+DATABASE_URL = "postgresql://postgres:dJcyibyNhhPVsuwkWJZTNxXtfxktubKm@monorail.proxy.rlwy.net:33959/railway"
+DATABASE_URL2 = "postgresql://postgres:vTfqBhKWPLGnFPxvOncgkJmQmUknXptH@monorail.proxy.rlwy.net:11940/railway"
 
 
 
