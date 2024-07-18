@@ -1,3 +1,4 @@
+# Импорт необходимых библиотек
 from flask import Flask, request, session, redirect, url_for, render_template, flash, Response
 import psycopg2
 import psycopg2.extras
@@ -15,15 +16,17 @@ from email.mime.text import MIMEText
 import os
 import openpyxl
 
+# Инициализация приложения
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 mail = Mail(app)
 
+# Облачное хранилище баз данных - URL можно заменить
 DATABASE_URL = "postgresql://postgres:dJcyibyNhhPVsuwkWJZTNxXtfxktubKm@monorail.proxy.rlwy.net:33959/railway"
 DATABASE_URL2 = "postgresql://postgres:vTfqBhKWPLGnFPxvOncgkJmQmUknXptH@monorail.proxy.rlwy.net:11940/railway"
 
 
-
+# Конфигурация для отправки писем на адрес электронной почты
 app.config['MAIL_SERVER'] = 'smtp.yandex.ru'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USERNAME'] = 'Analstasia.Sholokhova@yandex.ru'
@@ -31,10 +34,11 @@ app.config['MAIL_PASSWORD'] = 'xyanueciccoxachh'
 app.config['MAIL_USE_TLS'] = 1
 app.config['MAIL_USE_SSL'] = False
 
+#Установка соединения
 conn = psycopg2.connect(DATABASE_URL, sslmode = "require")
 conn2 = psycopg2.connect(DATABASE_URL2, sslmode="require")
 
-
+#Регистрация
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -79,6 +83,7 @@ def register():
         flash('Пожалуйста, заполните форму!')
     return render_template('register.html')
 
+# Авторизация
 @app.route('/', methods=['GET', 'POST'])
 def login():
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -112,10 +117,12 @@ def login():
  
     return render_template('login.html')
 
+# Недоделанный функционал - авторизация через archive directory
 @app.route('/login_ad', methods=['GET', 'POST'])
 def login_ad():
     pass
 
+# Декоратор для выбора ролей
 def role_required(*roles):
     def decorator(func):
         @wraps(func)
@@ -128,6 +135,7 @@ def role_required(*roles):
         return wrapper
     return decorator
 
+# Выход
 @app.route('/logout')
 def logout():
    session.pop('loggedin', None)
@@ -135,6 +143,7 @@ def logout():
    session.pop('username', None)
    return redirect(url_for('login'))
 
+#Домашняя страница - администратор
 @app.route('/home')
 @role_required('admin')
 def home():
@@ -146,6 +155,7 @@ def home():
         return render_template('home.html', username=session['username'], list_licences = list_licences)
     return redirect(url_for('login'))
 
+#Домашняя страница - техническая поддержка
 @app.route('/home_support')
 @role_required('support')
 def home_support():
@@ -157,6 +167,7 @@ def home_support():
         return render_template('home_support.html', username=session['username'], list_licences = list_licences)
     return redirect(url_for('login'))
 
+# Домашняя страница - редактор
 @app.route('/home_editor')
 @role_required('editor')
 def home_editor():
@@ -168,6 +179,7 @@ def home_editor():
         return render_template('home_editor.html', username=session['username'], list_licences = list_licences)
     return redirect(url_for('login'))
  
+# Добавление данных о лицензировании ПО - администратор
 @app.route('/add_licence', methods=['POST'])
 def add_licence():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -233,6 +245,7 @@ def add_licence():
             flash('Такого ПО не существует в справочнике ПО')
             return redirect(url_for('home'))
 
+# Добавление данных о лицензировнаии ПО - редактор
 @app.route('/editor_add_licence', methods=['POST'])
 def editor_add_licence():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -298,6 +311,7 @@ def editor_add_licence():
             flash('Такого ПО нет в справочнике ПО!')
             return redirect(url_for('home_editor'))
     
+# Редактирование данных о лицензировании ПО - администратор
 @app.route('/edit/<id>', methods=['POST', 'GET'])
 def get_licence(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -306,6 +320,7 @@ def get_licence(id):
     cur.close()
     return render_template('edit.html', licence = data[0])
 
+#Редактирование данных о лицензировании ПО - редактор
 @app.route('/editor_edit/<id>', methods=['POST', 'GET'])
 def editor_get_licence(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -314,6 +329,7 @@ def editor_get_licence(id):
     cur.close()
     return render_template('editor_edit.html', licence=data[0])
 
+# Обновление данных о лицензировании ПО - администратор
 @app.route('/update/<id>', methods=['POST'])
 def update_licence(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -386,6 +402,7 @@ def update_licence(id):
             flash('Такого ПО нет в справочнике ПО!')
             return redirect(url_for('get_licence', id=id))
     
+# Обновление данных о лицензировании ПО - редактор
 @app.route('/editor_update/<id>', methods=['POST'])
 def editor_update_licence(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -457,7 +474,8 @@ def editor_update_licence(id):
         else:
             flash('Такого ПО нет в справочнике ПО!')
             return redirect(url_for('editor_get_licence', id=id))
-    
+
+# удаление данных о лицензировании ПО - администратор
 @app.route('/delete/<string:id>', methods=['POST', 'GET'])
 def delete_licence(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -466,6 +484,7 @@ def delete_licence(id):
     flash('Запись успешно удалена!')
     return redirect(url_for('home'))
 
+# удаление данных о лицензировании ПО - редактор
 @app.route('/editor_delete/<string:id>', methods=['POST', 'GET'])
 def editor_delete_licence(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -473,7 +492,8 @@ def editor_delete_licence(id):
     conn2.commit()
     flash('Запись успешно удалена!')
     return redirect(url_for('home_editor'))
-                
+            
+# Профиль администратора    
 @app.route('/profile')
 def profile(): 
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -484,6 +504,7 @@ def profile():
         return render_template('profile.html', account=account)
     return redirect(url_for('login'))
 
+# Профиль специалиста технической поддержки
 @app.route('/support_profile')
 def support_profile():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -493,6 +514,7 @@ def support_profile():
         return render_template('support_profile.html', account=account)
     return redirect(url_for('login'))
 
+# Профиль редактора
 @app.route('/editor_profile')
 def editor_profile():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -501,7 +523,8 @@ def editor_profile():
         account = cur.fetchone()
         return render_template('editor_profile.html', account=account)
     return redirect(url_for('login'))
- 
+
+# Справочник программного обеспечения - администратор
 @app.route('/software')
 @role_required('admin')
 def software_list():
@@ -513,6 +536,7 @@ def software_list():
         return render_template('software.html', list_software=list_software)
     return redirect(url_for('login'))
 
+# Справочник программного обеспечения - редактор
 @app.route('/editor_software')
 @role_required('editor')
 def editor_software_list():
@@ -524,6 +548,7 @@ def editor_software_list():
         return render_template('editor_software.html', list_software=list_software)
     return redirect(url_for('login'))
 
+# Справочник программного обеспечения - техподдержка
 @app.route('/support_software')
 @role_required('support')
 def support_software_list():
@@ -535,6 +560,7 @@ def support_software_list():
         return render_template('support_software.html', list_software=list_software)
     return redirect(url_for('login'))
 
+# Добавление ПО в справочник - администратор
 @app.route('/add_software', methods=['POST'])
 def add_software():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -557,6 +583,7 @@ def add_software():
         flash('Запись успешно создана!')
         return redirect(url_for('software_list'))
 
+# Добавление ПО в справочник - редактор
 @app.route('/editor_add_software', methods=['POST'])
 def editor_add_software():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -579,6 +606,7 @@ def editor_add_software():
         flash('Запись успешно создана!')
         return redirect(url_for('editor_software_list'))
 
+# Редактирование программного обеспечения - администратор
 @app.route('/edit_software/<id>', methods=['POST', 'GET'])
 def edit_software(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -587,6 +615,7 @@ def edit_software(id):
     cur.close()
     return render_template('edit_software.html', software=get_software[0])
 
+# Редактирование программного обеспечения - редактор
 @app.route('/editor_edit_software/<id>', methods=['POST', 'GET'])
 def editor_edit_software(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -595,6 +624,7 @@ def editor_edit_software(id):
     cur.close()
     return render_template('editor_edit_software.html', software=get_software[0])
 
+# Обновление списка справочника ПО - администратор
 @app.route('/update_software/<id>', methods=['POST'])
 def update_software(id):
     if request.method == 'POST':
@@ -621,6 +651,7 @@ def update_software(id):
         conn2.commit()
         return redirect(url_for('software_list'))
     
+# Обновление справочника программного обеспечения - редактор
 @app.route('/editor_update_software/<id>', methods=['POST'])
 def editor_update_software(id):
     if request.method == 'POST':
@@ -647,7 +678,7 @@ def editor_update_software(id):
         conn2.commit()
         return redirect(url_for('editor_software_list'))
     
-    
+# Удаление программного обеспечения из справочника ПО - администратор
 @app.route('/delete_software/<string:id>', methods=['POST', 'GET'])
 def delete_software(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -656,6 +687,7 @@ def delete_software(id):
     flash('Запись успешно удалена!')
     return redirect(url_for('software_list'))
 
+# Удаление ПО из справочника программного обеспечения - редактор
 @app.route('/editor_delete_software/<string:id>' ,methods=['POST', 'GET'])
 def editor_delete_software(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -664,6 +696,7 @@ def editor_delete_software(id):
     flash('Запись успешно удалена!')
     return redirect(url_for('editor_software_list'))
 
+# Скачивание отчёта справочника ПО
 @app.route('/download_software/report/excel')
 def download_software_report():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -695,6 +728,7 @@ def download_software_report():
     output_software.seek(0)
     return Response(output_software, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=software_report.xls"})
 
+# Справочник производителей ПО - администратор
 @app.route('/vendor')
 @role_required('admin')
 def vendor_list():
@@ -706,6 +740,7 @@ def vendor_list():
         return render_template('vendor.html', list_vendor=list_vendor)
     return redirect(url_for('login'))
 
+# Справочник производителей ПО - редактор
 @app.route('/editor_vendor')
 @role_required('editor')
 def editor_vendor_list():
@@ -717,6 +752,7 @@ def editor_vendor_list():
         return render_template('editor_vendor.html', list_vendor=list_vendor)
     return redirect(url_for('login'))
 
+# Справочник производителей ПО - техподдержка
 @app.route('/support_vendor')
 @role_required('support')
 def support_vendor_list():
@@ -728,6 +764,7 @@ def support_vendor_list():
         return render_template('support_vendor.html', list_vendor=list_vendor)
     return redirect(url_for('login'))
 
+# Добавление производителя ПО - администратор
 @app.route('/add_vendor', methods=['POST'])
 def add_vendor():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -741,7 +778,8 @@ def add_vendor():
         conn2.commit()
         flash('Запись успешно создана!')
         return redirect(url_for('vendor_list'))
-    
+
+# Добавление производителя ПО - редактор
 @app.route('/editor_add_vendor', methods=['POST'])
 def editor_add_vendor():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -756,6 +794,7 @@ def editor_add_vendor():
         flash('Запись успешно создана!')
         return redirect(url_for('editor_vendor_list'))
 
+# Редактирование производителя ПО - администратор
 @app.route('/edit_vendor/<id>', methods=['POST', 'GET'])
 def edit_vendor(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -764,6 +803,7 @@ def edit_vendor(id):
     cur.close()
     return render_template('edit_vendor.html', vendor = vendors[0])
 
+# Редактирование производителя ПО - редактор
 @app.route('/editor_edit_vendor/<id>', methods=['POST', 'GET'])
 def editor_edit_vendor(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -772,6 +812,7 @@ def editor_edit_vendor(id):
     cur.close()
     return render_template('editor_edit_vendor.html', vendor = vendors[0])
 
+# Обновление справочника производителей ПО - администратор
 @app.route('/update_vendor/<id>', methods=['POST'])
 def update_vendor(id):
     if request.method == 'POST':
@@ -791,7 +832,8 @@ def update_vendor(id):
         flash("Запись успешно обновлена!")
         conn2.commit()
         return redirect(url_for('vendor_list'))
-    
+
+# Обновление справочника производителей ПО - редактор
 @app.route('/editor_update_vendor/<id>', methods=['POST'])
 def editor_update_vendor(id):
     if request.method == 'POST':
@@ -812,6 +854,7 @@ def editor_update_vendor(id):
         conn2.commit()
         return redirect(url_for('editor_vendor_list'))
 
+# Удаление производителя из справочника - администратор
 @app.route('/delete_vendor/<string:id>', methods=['POST', 'GET'])
 def delete_vendor(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -820,6 +863,7 @@ def delete_vendor(id):
     flash('Запись успешно удалена!')
     return redirect(url_for('vendor_list'))
 
+# Удаление производителя из справочника - редактор
 @app.route('/editor_delete_vendor/<string:id>', methods=['POST', 'GET'])
 def editor_delete_vendor(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -828,6 +872,7 @@ def editor_delete_vendor(id):
     flash('Запись успешно удалена!')
     return redirect(url_for('editor_vendor_list'))
 
+# Скачивание отчёта по производителям ПО
 @app.route('/download_vendor/report/excel')
 def download_vendor_report():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -853,6 +898,7 @@ def download_vendor_report():
     output_vendor.seek(0)
     return Response(output_vendor, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=vendor_report.xls"})
 
+# Список заказчиков ПО - администратор
 @app.route('/customer')
 @role_required('admin')
 def customer_list():
@@ -864,6 +910,7 @@ def customer_list():
         return render_template('customer.html', list_customer=list_customer)
     return redirect(url_for('login'))
 
+# Список заказчиков ПО - редактор
 @app.route('/editor_customer')
 @role_required('editor')
 def editor_customer_list():
@@ -875,6 +922,7 @@ def editor_customer_list():
         return render_template('editor_customer.html', list_customer=list_customer)
     return redirect(url_for('login'))
 
+# Список заказчиков ПО - техподдержка
 @app.route('/support_customer')
 @role_required('support')
 def support_customer_list():
@@ -886,6 +934,7 @@ def support_customer_list():
         return render_template('support_customer.html', list_customer=list_customer)
     return redirect(url_for('login'))
 
+# Добавление заказчика ПО - администратор
 @app.route('/add_customer', methods=['POST'])
 def add_customer():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -899,7 +948,8 @@ def add_customer():
         conn2.commit()
         flash('Запись успешно создана!')
         return redirect(url_for('customer_list'))
-    
+
+# Добавление заказчика ПО - редактор
 @app.route('/editor_add_customer', methods=['POST'])
 def editor_add_customer():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -915,6 +965,7 @@ def editor_add_customer():
         return redirect(url_for('editor_customer_list'))
     
 
+# Редактирование справочника заказчиков ПО - администратор
 @app.route('/edit_customer/<id>', methods=['POST','GET'])
 def edit_customer(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -923,6 +974,7 @@ def edit_customer(id):
     cur.close()
     return render_template('edit_customer.html', customer=customers[0])
 
+# Редактирование справочника заказчиков ПО - редактор
 @app.route('/editor_edit_customer/<id>', methods=['POST', 'GET'])
 def editor_edit_customer(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -931,6 +983,7 @@ def editor_edit_customer(id):
     cur.close()
     return render_template('editor_edit_customer.html', customer=customers[0])
 
+# Обновление справочника заказчиков ПО - администратор
 @app.route('/update_customer/<id>', methods=['POST'])
 def update_customer(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -950,7 +1003,8 @@ def update_customer(id):
         flash("Запись успешно обновлена!")
         conn2.commit()
         return redirect(url_for('customer_list'))
-    
+
+# Обновление справочника заказчиков ПО - редактор
 @app.route('/editor_update_customer/<id>', methods=['POST'])
 def editor_update_customer(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -970,7 +1024,8 @@ def editor_update_customer(id):
         flash("Запись успешно обновлена!")
         conn2.commit()
         return redirect(url_for('editor_customer_list'))
-    
+
+# Удаление заказчика ПО - администратор
 @app.route('/delete_customer/<string:id>', methods=['POST', 'GET'])
 def delete_customer(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -979,6 +1034,7 @@ def delete_customer(id):
     flash('Запись успешно удалена!')
     return redirect(url_for('customer_list'))
 
+# Удаление заказчика ПО - редактор
 @app.route('/editor_delete_customer/<string:id>', methods=['POST', 'GET'])
 def editor_delete_customer(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -987,6 +1043,7 @@ def editor_delete_customer(id):
     flash('Запись успешно удалена!')
     return redirect(url_for('editor_customer_list'))
 
+# Скачиавание списка заказчиков ПО
 @app.route('/download_customer/report/excel')
 def download_customer_report():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1012,6 +1069,7 @@ def download_customer_report():
     output_customer.seek(0)
     return Response(output_customer, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=customer_report.xls"})
 
+# Справочника лицензий - администратор
 @app.route('/licence')
 @role_required('admin')
 def licence_list():
@@ -1023,6 +1081,7 @@ def licence_list():
         return render_template('licence.html', list_licence=list_licence)
     return redirect(url_for('login'))
 
+# Справочник лицензий - редактор
 @app.route('/editor_licence')
 @role_required('editor')
 def editor_licence_list():
@@ -1034,6 +1093,7 @@ def editor_licence_list():
         return render_template('editor_licence.html', list_licence=list_licence)
     return redirect(url_for('login'))
 
+# Справочник лицензий - техподдержка
 @app.route('/support_licence')
 @role_required('support')
 def support_licence_list():
@@ -1044,7 +1104,8 @@ def support_licence_list():
         list_licence = cur.fetchall()
         return render_template('support_licence.html', list_licence=list_licence)
     return redirect(url_for('login'))
-    
+
+# Добавление лицензии в список - администратор
 @app.route('/add_licence_to_list', methods=['POST'])
 def add_licence_to_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1060,6 +1121,7 @@ def add_licence_to_list():
         flash('Запись успешно создана!')
         return redirect(url_for('licence_list'))
 
+# Добавление лицензии в список - редактор
 @app.route('/editor_add_licence_to_list', methods=['POST'])
 def editor_add_licence_to_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1075,6 +1137,7 @@ def editor_add_licence_to_list():
         flash('Запись успешно создана!')
         return redirect(url_for('editor_licence_list'))
     
+# Редактирование справочника лицензий - администратор  
 @app.route('/edit_licence/<id>', methods=['POST', 'GET'])
 def edit_licence(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1082,6 +1145,7 @@ def edit_licence(id):
     lic = cur.fetchall()
     return render_template('edit_licence.html', lice = lic[0])
 
+# Редактирование справочника лицензий - редактор
 @app.route('/editor_edit_licence/<id>', methods=['POST', 'GET'])
 def editor_edit_licence(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1089,6 +1153,7 @@ def editor_edit_licence(id):
     lic = cur.fetchall()
     return render_template('editor_edit_licence.html', lice = lic[0])
 
+# Обновление справочника лицензий - администратор
 @app.route('/update_licence/<id>', methods=['POST'])
 def update_licence_list(id):
     if request.method == 'POST':
@@ -1109,7 +1174,8 @@ def update_licence_list(id):
         flash('Запись успешно обновлена!')
         conn2.commit()
         return redirect(url_for('licence_list'))
-    
+
+# Обновление справочника лицензий - редактор
 @app.route('/editor_update_licence/<id>', methods=['POST'])
 def editor_update_licence_list(id):
     if request.method == 'POST':
@@ -1130,7 +1196,8 @@ def editor_update_licence_list(id):
         flash('Запись успешно обновлена!')
         conn2.commit()
         return redirect(url_for('editor_licence_list'))
-    
+
+# Удаление лицензии из справочника - администратор    
 @app.route('/delete_licence/<string:id>', methods=['POST', 'GET'])
 def delete_licence_from_list(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1139,6 +1206,7 @@ def delete_licence_from_list(id):
     flash('Запись успешно удалена!')
     return redirect(url_for('licence_list'))
 
+# Удаление лицензии из справочника - редактор
 @app.route('/editor_delete_licence/<string:id>', methods=['POST', 'GET'])
 def editor_delete_licence_from_list(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1147,6 +1215,7 @@ def editor_delete_licence_from_list(id):
     flash('Запись успешно удалена!')
     return redirect(url_for('editor_licence_list'))
 
+# Справочник контрагентов - администратор
 @app.route('/partners_list')
 @role_required('admin')
 def partners_list():
@@ -1158,6 +1227,7 @@ def partners_list():
         return render_template('partner.html', partner_list=partner_list)
     return redirect(url_for('login'))
 
+# Справочник контрагентов - редактор
 @app.route('/editor_partners_list')
 @role_required('editor')
 def editor_partners_list():
@@ -1169,6 +1239,7 @@ def editor_partners_list():
         return render_template('editor_partner.html', partner_list=partner_list)
     return redirect(url_for('login'))
 
+# Справочник контрагентов - техподдержка
 @app.route('/support_partners_list')
 @role_required('support')
 def support_partners_list():
@@ -1180,6 +1251,7 @@ def support_partners_list():
         return render_template('support_partner.html', partner_list=partner_list)
     return redirect(url_for('login'))
 
+# Добавление контрагента в справочник - администратор
 @app.route('/add_partner', methods=['POST'])
 def add_partner():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1192,7 +1264,8 @@ def add_partner():
         conn2.commit()
         flash('Запись успешно создана!')
         return redirect(url_for('partners_list'))
-    
+
+# Добавление контрагента в справочник - редактор    
 @app.route('/editor_add_partner', methods=['POST'])
 def editor_add_partner():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1205,7 +1278,8 @@ def editor_add_partner():
         conn2.commit()
         flash('Запись успешно создана!')
         return redirect(url_for('editor_partners_list'))
-    
+
+# Редактирование контрагента - администратор    
 @app.route('/edit_partner/<id>', methods=['POST', 'GET'])
 def edit_partner(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1213,6 +1287,7 @@ def edit_partner(id):
     partners = cur.fetchall()
     return render_template('edit_partner.html', partner = partners[0])
 
+# Редактирование контрагента - редактор
 @app.route('/editor_edit_partner/<id>', methods=['POST', 'GET'])
 def editor_edit_partner(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1220,6 +1295,7 @@ def editor_edit_partner(id):
     partners=cur.fetchall()
     return render_template('editor_edit_partner.html', partner=partners[0])
 
+# Обновление справочника контрагентов - администратор
 @app.route('/update_partner/<id>', methods=['POST'])
 def update_partner(id):
     if request.method == 'POST':
@@ -1236,7 +1312,8 @@ def update_partner(id):
         flash('Запись успешно обновлена!')
         conn2.commit()
         return redirect(url_for('partners_list'))
-    
+
+# Обновление справочника контрагентов - редактор
 @app.route('/editor_update_partner/<id>', methods=['POST'])
 def editor_update_partner(id):
     if request.method == 'POST':
@@ -1253,7 +1330,8 @@ def editor_update_partner(id):
         flash('Запись успешно обновлена!')
         conn2.commit()
         return redirect(url_for('editor_partners_list'))
-    
+
+# Удаление контрагента из справочника - администратор    
 @app.route('/delete_partner/<string:id>', methods=['POST', 'GET'])
 def delete_partner(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1262,6 +1340,7 @@ def delete_partner(id):
     flash('Запись успешно удалена!')
     return redirect(url_for('partners_list'))
 
+# Удаление контрагента из справочника - редактор
 @app.route('/editor_delete_partner/<string:id>', methods=['POST', 'GET'])
 def editor_delete_partner(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1270,6 +1349,7 @@ def editor_delete_partner(id):
     flash('Запись успешно удалена!')
     return redirect(url_for('editor_partners_list'))
 
+# Скачивание справочника контрагентов
 @app.route('/download_partner/report/excel')
 def download_partner_report():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1293,6 +1373,7 @@ def download_partner_report():
     output_partner.seek(0)
     return Response(output_partner, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=partner_report.xls"})
 
+# Скачивание справочника лицензий
 @app.route('/download_licence/report/excel')
 def download_licence_report():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1320,6 +1401,7 @@ def download_licence_report():
     output_licence.seek(0)
     return Response(output_licence, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=licence_report.xls"})
 
+# Скачивание справочника информации с домашней страницы
 @app.route('/download/report/excel')
 def download_report():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1365,6 +1447,7 @@ def download_report():
     output.seek(0)
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=total_report.xls"})
 
+# Установка ПО - техподдержка
 @app.route('/support_install_software')
 @role_required('support')
 def support_install_software():
@@ -1374,6 +1457,7 @@ def support_install_software():
     list_installation = cur.fetchall()
     return render_template('support_install.html', list_installation=list_installation)
 
+# Установка ПО - редактор
 @app.route('/editor_installation_software')
 def editor_installation_software():
     if 'role' in session and session['role'] == 'editor':
@@ -1384,6 +1468,7 @@ def editor_installation_software():
         return render_template('editor_install.html', list_installation=list_installation)
     return redirect(url_for('login'))
 
+# Установка ПО - техподдержка
 @app.route('/install_software')
 @role_required('admin')
 def install_software():
@@ -1393,6 +1478,7 @@ def install_software():
     list_installation = cur.fetchall()
     return render_template('install.html', list_installation=list_installation)
 
+# Добавление установки ПО - администратор
 @app.route('/admin_add_installation', methods=['POST'])
 def admin_add_installation():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1449,7 +1535,8 @@ def admin_add_installation():
             conn2.commit()
             flash('Запись успешно создана!')
             return redirect(url_for('install_software'))
-        
+
+# Добавление установки ПО - техподдержка        
 @app.route('/add_installation', methods=['POST'])
 def add_installation():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1500,7 +1587,8 @@ def add_installation():
             conn2.commit()
             flash('Запись успешно создана!')
             return redirect(url_for('support_install_software'))
-    
+
+# Редактирование установки ПО - техподдержка
 @app.route('/edit_installation/<id>', methods=['POST', 'GET'])
 def edit_installation(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1508,6 +1596,7 @@ def edit_installation(id):
     installations = cur.fetchall()
     return render_template('edit_installation.html', installation = installations[0])
 
+# Редактирование установки ПО - администратор
 @app.route('/admin_edit_installation/<id>', methods=['POST', 'GET'])
 def admin_edit_installation(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1515,7 +1604,7 @@ def admin_edit_installation(id):
     installations = cur.fetchall()
     return render_template('admin_edit_installation.html', installation = installations[0])
 
-
+# Обновление информации об установке ПО - техподдержка
 @app.route('/update_installation/<id>', methods=['POST'])
 def update_installation(id):
     if request.method == 'POST':
@@ -1725,7 +1814,8 @@ def update_installation(id):
         flash('Запись успешно обновлена!')
         conn2.commit()
         return redirect(url_for('support_install_software'))
-    
+ 
+# Обновление информации об установке ПО - администратор
 @app.route('/admin_update_installation/<id>', methods=['POST'])
 def admin_update_installation(id):
     if request.method == 'POST':
@@ -1939,7 +2029,8 @@ def admin_update_installation(id):
         flash('Запись успешно обновлена!')
         conn2.commit()
         return redirect(url_for('install_software'))
-    
+
+# Удаление установки ПО - техподдержка
 @app.route('/delete_installation/<string:id>', methods=['POST', 'GET'])
 def delete_installation(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1975,6 +2066,7 @@ def delete_installation(id):
 
     return redirect(url_for('support_install_software'))
 
+# Удаление установки ПО - администратор
 @app.route('/admin_delete_installation/<string:id>', methods=['POST', 'GET'])
 def admin_delete_installation(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2010,6 +2102,7 @@ def admin_delete_installation(id):
 
     return redirect(url_for('install_software'))
 
+# Скачивание отчёта об установке ПО
 @app.route('/download/software_install_report/excel')
 def download_software_install_report():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2049,6 +2142,7 @@ def download_software_install_report():
     output.seek(0)
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=software_installation_report.xls"})
 
+# Справочник с количеством лицензий - администратор
 @app.route('/number_licences')
 @role_required('admin')
 def number_licences():
@@ -2060,6 +2154,7 @@ def number_licences():
         return render_template('number.html', list_number=list_number)
     return redirect(url_for('login'))
 
+# Справочник с количеством лицензий - редактор
 @app.route('/editor_number_licences')
 @role_required('editor')
 def editor_number_licences():
@@ -2071,6 +2166,7 @@ def editor_number_licences():
         return render_template('editor_number.html', list_number=list_number)
     return redirect(url_for('login'))
 
+# Справочник с количеством лицензий - техподдержка
 @app.route('/view_number_licences')
 @role_required('support')
 def view_number_licences():
@@ -2082,6 +2178,7 @@ def view_number_licences():
         return render_template('support_number.html', list_number=list_number)
     return redirect(url_for('login'))
 
+# Добавление количества лицензий - администратор
 @app.route('/add_number', methods=['POST'])
 def add_number():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2096,7 +2193,7 @@ def add_number():
         flash('Запись успешно создана!')
         return redirect(url_for('number_licences'))
     
-
+# Редактирование количества лицензий - администратор
 @app.route('/edit_number/<id>', methods=['POST', 'GET'])
 def edit_number(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2104,6 +2201,7 @@ def edit_number(id):
     numbers = cur.fetchall()
     return render_template('edit_number.html', number = numbers[0])
 
+# Обновление списка количества лицензий - администратор
 @app.route('/update_number/<id>', methods=['POST'])
 def update_number(id):
     if request.method == 'POST':
@@ -2122,7 +2220,8 @@ def update_number(id):
         flash('Запись успешно обновлена!')
         conn2.commit()
         return redirect(url_for('number_licences'))
-    
+
+# Удаление записи о количестве лицензий - админимстратор    
 @app.route('/delete_number/<string:id>', methods=['POST', 'GET'])
 def delete_number(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2131,6 +2230,7 @@ def delete_number(id):
     flash('Запись успешно удалена!')
     return redirect(url_for('number_licences'))
 
+# Скачивание отчёта с количеством лицензий
 @app.route('/download/number_report/excel')
 def download_number_report():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2156,6 +2256,7 @@ def download_number_report():
     output.seek(0)
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=number_report.xls"})
 
+# Смена пароля пользователя
 @app.route('/user_change_password', methods = ['POST', 'GET'])
 def user_change_password():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2190,7 +2291,8 @@ def user_change_password():
                     flash('Введены некорректные данные!')
                     return redirect(url_for('user_change_password'))
         return render_template('profile_change_password.html', title="Поменять пароль")
-    
+
+# Смена пароля - техподдержка    
 @app.route('/support_change_password', methods=['POST', 'GET'])
 def support_change_password():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2224,7 +2326,8 @@ def support_change_password():
                     flash('Введены некорректные данные!')
                     return redirect(url_for('support_change_password'))
         return render_template('support_change_password.html', title='Поменять пароль')
-    
+
+# Смена пароля - редактор    
 @app.route('/editor_change_password', methods=['POST', 'GET'])
 def editor_change_password():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2259,7 +2362,7 @@ def editor_change_password():
                     return redirect(url_for('editor_change_password'))
         return render_template('editor_change_password.html', title='Поменять пароль')
     
-
+# Смена адреса электронной почты - администратор
 @app.route('/user_change_email', methods=['POST', 'GET'])
 def user_change_email():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2290,6 +2393,7 @@ def user_change_email():
                     return redirect(url_for('user_change_email'))
         return render_template('change_email.html', title='Поменять адрес электронной почты')
 
+# Смена адреса электронной почты - техподдержка
 @app.route('/support_change_email', methods=['POST', 'GET'])
 def support_change_email():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2320,6 +2424,7 @@ def support_change_email():
                     return redirect(url_for('support_change_email'))
         return render_template('support_change_email.html', title='Поменять адрес электронной почты')
 
+# Смена адреса электронной почты - редактор
 @app.route('/editor_change_email', methods=['POST', 'GET'])
 def editor_change_email():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2350,6 +2455,7 @@ def editor_change_email():
                     return redirect(url_for('editor_change_email'))
         return render_template('editor_change_email.html', title='Поменять адрес электронной почты')
 
+# Восстановление пароля - администратор
 @app.route('/profile_reset_password', methods=['POST', 'GET'])
 def profile_reset_password():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2410,6 +2516,7 @@ def profile_support_reset_password():
             return render_template('profile_support_reset_password.html', email=email)
     return render_template('profile_support_reset_password.html', title='Пользователь забыл пароль')
 
+# Восстановление пароля - редактор
 @app.route('/profile_editor_reset_password', methods=['POST', 'GET'])
 def profile_editor_reset_password():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2440,6 +2547,7 @@ def profile_editor_reset_password():
             return render_template('profile_editor_reset_password.html', email=email)
     return render_template('profile_editor_reset_password.html', title='Пользователь забыл пароль ')
 
+# Востановление адреса электронной почты по номеру телефона 
 @app.route('/reset_email', methods=['POST', 'GET'])
 def reset_email():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2456,7 +2564,7 @@ def reset_email():
             return redirect(url_for('change_password_email', phone_number=phone_number))
     return render_template('reset_email.html', title='Пользователь забыл адрес электронной почты')
     
-
+# Всстановленеи пароля - 2
 @app.route('/reset_password', methods=['POST', 'GET'])
 def reset_password():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2488,6 +2596,7 @@ def reset_password():
 
     return render_template('reset_password.html', title='Пользователь забыл пароль')
 
+# Функция отпавки однноразового кода подтверждения
 def send_email(email, otp):
     msg = MIMEText(str(otp))
     msg['Subject'] = 'OTP'
@@ -2498,7 +2607,8 @@ def send_email(email, otp):
         smtp.starttls()
         smtp.login('Analstasia.Sholokhova@yandex.ru', 'xyanueciccoxachh')
         smtp.send_message(msg)
-        
+
+# Смена пароля чреез номер телефона - странно работает        
 @app.route('/change_password_email/<phone_number>', methods=['POST', 'GET'])
 def change_password_email(phone_number):
     cur= conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2518,6 +2628,7 @@ def change_password_email(phone_number):
         return redirect(url_for('login'))
     return render_template('change_password_email.html', phone_number=phone_number, title='Изменить пароль')
 
+# Смена пароля
 @app.route('/change_password/<email>', methods=['POST', 'GET'])
 def change_password(email):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2537,6 +2648,7 @@ def change_password(email):
         return redirect(url_for('login'))
     return render_template('change_password.html', email=email, title='Изменить пароль')
 
+# Смена пароля в профиле - администратор
 @app.route('/profile_change_password/<email>', methods=['POST', 'GET'])
 def profile_change_password(email):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2556,6 +2668,7 @@ def profile_change_password(email):
         return redirect(url_for('profile'))
     return render_template('success_change_password.html', email=email, title='Изменить пароль')
 
+# Смена пароля в профиле - техподдержка
 @app.route('/profile_support_change_password/<email>', methods=['POST', 'GET'])
 def profile_support_change_password(email):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2575,6 +2688,7 @@ def profile_support_change_password(email):
         return redirect(url_for('support_profile'))
     return render_template('success_support_change_password.html', email=email, title='Изменить пароль')
 
+# Смена пароля в профиле - редактор
 @app.route('/profile_editor_change_password/<email>', methods=['POST', 'GET'])
 def profile_editor_change_password(email):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2595,6 +2709,7 @@ def profile_editor_change_password(email):
     return render_template('success_editor_change_password.html', email=email, title='Изменить пароль')
 
 
+# Детали по установленному ПО - администратор
 @app.route('/page/<software>')
 def show_installation_details(software):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2602,6 +2717,7 @@ def show_installation_details(software):
     list_installation = cur.fetchall()
     return render_template('software_description.html', list_installation=list_installation, software=software)
 
+# Детали по установленному ПО - техподдержка
 @app.route('/support_page/<software>')
 def support_show_installation_details(software):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2613,7 +2729,7 @@ def support_show_installation_details(software):
     list_installation = cur.fetchall()
     return render_template('support_software_description.html', list_installation=list_installation, software=software)
 
-
+# Загрузка отчёта по установке ПО
 @app.route('/download/soft_report/excel/<software>')
 def download_soft_report(software):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2641,6 +2757,7 @@ def download_soft_report(software):
     output.seek(0)
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=soft_report.xls"})
 
+# Загрузка домашней страницы - администратор
 @app.route('/upload_data', methods=['POST', 'GET'])
 def upload_data():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2674,7 +2791,8 @@ def upload_data():
         return render_template('home.html')
     else:
         return render_template('home.html')
-    
+
+# Загрузка домашней страницы - редактор    
 @app.route('/editor_upload_data', methods=['POST', 'GET'])
 def editor_upload_data():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2709,6 +2827,7 @@ def editor_upload_data():
     else:
         return render_template('home_editor.html')
 
+# Загрузка справочника лицензий - администратор
 @app.route('/upload_licence', methods=['POST', 'GET'])
 def upload_licence():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2735,7 +2854,8 @@ def upload_licence():
         return render_template('licence.html')
     else:
         return render_template('licence.html')
-    
+
+# Загрузка справочника лицензий - редактор    
 @app.route('/editor_upload_licence', methods=['POST', 'GET'])
 def editor_upload_licence():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2762,7 +2882,8 @@ def editor_upload_licence():
         return render_template('editor_licence.html')
     else:
         return render_template('editor_licence.html')
-    
+
+# Загрузка таблицы ПО - администратор    
 @app.route("/upload_software", methods=['POST', 'GET'])
 def upload_software():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2790,7 +2911,8 @@ def upload_software():
         return render_template('software.html')
     else:
         return render_template('software.html')
-    
+
+# Загрузка таблицы заказчиков ПО - редактор    
 @app.route('/editor_upload_software', methods=['POST', 'GET'])
 def editor_upload_software():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2818,7 +2940,8 @@ def editor_upload_software():
         return render_template('editor_software.html')
     else:
         return render_template('editor_software.html')
-    
+
+# Загрузка таблицы заказчиков ПО - администратор    
 @app.route('/upload_customer', methods=['POST', 'GET'])
 def upload_customer():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2846,7 +2969,8 @@ def upload_customer():
         return render_template('customer.html')
     else:
         return render_template('customer.html')
-    
+
+# Загрузка таблицы производителей - редактор    
 @app.route('/editor_upload_customer', methods=['POST', 'GET'])
 def editor_upload_customer():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2874,7 +2998,8 @@ def editor_upload_customer():
         return render_template('editor_customer.html')
     else:
         return render_template('editor_customer.html')
-    
+
+# Загрузка таблицы производителей 
 @app.route('/upload_vendor', methods=['POST', 'GET'])
 def upload_vendor():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2902,7 +3027,8 @@ def upload_vendor():
         return render_template('vendor.html')
     else:
         return render_template('vendor.html')
-    
+
+# Загрузка таблицы производителей ПО - редактор    
 @app.route('/editor_upload_vendor', methods=['POST', 'GET'])
 def editor_upload_vendor():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2930,7 +3056,8 @@ def editor_upload_vendor():
         return render_template('editor_vendor.html')
     else:
         return render_template('editor_vendor.html')
-    
+
+# Загрузка данных установки ПО - администратор
 @app.route('/upload_installation', methods=['POST', 'GET'])
 def upload_installation():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2958,7 +3085,8 @@ def upload_installation():
         return render_template('install.html')
     else:
         return render_template('install.html')
-    
+
+# Загрузка таблицы количества лицензий ПО - техподдержка    
 @app.route('/support_upload_installation')
 def support_upload_installation():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2986,7 +3114,8 @@ def support_upload_installation():
         return render_template('support_install.html')
     else:
         return render_template('support_install.html')
-    
+
+# Загрузка таблицы количества лицензий ПО - администратор    
 @app.route('/upload_number', methods=['POST', 'GET'])
 def upload_number():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -3015,6 +3144,7 @@ def upload_number():
     else:
         return render_template('number.html')
 
+# Загрузка таблицы контрагентов - администратор
 @app.route('/upload_partner', methods=['POST', 'GET'])
 def upload_partner():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -3043,6 +3173,7 @@ def upload_partner():
     else:
         return render_template('partner.html')
 
+# Загрузка таблицы контрагентов - редактор
 @app.route('/editor_upload_partner', methods=['POST', 'GET'])
 def editor_upload_partner():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -3070,6 +3201,7 @@ def editor_upload_partner():
         return render_template('editor_partner.html')
     else:
         return render_template('editor_partner.html')
-    
+
+# Запуск приложения через waitress-serve    
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=5000)
