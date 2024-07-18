@@ -13,7 +13,7 @@ from random import randint
 import smtplib
 from email.mime.text import MIMEText
 import os
-#import openpyxl
+import openpyxl
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -2640,7 +2640,7 @@ def download_soft_report(software):
     workbook.save(output)
     output.seek(0)
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=soft_report.xls"})
-"""@app.route('/upload_data', methods=['POST', 'GET'])
+@app.route('/upload_data', methods=['POST', 'GET'])
 def upload_data():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
@@ -2699,7 +2699,7 @@ def upload_licence():
             return redirect(url_for('licence_list'))
         return render_template('licence.html')
     else:
-        return render_template('licence.html')"""
+        return render_template('licence.html')
     
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=5000)
