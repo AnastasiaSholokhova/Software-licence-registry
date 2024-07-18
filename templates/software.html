@@ -100,5 +100,10 @@
   </div>
 </div>
 <a href="{{url_for('download_software_report')}}">Сгенерировать справочник ПО</a>
+<form action="{{url_for('upload_software')}}" method="POST" enctype="multipart/form-data">
+  <input type="file"  name="file" accept=".xlsx">
+    <button type="submit">Отправить файл</button>
+  </input>
+</form>
 </div>
 {% endblock %}

@@ -120,5 +120,10 @@
   </div>
   </div>
 <a href="{{url_for('download_report') }}">Сгенерировать отчет в Excel</a>
+<form action="{{url_for('editor_upload_data') }}" method="POST" enctype="multipart/form-data">
+  <input type="file" name="file" accept=".xlsx">
+    <button class="submit">Загрузить файл</button>
+  </input>
+</form>
 </div>
 {% endblock %}

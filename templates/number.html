@@ -83,5 +83,10 @@
   </div>
 </div>
 <a href="{{url_for('download_number_report')}}">Сгенерировать отчет по количество лицензий</a>
+<form action="{{url_for('upload_number') }}" method="POST" enctype="multipart/form-data">
+  <input type="file" name="file" accept=".xlsx">
+    <button class="submit">Загрузить файл</button>
+  </input>
+</form>
 </div>
 {% endblock %}

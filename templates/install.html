@@ -118,5 +118,10 @@
   </div>
 </div>
 <a href="{{url_for('download_software_install_report')}}">Сгенерировать журнал установки ПО</a>
+<form action="{{url_for('upload_installation') }}" method="POST" enctype="multipart/form-data">
+  <input type="file" name="file" accept=".xlsx">
+    <button class="submit">Загрузить файл</button>
+  </input>
+</form>
 </div>
 {% endblock %}

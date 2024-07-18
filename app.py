@@ -2640,6 +2640,7 @@ def download_soft_report(software):
     workbook.save(output)
     output.seek(0)
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=soft_report.xls"})
+
 @app.route('/upload_data', methods=['POST', 'GET'])
 def upload_data():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2673,6 +2674,40 @@ def upload_data():
         return render_template('home.html')
     else:
         return render_template('home.html')
+    
+@app.route('/editor_upload_data', methods=['POST', 'GET'])
+def editor_upload_data():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        file = request.files['file']
+        if file:
+            if file.filename.endswith("xlsx"):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                data = []
+                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                    if len(row) == 15: 
+                        data.append(row)
+                    else:
+                        flash('Неправильный формат файла')
+                        return redirect(url_for('home_editor'))
+                for row in data:
+                    cur.execute(
+                        "INSERT INTO лицензии (номер_пп, наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, срок_действия_лицензии, оплачено, остаток, примечание) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval, %s, %s, %s)",
+                        (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14])
+                    )
+                conn2.commit()
+                flash('Файл успешно загружен!')
+                return redirect(url_for('home_editor'))
+            else:
+                flash('Неверный тип файла')
+                return redirect(url_for('home_editor'))
+        else:
+            flash('Файл не выбран!')
+            return redirect(url_for('home_editor'))
+        return render_template('home_editor.html')
+    else:
+        return render_template('home_editor.html')
 
 @app.route('/upload_licence', methods=['POST', 'GET'])
 def upload_licence():
@@ -2700,7 +2735,34 @@ def upload_licence():
         return render_template('licence.html')
     else:
         return render_template('licence.html')
-
+    
+@app.route('/editor_upload_licence', methods=['POST', 'GET'])
+def editor_upload_licence():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        file = request.files['file']
+        if file:
+            if file.filename.endswith("xlsx"):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                data = []
+                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                    data.append(row)
+                for row in data:
+                    cur.execute('INSERT INTO Справочник_лицензий (код_лицензии, наименование_лицензии, тип_лицензии, счёт_списания, версия_лицензии, примечание) VALUES(%s,%s,%s,%s,%s,%s)', (row[0], row[1], row[2], row[3], row[4], row[5]))
+                conn2.commit()
+                flash('Файл успешно загружен!')
+                return redirect(url_for('editor_licence_list'))
+            else:
+                flash('Неверный тип файла')
+                return redirect(url_for('editor_licence_list'))
+        else:
+            flash('Файл не выбран!')
+            return redirect(url_for('editor_licence_list'))
+        return render_template('editor_licence.html')
+    else:
+        return render_template('editor_licence.html')
+    
 @app.route("/upload_software", methods=['POST', 'GET'])
 def upload_software():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2729,6 +2791,34 @@ def upload_software():
     else:
         return render_template('software.html')
     
+@app.route('/editor_upload_software', methods=['POST', 'GET'])
+def editor_upload_software():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        file = request.files['file']
+        if file:
+            if file.filename.endswith("xlsx"):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                data = []
+                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-2):
+                    data.append(row)
+                for row in data:
+                    print(row)
+                    cur.execute("INSERT INTO Справочник_ПО (код_ПО, наименование_ПО, описание_ПО, ссылка_на_сайт_ПО, вендор, стоимость_за_единицу, признак_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)", (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]))
+                conn2.commit()
+                flash('Файл успешно загружен!')
+                return redirect(url_for('editor_software_list'))
+            else:
+                flash('Неверный тип файла')
+                return redirect(url_for('editor_software_list'))
+        else:
+            flash('Файл не выбран!')
+            return redirect(url_for('editor_software_list'))
+        return render_template('editor_software.html')
+    else:
+        return render_template('editor_software.html')
+    
 @app.route('/upload_customer', methods=['POST', 'GET'])
 def upload_customer():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2756,7 +2846,35 @@ def upload_customer():
         return render_template('customer.html')
     else:
         return render_template('customer.html')
-
+    
+@app.route('/editor_upload_customer', methods=['POST', 'GET'])
+def editor_upload_customer():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method=='POST':
+        file = request.files['file']
+        if file:
+            if file.filename.endswith("xlsx"):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                data = []
+                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                    data.append(row)
+                for row in data:
+                    print(row)
+                    cur.execute('INSERT INTO Справочник_заказчиков_ПО (код_заказчика, заказчик_ПО, описание_заказчика, ссылка_на_сайт_заказчика, примечание) VALUES(%s,%s,%s,%s,%s)', (row[0], row[1], row[2], row[3], row[4]))
+                conn2.commit()
+                flash('Файл успешно загружен!')
+                return redirect(url_for('editor_customer_list'))
+            else:
+                flash('Неверный тип файла')
+                return redirect(url_for('editor_customer_list'))
+        else:
+            flash('Файл не выбран!')
+            return redirect(url_for('editor_customer_list'))
+        return render_template('editor_customer.html')
+    else:
+        return render_template('editor_customer.html')
+    
 @app.route('/upload_vendor', methods=['POST', 'GET'])
 def upload_vendor():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2784,6 +2902,34 @@ def upload_vendor():
         return render_template('vendor.html')
     else:
         return render_template('vendor.html')
+    
+@app.route('/editor_upload_vendor', methods=['POST', 'GET'])
+def editor_upload_vendor():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method=='POST':
+        file = request.files['file']
+        if file:
+            if file.filename.endswith("xlsx"):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                data = []
+                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                    data.append(row)
+                for row in data:
+                    print(row)
+                    cur.execute('INSERT INTO Справочник_производителей_ПО (код_производителя, производитель, описание_производителя, ссылка_на_сайт_производителя, примечание) VALUES(%s,%s,%s,%s,%s)', (row[0], row[1], row[2], row[3], row[4]))
+                conn2.commit()
+                flash('Файл успешно загружен!')
+                return redirect(url_for('editor_vendor_list'))
+            else:
+                flash('Неверный тип файла')
+                return redirect(url_for('editor_vendor_list'))
+        else:
+            flash('Файл не выбран!')
+            return redirect(url_for('editor_vendor_list'))
+        return render_template('editor_vendor.html')
+    else:
+        return render_template('editor_vendor.html')
     
 @app.route('/upload_installation', methods=['POST', 'GET'])
 def upload_installation():
@@ -2813,6 +2959,34 @@ def upload_installation():
     else:
         return render_template('install.html')
     
+@app.route('/support_upload_installation')
+def support_upload_installation():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method=='POST':
+        file = request.files['file']
+        if file:
+            if file.filename.endswith("xlsx"):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                data = []
+                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                    data.append(row)
+                for row in data:
+                    print(row)
+                    cur.execute('INSERT INTO Установка_ПО (код_установки, наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11]))
+                conn2.commit()
+                flash('Файл успешно загружен!')
+                return redirect(url_for('support_install_software'))
+            else:
+                flash('Неверный тип файла')
+                return redirect(url_for('support_install_software'))
+        else:
+            flash('Файл не выбран!')
+            return redirect(url_for('support_install_software'))
+        return render_template('support_install.html')
+    else:
+        return render_template('support_install.html')
+    
 @app.route('/upload_number', methods=['POST', 'GET'])
 def upload_number():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2840,6 +3014,62 @@ def upload_number():
         return render_template('number.html')
     else:
         return render_template('number.html')
+
+@app.route('/upload_partner', methods=['POST', 'GET'])
+def upload_partner():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method=='POST':
+        file = request.files['file']
+        if file:
+            if file.filename.endswith("xlsx"):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                data = []
+                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                    data.append(row)
+                for row in data:
+                    print(row)
+                    cur.execute('INSERT INTO Контрагенты (код_контрагента, наименование_контрагента, договор, примечание) VALUES(%s,%s,%s,%s)', (row[0], row[1], row[2], row[3]))
+                conn2.commit()
+                flash('Файл успешно загружен!')
+                return redirect(url_for('partners_list'))
+            else:
+                flash('Неверный тип файла')
+                return redirect(url_for('partners_list'))
+        else:
+            flash('Файл не выбран!')
+            return redirect(url_for('partners_list'))
+        return render_template('partner.html')
+    else:
+        return render_template('partner.html')
+
+@app.route('/editor_upload_partner', methods=['POST', 'GET'])
+def editor_upload_partner():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method=='POST':
+        file = request.files['file']
+        if file:
+            if file.filename.endswith("xlsx"):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                data = []
+                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                    data.append(row)
+                for row in data:
+                    print(row)
+                    cur.execute('INSERT INTO Контрагенты (код_контрагента, наименование_контрагента, договор, примечание) VALUES(%s,%s,%s,%s)', (row[0], row[1], row[2], row[3]))
+                conn2.commit()
+                flash('Файл успешно загружен!')
+                return redirect(url_for('editor_partners_list'))
+            else:
+                flash('Неверный тип файла')
+                return redirect(url_for('editor_partners_list'))
+        else:
+            flash('Файл не выбран!')
+            return redirect(url_for('editor_partners_list'))
+        return render_template('editor_partner.html')
+    else:
+        return render_template('editor_partner.html')
     
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=5000)
