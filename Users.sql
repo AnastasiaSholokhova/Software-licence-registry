@@ -126,11 +126,6 @@ COPY public.user_roles (user_id, role_id) FROM stdin;
 --
 
 COPY public.users (id, fullname, username, password, email, role, phone_number) FROM stdin;
-21	Anastasia	Anastasia_Sholokhova	scrypt:32768:8:1$iQl7EMaLKraXILea$8b2e4585875da64e91d84e66289d3b9b43c182afff0683822cd24c8529975a55f362092d544dfc555c2b29f2707f65653375640efa3118368ed3d5caae5337e0	sholokhova.nastia@bk.ru	admin	\N
-23	User	User	scrypt:32768:8:1$HI6v3SL3hvXxzG70$860aaf48f555366512c532e64295b8aa42f66e56e9816f11c929778f32e98aaeab511f3bbb77fba24c680e89ac0615aaa61cbc159a323c3518a249cdef357162	irina101@bk.ru	editor	+79167574938
-14	someone	someone	scrypt:32768:8:1$LlEzkgeS9wHcZ4ZQ$40af807a997de58d78151f02aa9e0fc59da98e9fb65d51493e624fe2284925e4a5d38d7b10fa7455e6e457d32b8311594c95bd84061ea38c9a6b20b0710256fc	Analstasia.Sholokhova@yandex.ru	editor	\N
-20	s1	s1	scrypt:32768:8:1$D2j2i7XDq0VpClat$9dae12075f6826f63509e5ae8ac264726cdfa6f3ea9a9af57eaf6b9cf384dfe3edce6793e352adcca72a5912197ed89f784ba571ca76f33dad727f844e218358	mlstudent2003@gmail.com	support	\N
-22	Anastasia	Anastasia	scrypt:32768:8:1$41jtLWZxRtMQbPTG$6b094ca4c413fc30afbf4f5ceeed5f4b6341a1601ab89a894949f67926040885450573837c8dcced44a02080d846e716ddc737047c62bae6b5b1f4a549b58338	m2105497@edu.misis.ru	admin	+79167574938
 \.
 
 
