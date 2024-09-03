@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+{% block title %}Редактирование общей информации{% endblock %}
+{% block content %}
+  <div class="row">
+    <div class="col-md-4">
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">x</span>
+        </button>
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+      <div class="card card-body">
+        <form action="/editor_update_total/{{total.код_ПО}}" method="POST">
+          <div class="form-group">
+            <label for="статья_затрат"><b>Статья затрат:</b></label>
+            <input type="text" name="статья_затрат" value="{{total.статья_затрат}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="наименование_ПО"><b>Наименование ПО:</b></label>
+            <input type="text" name="наименование_ПО" value="{{total.наименование_ПО}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="количество"><b>Количество:</b></label>
+            <input type="number" name="количество" value="{{total.количество}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="код"><b>Код:</b></label>
+            <input type="text" name="код" value="{{total.код}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="филиал"><b>Филиал:</b></label>
+            <input type="text" name="филиал" value="{{total.филиал}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="счет_затрат"><b>Счет затрат:</b></label>
+            <input type="text" name="счет_затрат" value="{{total.счет_затрат}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="вид_деятельности"><b>Вид деятельности:</b></label>
+            <input type="text" name="вид_деятельности" value="{{total.вид_деятельности}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="стоимость_ПО_без_ндс"><b>Стоимость ПО (всего) без НДС:</b></label>
+            <input type="number" name="стоимость_ПО_без_ндс" value="{{total.стоимость_ПО_без_ндс}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="стоимость_ПО_с_ндс"><b>Стоимость ПО (всего) с НДС:</b></label>
+            <input type="number" name="стоимость_ПО_с_ндс" value="{{total.стоимость_ПО_с_ндс}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="срок_полезного_использования_мес"><b>Срок полезного использования (мес.):</b></label>
+            <input type="text" name="срок_полезного_использования_мес" value="{{total.срок_полезного_использования_мес}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="дата_начала_списания"><b>Дата начала списания:</b></label>
+            <input type="date" name="дата_начала_списания" value="{{total.дата_начала_списания}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="дата_окончания_списания"><b>Дата окончания списания:</b></label>
+            <input type="date" name="дата_окончания_списания" value="{{total.дата_окончания_списания}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="договор_счет"><b>Договор/счет:</b></label>
+            <input type="text" name="договор_счет" value="{{total.договор_счет}}" class="form-contro">
+          </div>
+          <div class="form-group">
+            <label for="контрагент"><b>Контрагент:</b></label>
+            <input type="text" name="контрагент" value="{{total.контрагент}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="первичный_документ"><b>Первичный документ:</b></label>
+            <input type="text" name="первичный_документ" value="{{total.первичный_документ}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="страна_производитель"></b>Страна-производитель:</b></label>
+            <input type="text" name="страна_производитель" value="{{total.страна_производитель}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="правообладатель"></b>Правообладатель:</b></label>
+            <input type="text" name="правообладатель" value="{{total.правообладатель}}" class="form-control">
+          </div>
+          <div class="form-group">
+             <label for="включен_в_реестр"><b>Включен в реестр Российсого ПО Да/нет:</b></label>
+            <select class="form-control" name="включен_в_реестр">
+              <option value="да">Да</option>
+              <option value="нет">Нет</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="срок_предоставления_права"><b>Срок предоставления права:</b></label>
+            <input type="text" name="срок_предоставления_права" value="{{total.срок_предоставления_права}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary btn-block">
+              Обновить
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

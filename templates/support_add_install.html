@@ -1,0 +1,64 @@
+{% extends 'support_layout.html' %}
+{% block title %}Добавление установки ПО{% endblock %}
+{% block content %}
+<div class="col-md-4">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{message}}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">x</span>
+      </button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <div class="card card-body">
+      <form action="{{url_for('add_installation')}}" method="POST">
+        <div class="form-group">
+          <input type="text" class="form-control" name="наименование_ПО" placeholder="Наименование ПО">
+        </div>
+        <div class="form-group">
+          <p>Тип лицензии:</p>
+          <select class="form-control" name="тип_лицензии">
+            <option value="Сетевая">Сетевая</option>
+            <option value="Локальная">Локальная</option>
+            <option value="Условно-бесплатная">Условно-бесплатная</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="ФИО" placeholder="ФИО">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="ip_адрес" placeholder="IP адрес">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="наименование_машины" placeholder="Наименование машины">
+        </div>
+        <div class="form-group">
+            <label for="чекбокс">
+            <input type="checkbox" class="form-control" id="чекбокс" name="чекбокс">
+            </label>
+            ПО установлено?
+        </div>
+        <div class="form-group">
+          <p>Дата установки ПО:</p>
+          <input type="date" class="form-control" name="дата_установки_ПО" placeholder="Дата установки ПО">
+        </div>
+        <div class="form-group">
+          <label for="checkbox_po">
+          <input type="checkbox"  class="form-control" id="checkbox_po" name="чекбокс_условно_бесплатное_ПО"/>
+          </label>
+          ПО условно-бесплатное?
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="примечание" placeholder="Примечание">
+        </div>
+        <button class="btn btn-primary btn-block">
+          Сохранить
+        </button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

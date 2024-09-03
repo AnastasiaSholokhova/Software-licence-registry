@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
  <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
@@ -16,67 +16,67 @@
 
  </head>
  <body class="loggedin">
- <div id="main" class="duplicate">
- <nav class="site-header sticky-top py-1">
-      <div class="container d-flex flex-column flex-md-row justify-content-between">
-  <a class="py-2 d-none d-md-inline-block" href="{{ url_for('home') }}"><i class="fas fa-home"></i><b>Домашняя страница</b></a>
-  <a class="py-2 d-none d-md-inline-block" href="{{ url_for('profile') }}"><i class="fas fa-user-circle"></i><b>Профиль</b></a>
-  <a class="py-2 d-none d-md-inline-block" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i><b>Выход</b></a>
-   </div>
-    </nav>
+ <div class="menu">
+    <div class="dropdown">
+      <li><a href="#" style="display:block;width:150px"><i class="fas fa-home"></i><b>Домашняя страница</b></a></li>
+      <div class="dropdown-options">
+          <li><a href="{{ url_for('total') }}">Общая информация</a></li>
+          <li><a href="{{ url_for('home') }}">Расчет стоимости</a></li>
+      </div>
+    </div>
+    <li><a href="{{ url_for('profile') }}"><i class="fas fa-user-circle"></i><b>Профиль</b></a></li>
+    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i><b>Выход</b></a></li>
  </div>
- <div id="stickyContent"></div>
-   
- <div class="container-fluid">
-      <div class="row">
-        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-          <div class="sidebar-sticky">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                  <a class="nav-link" href="{{url_for('number_licences') }}">
-                   <i class="fas fa-download"></i>
-                    Количество ПО
-                  </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{{url_for('customer_list') }}">
+   <div class="container-fluid">
+    <div class="row">
+            <div id="mySidenav" class="sidenav">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+                <a href="{{url_for('customer_list') }}" style="display:block;width:200px;">
                   <i class="fas fa-users"></i>
                   Покупатели
                 </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{{url_for('licence_list') }}">
+                <div class="side-dropdown">
+                <a href="{{url_for('licence_list') }}" style="display:block;width:200px">
     <i class="fas fa-shopping-cart"></i>
                   Лицензии
                 </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{{url_for('vendor_list') }}">
+                <ul class="dropdown-content">
+                <a href="{{ url_for('number_licences') }}" style="display:block;width:200px;">
+                <i class="fas fa-download"></i>
+                Количество лицензий ПО
+                </a>
+                </ul>
+                </div>
+                <a href="{{url_for('vendor_list') }}" style="display:block;width:200px;">
                   <i class="fas fa-users"></i>
                   Вендоры
                 </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{{url_for('software_list') }}">
+                <div class="side-dropdown">
+                <a href="{{url_for('software_list') }}" style="display:block;width:200px;">
                   <i class="fas fa-download"></i>
                   ПО
                 </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{{url_for('partners_list') }}">
-                  <i class="fas fa-users"></i>
-                  Контрагенты
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{{url_for('install_software') }}">
+                <ul class="dropdown-content">
+                <li><a href="{{url_for('install_software') }}" style="display:block;width:200px">
                   <i class="fas fa-download"></i>
                   Установленное ПО
                 </a>
-              </li>
-            </ul>
-   </div>
-        </nav>
+                </li>
+                <li><a href="{{url_for('types') }}" style="display:block;width:200px;">
+                  <i class="fas fa-download"></i>
+                  Виды ПО
+                  </a>
+                  </li>
+                </ul>
+                </div>
+                <a href="{{url_for('partners_list') }}" style="display:block;width:200px">
+                  <i class="fas fa-users"></i>
+                  Контрагенты
+                </a>
+             </div>
+    </div>
+    </div>
+ <span style="font-size:30px;cursor:pointer;color:black;" onclick="openNav()">☰  Меню</span>
     <div class="container-pt-4">
       {% block body %}
       {% endblock %}
@@ -88,9 +88,16 @@
    </div>
           </div>
    </main>
-     
-      </div>
-    </div>
+   <script>
+   function openNav() {
+      document.getElementById("mySidenav").style.width = "250px";
+  }
+  
+  /* Set the width of the side navigation to 0 */
+  function closeNav() {
+      document.getElementById("mySidenav").style.width = "0";
+  }
+  </script>
         <script>
   $(document).ready(function(){
     const btnDelete = document.querySelectorAll('.btn-delete');

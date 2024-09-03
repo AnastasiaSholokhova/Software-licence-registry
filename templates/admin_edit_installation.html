@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
-{% block body %}
+{% block title %}Редактирование установки ПО{% endblock %}
+{% block content %}
   <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-8">
       {% with messages = get_flashed_messages() %}
       {% if messages %}
       {% for message in messages %}

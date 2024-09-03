@@ -1,0 +1,87 @@
+{% extends 'layout.html' %}
+{% block title %}Добавление общей информации{% endblock %}
+{% block content %}
+<div class="col-md-10">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{message}}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">x</span>
+      </button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <div class="card card-body">
+      <form action="{{url_for('add_total')}}" method="POST">
+        <div class="form-group">
+          <input type="text" class="form-control" name="статья_затрат" placeholder="Статья затрат">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="наименование_ПО" placeholder="Наименование ПО">
+        </div>
+        <div class="form-group">
+          <input type="number" class="form-control" name="количество" placeholder="Количество">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="код" placeholder="Код">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="филиал" placeholder="Филиал">
+        </div>
+        <div class="form-group">
+          <input type="number" class="form-control" name="счет_затрат" placeholder="Счет затрат">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="вид_деятельности" placeholder="Вид деятельности">
+        </div>
+        <div class="form-group">
+          <input type="number" class="form-control" name="стоимость_ПО_без_ндс" placeholder="Стоимость ПО (всего) без НДС">
+        </div>
+        <div class="form-group">
+          <input type="number" class="form-control" name="стоимость_ПО_с_ндс" placeholder="Стоимость ПО (всего) с НДС">
+        </div>
+        <div class="form-group">
+          <input type="number" class="form-control" name="срок_полезного_использования_мес" placeholder="Срок полезного использования (мес.)">
+        </div>
+        <div class="form-group">
+          <p>Дата начала списания</p>
+          <input type="date" class="form-control" name="дата_начала_списания" placeholder="Дата начала списания">
+        </div>
+        <div class="form-group">
+          <p>Дата окончания списания</p>
+          <input type="date" class="form-control" name="дата_окончания_списания" placeholder="Дата окончания списания">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="договор_счет" placeholder="Договор/счет">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="контрагент" placeholder="Контрагент">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="первичный_документ" placeholder="Первичный документ">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="страна_производитель" placeholder="Страна-производитель">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="правообладатель" placeholder="Правообладатель">
+        </div>
+        <div class="form-group">
+        <label for="checkbox">
+          <input type="checkbox" class="form-control" name="включен_в_рееестр" placeholder="Включен в реестр Российского ПО Да/нет">
+        </label>
+        Включен в реестр ПО?
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="срок_предоставления_права" placeholder="Срок предоставления права">
+        </div>
+        <button class="btn btn-primary btn-block">
+          Сохранить
+        </button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

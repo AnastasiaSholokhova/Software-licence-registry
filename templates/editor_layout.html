@@ -16,64 +16,66 @@
 
  </head>
  <body class="loggedin">
- <nav class="site-header sticky-top py-1">
-      <div class="container d-flex flex-column flex-md-row justify-content-between">
-  <a class="py-2 d-none d-md-inline-block" href="{{ url_for('home_editor') }}"><i class="fas fa-home"></i><b>Домашняя страница</b></a>
-  <a class="py-2 d-none d-md-inline-block" href="{{ url_for('editor_profile') }}"><i class="fas fa-user-circle"></i><b>Профиль</b></a>
-  <a class="py-2 d-none d-md-inline-block" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i><b>Выход</b></a>
-   </div>
-    </nav>
-   
- <div class="container-fluid">
+ <div class="menu">
+    <div class="dropdown">
+      <li><a href="#" style="display:block;width:150px"><i class="fas fa-home"></i><b>Домашняя страница</b></a></li>
+      <div class="dropdown-options">
+          <li><a href="{{ url_for('editor_total') }}">Общая информация</a></li>
+          <li><a href="{{ url_for('home_editor') }}">Расчет стоимости</a></li>
+      </div>
+    </div>
+    <li><a href="{{ url_for('editor_profile') }}"><i class="fas fa-user-circle"></i><b>Профиль</b></a></li>
+    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i><b>Выход</b></a></li>
+ </div>  
+   <div class="container-fluid">
       <div class="row">
-        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-          <div class="sidebar-sticky">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                  <a class="nav-link" href="{{url_for('editor_number_licences') }}">
-                    <i class="fas fa-download"></i>
-                    Количество ПО
-                  </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{{url_for('editor_customer_list') }}">
+        <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+                <a href="{{url_for('editor_customer_list') }}" style="display:block;width:200px">
                   <i class="fas fa-users"></i>
                   Покупатели
                 </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{{url_for('editor_licence_list') }}">
+                <div class="side-dropdown">
+                <a href="{{url_for('editor_licence_list') }}" style="display:block;width:200px">
     <i class="fas fa-shopping-cart"></i>
                   Лицензии
                 </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{{url_for('editor_vendor_list') }}">
+                <ul class="dropdown-content">
+                  <a href="{{url_for('editor_number_licences') }}" style="display:block;width:200px">
+                   <i class="fas fa-download"></i>
+                    Количество лицензий ПО
+                  </a>
+                </ul>
+                </div>
+                <a href="{{url_for('editor_vendor_list') }}" style="display:block;width:200px;">
                   <i class="fas fa-users"></i>
                   Вендоры
                 </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{{url_for('editor_software_list') }}">
+                <div class="side-dropdown">
+                <a href="{{url_for('editor_software_list') }}" style="display:block;width:200px">
                   <i class="fas fa-download"></i>
                   ПО
                 </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{{url_for('editor_partners_list') }}">
-                  <i class="fas fa-users"></i>
-                  Контрагенты
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{{url_for('editor_installation_software') }}">
+                <ul class="dropdown-content">
+                <a href="{{url_for('editor_installation_software') }}" style="display:block;width:200px">
                   <i class="fas fa-download"></i>
                   Установленное ПО
                 </a>
-              </li>
-            </ul>
-   </div>
-        </nav>
+                <a href="{{url_for('editor_types')}}" style="display:block;width:200px;">
+                  <i class="fas fa-download"></i>
+                  Виды ПО
+                </a>
+                </ul>
+                </div>
+                <a href="{{url_for('editor_partners_list') }}" style="display:block;width:200px">
+                  <i class="fas fa-users"></i>
+                  Контрагенты
+                </a>
+            </div>
+        </div>
+      </div>
+      <span style="font-size:30px;cursor:pointer;color:black;" onclick="openNav()">☰ Меню</span>
+
     <div class="container-pt-4">
       {% block body %}
       {% endblock %}
@@ -85,9 +87,16 @@
    </div>
           </div>
    </main>
-     
-      </div>
-    </div>
+    <script>
+   function openNav() {
+      document.getElementById("mySidenav").style.width = "250px";
+  }
+  
+  /* Set the width of the side navigation to 0 */
+  function closeNav() {
+      document.getElementById("mySidenav").style.width = "0";
+  }
+  </script>
         <script>
   $(document).ready(function(){
     const btnDelete = document.querySelectorAll('.btn-delete');

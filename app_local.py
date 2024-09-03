@@ -139,12 +139,532 @@ def logout():
    session.pop('username', None)
    return redirect(url_for('login'))
 
+@app.route('/total')
+@role_required('admin')
+def total():
+    if 'loggedin' in session:
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        s = 'SELECT статья_затрат, наименование_ПО_БУ, наименование_ПО, краткое_наименование_ПО, количество, код, филиал, счет_затрат, вид_деятельности, стоимость_ПО_без_ндс, стоимость_ПО_с_ндс, срок_полезного_использования_мес, дата_начала_списания, дата_окончания_списания, договор_счет, контрагент, первичный_документ, страна_производитель, правообладатель, включен_в_реестр, срок_предоставления_права FROM общая_информация'
+        cur.execute(s)
+        list_total = cur.fetchall()
+        return render_template('total.html', username=session['username'], list_total = list_total)
+    return redirect(url_for('login'))
+
+@app.route('/editor_total')
+@role_required('editor')
+def editor_total():
+    if 'loggedin' in session:
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        s = 'SELECT статья_затрат, наименование_ПО_БУ, наименование_ПО, краткое_наименование_ПО, количество, код, филиал, счет_затрат, вид_деятельности, стоимость_ПО_без_ндс, стоимость_ПО_с_ндс, срок_полезного_использования_мес, дата_начала_списания, дата_окончания_списания, договор_счет, контрагент, первичный_документ, страна_производитель, правообладатель, включен_в_реестр, срок_предоставления_права FROM общая_информация'
+        cur.execute(s)
+        list_total = cur.fetchall()
+        return render_template('editor_total.html', username=session['username'], list_total=list_total)
+    return redirect(url_for('login'))
+
+@app.route('/show_total', methods=['POST', 'GET'])
+@role_required('admin')
+def show_total():
+    if 'loggedin' in session:
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        s = 'SELECT * FROM общая_информация'
+        cur.execute(s)
+        list_total = cur.fetchall()
+        return render_template('show_total.html', username=session['username'], list_total = list_total)
+    return redirect(url_for('login'))
+
+@app.route('/editor_show_total', methods=['POST', 'GET'])
+@role_required('editor')
+def editor_show_total():
+    if 'loggedin' in session:
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        s = 'SELECT * FROM общая_информация'
+        cur.execute(s)
+        list_total = cur.fetchall()
+        return render_template('editor_show_total.html', username=session['username'], list_total=list_total)
+    return redirect(url_for('login'))
+
+@app.route('/support_show_total')
+@role_required('support')
+def support_show_total():
+    if 'loggedin' in session:
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        s = 'SELECT * FROM общая_информация'
+        cur.execute(s)
+        list_total = cur.fetchall()
+        return render_template('support_show_total.html', username=session['username'], list_total=list_total)
+    return redirect(url_for('login'))
+
+@app.route('/add_total', methods=['POST'])
+def add_total():
+    if 'loggedin' in session:
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        if request.method == 'POST':
+            статья_затрат = request.form['статья_затрат']
+            наименование_ПО_БУ = request.form['наименование_ПО']
+            наименование_ПО = request.form['наименование_ПО']
+            краткое_наименование_ПО = request.form['краткое_наименование_ПО']
+            количество = request.form['количество']
+            код = request.form['код']
+            филиал = request.form['филиал']
+            счет_затрат = request.form['счет_затрат']
+            вид_деятельности = request.form['вид_деятельности']
+            стоимость_ПО_без_ндс = request.form['стоимость_ПО_без_ндс']
+            стоимость_ПО_с_ндс = request.form['стоимость_ПО_с_ндс']
+            срок_полезного_использования_мес = request.form['срок_полезного_использования_мес']
+            дата_начала_списания = request.form['дата_начала_списания']
+            дата_окончания_списания = request.form['дата_окончания_списания']
+            договор_счет = request.form['договор_счет']
+            контрагент = request.form['контрагент']
+            первичный_документ = request.form['первичный_документ']
+            страна_производитель = request.form['страна_производитель']
+            правообладатель = request.form['правообладатель']
+            включен_в_реестр = request.form['включен_в_реестр']
+            срок_предоставления_права = request.form['срок_предоставления_права']
+            cur.execute(
+                "INSERT INTO общая_информация (статья_затрат, наименование_ПО_БУ, наименование_ПО, краткое_наименование_ПО, количество, код, филиал, счет_затрат, вид_деятельности, стоимость_ПО_без_ндс, стоимость_ПО_с_ндс, срок_полезного_использования_мес, дата_начала_списания, дата_окончания_списания, договор_счет, контрагент, первичный_документ, страна_производитель, правообладатель, включен_в_реестр, срок_предоставления_права) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                (
+                    статья_затрат, наименование_ПО_БУ, наименование_ПО, краткое_наименование_ПО, количество, код, филиал, счет_затрат, вид_деятельности,
+                    стоимость_ПО_без_ндс, стоимость_ПО_с_ндс, срок_полезного_использования_мес, дата_начала_списания,
+                    дата_окончания_списания, договор_счет, контрагент, первичный_документ, страна_производитель,
+                    правообладатель, включен_в_реестр, срок_предоставления_права
+                )
+            )
+            #cur.execute('INSERT INTO Контрагенты (наименование_контрагента, договор) VALUES(%s, %s) WHERE ', (наименование_контрагента, договор, ))
+            flash('Запись была успешно добавлена!')
+            conn2.commit()
+            return redirect(url_for('total'))
+
+@app.route('/editor_add_total', methods=['POST'])
+@role_required('editor')
+def editor_add_total():
+    if 'loggedin' in session:
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        if request.method == 'POST':
+            статья_затрат = request.form['статья_затрат']
+            наименование_ПО_БУ = request.form['наименование_ПО_БУ']
+            наименование_ПО = request.form['наименование_ПО']
+            краткое_наименование_ПО = request.form['краткое_наименование_ПО']
+            количество = request.form['количество']
+            код = request.form['код']
+            филиал = request.form['филиал']
+            счет_затрат = request.form['счет_затрат']
+            вид_деятельности = request.form['вид_деятельности']
+            стоимость_ПО_без_ндс = request.form['стоимость_ПО_без_ндс']
+            стоимость_ПО_с_ндс = request.form['стоимость_ПО_с_ндс']
+            срок_полезного_использования_мес = request.form['стоимость_полезного_использования_мес']
+            дата_начала_списания = request.form['дата_начала_списания']
+            дата_окончания_списания = request.form['дата_окончания_списания']
+            договор_счет = request.form['договор_счет']
+            контрагент = request.form['контрагент']
+            первичный_документ = request.form['первичный_документ']
+            страна_производитель = request.form['страна_производитель']
+            правообладатель = request.form['правообладатель']
+            включен_в_реестр = request.form['включен_в_реестр']
+            срок_предоставления_права = request.form['срок_предоставления_права']
+            cur.execute(
+                "INSERT INTO общая_информация (статья_затрат, наименование_ПО_БУ, наименование_ПО, краткое_наименование_ПО, количество, код, филиал, счет_затрат, вид_деятельности, стоимость_ПО_без_ндс, стоимость_ПО_с_ндс, срок_полезного_использования_мес, дата_начала_списания, дата_окончания_списания, договор_счет, контрагент, первичный_документ, страна_производитель, правообладатель, включен_в_реестр, срок_предоставления_права) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                (
+                    статья_затрат, наименование_ПО_БУ, наименование_ПО, краткое_наименование_ПО, количество, код, филиал, счет_затрат, вид_деятельности,
+                    стоимость_ПО_без_ндс, стоимость_ПО_с_ндс, срок_полезного_использования_мес, дата_начала_списания,
+                    дата_окончания_списания, договор_счет, контрагент, первичный_документ, страна_производитель,
+                    правообладатель, включен_в_реестр, срок_предоставления_права
+                )
+            )
+            flash('Запись была успешно добавлена!')
+            conn2.commit()
+            return redirect(url_for('editor_total'))
+        return render_template('editor_show_total.html')
+    return render_template('editor_show_total.html')
+
+@app.route('/upload_total', methods=['POST', 'GET'])
+def upload_total():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method=='POST':
+        file = request.files['file']
+        if file:
+            if file.filename.endswith("xlsx"):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                data = []
+                for row in sheet.iter_rows(values_only=True, min_row=6):
+                    data.append(row)
+                for row in data:
+                    дата_начала_списания = datetime.strptime(row[10], '%d.%m.%Y').date()
+                    дата_окончания_списания = datetime.strptime(row[11], '%d.%m.%Y').date()
+                    cur.execute('''
+    INSERT INTO общая_информация (
+        статья_затрат,
+        наименование_ПО_БУ,
+        количество,
+        код,
+        филиал,
+        счет_затрат,
+        вид_деятельности,
+        стоимость_ПО_без_ндс,
+        стоимость_ПО_с_ндс,
+        срок_полезного_использования_мес,
+        дата_начала_списания,
+        дата_окончания_списания,
+        договор_счет,
+        контрагент,
+        первичный_документ,
+        страна_производитель,
+        правообладатель,
+        включен_в_реестр,
+        срок_предоставления_права
+    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    ''', 
+    (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], 
+    дата_начала_списания, дата_окончания_списания, row[12], row[13], row[14], row[15], row[16], row[17], row[18]))
+                    cur.execute('''INSERT INTO лицензии (
+                            наименование_ПО, контрагент,
+                            дата_начала_списания, дата_окончания_списания,
+                            счёт_списания, стоимость_ПО,
+                            количество, итоговая_стоимость_ПО,
+                            страна_производитель) 
+                            VALUES (%s, %s, %s, %s, %s,
+                                    %s, %s, %s, %s) RETURNING номер''', 
+                        (row[1], row[13], дата_начала_списания,
+                         дата_окончания_списания, row[9],
+                         row[7], row[2], row[8], row[15]))
+    
+                    licence_id = cur.fetchone()[0]
+                    общая_стоимость = row[7]
+    
+                    software_sign = 'Новое' if общая_стоимость == row[8] else 'Техподдержка'
+    
+                        # Обновление лицензии
+                    cur.execute('''UPDATE лицензии SET признак_ПО = %s,
+                                          срок_действия_лицензии = GREATEST(to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW(), interval '0 seconds')
+                                          WHERE номер = %s''', 
+                                    (software_sign, дата_окончания_списания, licence_id))
+                    cur.execute('SELECT COUNT(*) FROM Контрагенты WHERE наименование_контрагента=%s', (row[13],))
+                    count = cur.fetchone()[0]
+                    if count == 0:
+                        cur.execute("""INSERT INTO Контрагенты (наименование_контрагента, договор)
+                                    VALUES (%s, %s)""", (row[13], row[12]))
+                    cur.execute('INSERT INTO Виды_ПО (наименование_ПО, вид_ПО) VALUES(%s, %s)', (row[1], row[1]))
+                    conn2.commit()
+                flash('Файл успешно загружен!')
+                return redirect(url_for('total'))
+            else:
+                flash('Неверный тип файла')
+                return redirect(url_for('total'))
+        else:
+            flash('Файл не выбран!')
+            return redirect(url_for('total'))
+        return render_template('total.html')
+    else:
+        return render_template('total.html')
+    
+@app.route('/editor_upload_total', methods=['POST', 'GET'])
+def editor_upload_total():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method=='POST':
+        file = request.files['file']
+        if file:
+            if file.filename.endswith("xlsx"):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                data = []
+                for row in sheet.iter_rows(values_only=True, min_row=6):
+                    data.append(row)
+                for row in data:
+                    дата_начала_списания = datetime.strptime(row[10], '%d.%m.%Y').date()
+                    дата_окончания_списания = datetime.strptime(row[11], '%d.%m.%Y').date()
+                    cur.execute('''
+    INSERT INTO общая_информация (
+        статья_затрат,
+        наименование_ПО_БУ,
+        количество,
+        код,
+        филиал,
+        счет_затрат,
+        вид_деятельности,
+        стоимость_ПО_без_ндс,
+        стоимость_ПО_с_ндс,
+        срок_полезного_использования_мес,
+        дата_начала_списания,
+        дата_окончания_списания,
+        договор_счет,
+        контрагент,
+        первичный_документ,
+        страна_производитель,
+        правообладатель,
+        включен_в_реестр,
+        срок_предоставления_права
+    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    ''', 
+    (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], 
+    дата_начала_списания, дата_окончания_списания, row[12], row[13], row[14], row[15], row[16], row[17], row[18]))
+                    cur.execute('''INSERT INTO лицензии (
+                            наименование_ПО, контрагент,
+                            дата_начала_списания, дата_окончания_списания,
+                            счёт_списания, стоимость_ПО,
+                            количество, итоговая_стоимость_ПО,
+                            страна_производитель) 
+                            VALUES (%s, %s, %s, %s, %s,
+                                    %s, %s, %s, %s) RETURNING номер''', 
+                        (row[1], row[13], дата_начала_списания,
+                         дата_окончания_списания, row[9],
+                         row[7], row[2], row[8], row[15]))
+    
+                    licence_id = cur.fetchone()[0]
+                    общая_стоимость = row[7]
+    
+                    software_sign = 'Новое' if общая_стоимость == row[8] else 'Техподдержка'
+    
+                        # Обновление лицензии
+                    cur.execute('''UPDATE лицензии SET признак_ПО = %s,
+                                          срок_действия_лицензии = GREATEST(to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW(), interval '0 seconds')
+                                          WHERE номер = %s''', 
+                                    (software_sign, дата_окончания_списания, licence_id))
+                    cur.execute('SELECT COUNT(*) FROM Контрагенты WHERE наименование_контрагента=%s', (row[13],))
+                    count = cur.fetchone()[0]
+                    if count == 0:
+                        cur.execute("""INSERT INTO Контрагенты (наименование_контрагента, договор)
+                                    VALUES (%s, %s)""", (row[13], row[12]))
+                    cur.execute('INSERT INTO Виды_ПО (наименование_ПО, вид_ПО) VALUES(%s, %s)', (row[1], row[1]))
+                    conn2.commit()
+                flash('Файл успешно загружен!')
+                return redirect(url_for('editor_total'))
+            else:
+                flash('Неверный тип файла')
+                return redirect(url_for('editor_total'))
+        else:
+            flash('Файл не выбран!')
+            return redirect(url_for('editor_total'))
+        return render_template('editor_total.html')
+    else:
+        return render_template('editor_total.html')
+
+@app.route('/download_total_list')
+def download_total_list(): 
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM общая_информация')
+    res_total = cur.fetchall()
+    output_total = io.BytesIO()
+    workbook_total = xlwt.Workbook()
+    sh_total = workbook_total.add_sheet('Отчет по общей информации')
+    sh_total.write(0, 0, 'Статья затрат')
+    sh_total.write(0, 1, 'Наименование ПО (БУ)')
+    sh_total.write(0, 2, 'Наименование ПО')
+    sh_total.write(0, 3, 'Краткое наименование ПО')
+    sh_total.write(0, 4, 'Количество')
+    sh_total.write(0, 5, 'Код')
+    sh_total.write(0, 6, 'Филиал')
+    sh_total.write(0, 7, 'Счет затрат')
+    sh_total.write(0, 8, 'Вид деятельности')
+    sh_total.write(0, 9, 'Стоимость ПО (всего) без НДС')
+    sh_total.write(0, 10, 'Стоимость ПО (всего) с НДС')
+    sh_total.write(0, 11, 'Срок полезного использования (мес.)')
+    sh_total.write(0, 12, 'Дата начала списания')
+    sh_total.write(0, 13, 'Дата окончания списания')
+    sh_total.write(0, 14, 'Договор/счет')
+    sh_total.write(0, 15, 'Контрагент')
+    sh_total.write(0, 16, 'Первичный документ')
+    sh_total.write(0, 17, 'Страна-производитель')
+    sh_total.write(0, 18, 'Правообладатель')
+    sh_total.write(0, 19, 'Включено в реестр Российского ПО Да/нет')
+    sh_total.write(0, 20, 'Срок предоставления права')
+    idx = 0 
+    for row in res_total:
+        sh_total.write(idx+1, 0, row['статья_затрат'])
+        sh_total.write(idx+1, 1, row['наименование_ПО_БУ'])
+        sh_total.write(idx+1, 2, row['наименование_ПО'])
+        sh_total.write(idx+1, 3, row['краткое_наименование_ПО'])
+        sh_total.write(idx+1, 4, row['количество'])
+        sh_total.write(idx+1, 5, row['код'])
+        sh_total.write(idx+1, 6, row['филиал'])
+        sh_total.write(idx+1, 7, row['счет_затрат'])
+        sh_total.write(idx+1, 8, row['вид_деятельности'])
+        sh_total.write(idx+1, 9, row['стоимость_ПО_без_ндс'])
+        sh_total.write(idx+1, 10, row['стоимость_ПО_с_ндс'])
+        sh_total.write(idx+1, 11, row['срок_полезного_использования_мес'])
+        sh_total.write(idx+1, 12, row['дата_начала_списания'])
+        sh_total.write(idx+1, 13, row['дата_окончания_списания'])
+        sh_total.write(idx+1, 14, row['договор_счет'])
+        sh_total.write(idx+1, 15, row['контрагент'])
+        sh_total.write(idx+1, 16, row['первичный_документ'])
+        sh_total.write(idx+1, 17, row['страна_производитель'])
+        sh_total.write(idx+1, 18, row['правообладатель'])
+        sh_total.write(idx+1, 19, row['включен_в_реестр'])
+        sh_total.write(idx+1, 20, row['срок_предоставления_права'])
+        idx += 1
+    workbook_total.save(output_total)
+    output_total.seek(0)
+    return Response(output_total, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=total_list_report.xls"})
+   
+@app.route('/edit_total/<id>', methods=['POST', 'GET'])
+def get_total(id):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM общая_информация WHERE код = %s', (id,))
+    data = cur.fetchall()
+    cur.close()
+    return render_template('edit_total.html', total = data)
+
+@app.route('/editor_edit_total/<id>', methods=['POST', 'GET'])
+def editor_get_total(id):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM общая_информация WHERE код = %s', (id, ))
+    data = cur.fetchall()
+    cur.close()
+    return render_template('editor_edit_total.html', total=data)
+
+@app.route('/update_total/<id>', methods=['POST'])
+def update_total(id):
+    if request.method == 'POST':
+        статья_затрат = request.form['статья_затрат']
+        наименование_ПО_БУ = request.form['наименование_ПО_БУ']
+        наименование_ПО = request.form['наименование_ПО']
+        краткое_наименование_ПО = request.form['краткое_наименование_ПО']
+        количество = request.form['количество']
+        код = request.form['код']
+        филиал = request.form['филиал']
+        счет_затрат = request.form['счет_затрат']
+        вид_деятельности = request.form['вид_деятельности']
+        стоимость_ПО_без_ндс = request.form['стоимость_ПО_без_ндс']
+        стоимость_ПО_с_ндс = request.form['стоимость_ПО_с_ндс']
+        срок_полезного_использования_мес = request.form['срок_полезного_использования_мес']
+        дата_начала_списания = request.form['дата_начала_списания']
+        дата_окончания_списания = request.form['дата_окончания_списания']
+        договор_счет = request.form['договор_счет']
+        контрагент = request.form['контрагент']
+        первичный_документ = request.form['первичный_документ']
+        страна_производитель = request.form['страна_производитель']
+        правообладатель = request.form['правообладатель']
+        включен_в_реестр = request.form['включен_в_реестр']
+        срок_предоставления_права = request.form['срок_предоставления_права']
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute(""" UPDATE общая_информация
+                    SET
+                    статья_затрат=%s,
+                    наименование_ПО_БУ=%s,
+                    наименование_ПО=%s,
+                    краткое_наименование_ПО=%s,
+                    количество=%s,
+                    код=%s,
+                    филиал=%s,
+                    счет_затрат=%s,
+                    вид_деятельности=%s,
+                    стоимость_ПО_без_ндс=%s,
+                    стоимость_ПО_с_ндс=%s,
+                    срок_полезного_использования_мес=%s,
+                    дата_начала_списания=%s,
+                    дата_окончания_списания=%s,
+                    договор_счет=%s,
+                    контрагент=%s,
+                    первичный_документ=%s,
+                    страна_производитель=%s,
+                    правообладатель=%s,
+                    включен_в_реестр=%s,
+                    срок_предоставления_права=%s
+                    WHERE код_ПО=%s
+                    """, (статья_затрат, наименование_ПО_БУ, наименование_ПО, краткое_наименование_ПО, количество, код, филиал, счет_затрат, вид_деятельности, стоимость_ПО_без_ндс, стоимость_ПО_с_ндс, срок_полезного_использования_мес,
+                    дата_начала_списания, дата_окончания_списания, договор_счет, контрагент, первичный_документ, страна_производитель, правообладатель, включен_в_реестр, срок_предоставления_права, id))
+        flash("Запись успешно обновлена!")
+        conn2.commit()
+        return redirect(url_for('total'))
+    
+@app.route('/editor_update_total/<id>', methods=['POST'])
+def editor_update_total(id):
+    if request.method == 'POST':
+        статья_затрат = request.form['статья_затрат']
+        наименование_ПО_БУ = request.form['наименование_ПО_БУ']
+        наименование_ПО = request.form['наименование_ПО']
+        краткое_наименование_ПО = request.form['краткое_наименование_ПО']
+        количество = request.form['количество']
+        код = request.form['код']
+        филиал = request.form['филиал']
+        счет_затрат = request.form['счет_затрат']
+        вид_деятельности = request.form['вид_деятельности']
+        стоимость_ПО_без_ндс = request.form['стоимость_ПО_без_ндс']
+        стоимость_ПО_с_ндс = request.form['стоимость_ПО_с_ндс']
+        срок_полезного_использования_мес = request.form['срок_полезного_использования_мес']
+        дата_начала_списания = request.form['дата_начала_списания']
+        дата_окончания_списания = request.form['дата_окончания_списания']
+        договор_счет = request.form['договор_счет']
+        контрагент = request.form['контрагент']
+        первичный_документ = request.form['первичный_документ']
+        страна_производитель = request.form['страна_производитель']
+        правообладатель = request.form['правообладатель']
+        включен_в_реестр = request.form['включен_в_реестр']
+        срок_предоставления_права = request.form['срок_предоставления_права']
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute(""" UPDATE общая_информация
+                    SET
+                    статья_затрат=%s,
+                    наименование_ПО_БУ=%s,
+                    наименование_ПО=%s,
+                    краткое_наименование_ПО=%s,
+                    количество=%s,
+                    код=%s,
+                    филиал=%s,
+                    счет_затрат=%s,
+                    вид_деятельности=%s,
+                    стоимость_ПО_без_ндс=%s,
+                    стоимость_ПО_с_ндс=%s,
+                    срок_полезного_использования_мес=%s,
+                    дата_начала_списания=%s,
+                    дата_окончания_списания=%s,
+                    договор_счет=%s,
+                    контрагент=%s,
+                    первичный_документ=%s,
+                    страна_производитель=%s,
+                    правообладатель=%s,
+                    включен_в_реестр=%s,
+                    срок_предоставления_права=%s
+                    WHERE код_ПО=%s
+                    """, (статья_затрат, наименование_ПО_БУ, наименование_ПО, краткое_наименование_ПО, количество, код, филиал, счет_затрат, вид_деятельности, стоимость_ПО_без_ндс, стоимость_ПО_с_ндс, срок_полезного_использования_мес,
+                    дата_начала_списания, дата_окончания_списания, договор_счет, контрагент, первичный_документ, страна_производитель, правообладатель, включен_в_реестр, срок_предоставления_права, id))
+        flash("Запись успешно обновлена!")
+        conn2.commit()
+        return redirect(url_for('editor_total'))
+
+@app.route('/delete_total', methods=['POST', 'GET'])
+def delete_total():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        for id in request.form.getlist('delete_total_checkbox'):
+            cur.execute('DELETE FROM общая_информация WHERE код_ПО = %s', (id,))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('total'))
+    
+@app.route('/editor_delete_total', methods=['POST', 'GET'])
+def editor_delete_total():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        for id in request.form.getlist('editor_delete_total_checkbox'):
+            cur.execute('DELETE FROM общая_информация WHERE код_ПО = %s', (id,))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('editor_total'))
+
+@app.route('/delete_all_total', methods=['POST', 'GET'])
+def delete_all_total():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM общая_информация')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('total'))
+    
+@app.route('/editor_delete_all_total', methods=['POST', 'GET'])
+def editor_delete_all_total():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM общая_информация')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('editor_total'))
+    
 @app.route('/home')
 @role_required('admin')
 def home():
     if 'loggedin' in session:
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        s = 'SELECT * FROM лицензии'
+        s = 'SELECT наименование_ПО, контрагент, дата_начала_списания, дата_окончания_списания, счёт_списания, стоимость_ПО, количество, итоговая_стоимость_ПО, признак_ПО, страна_производитель, срок_действия_лицензии, оплачено, остаток, примечание FROM лицензии'
         cur.execute(s)
         list_licences = cur.fetchall()
         return render_template('home.html', username=session['username'], list_licences = list_licences)
@@ -155,7 +675,7 @@ def home():
 def home_support():
     if 'loggedin' in session:
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        s = 'SELECT * FROM лицензии'
+        s = 'SELECT наименование_ПО, контрагент, дата_начала_списания, дата_окончания_списания, счёт_списания, стоимость_ПО, количество, итоговая_стоимость_ПО, признак_ПО, страна_производитель, срок_действия_лицензии, оплачено, остаток, примечание FROM лицензии'
         cur.execute(s)
         list_licences = cur.fetchall()
         return render_template('home_support.html', username=session['username'], list_licences = list_licences)
@@ -166,82 +686,91 @@ def home_support():
 def home_editor():
     if 'loggedin' in session:
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        s = 'SELECT * FROM лицензии'
+        s = 'SELECT наименование_ПО, контрагент, дата_начала_списания, дата_окончания_списания, счёт_списания, стоимость_ПО, количество, итоговая_стоимость_ПО, признак_ПО, страна_производитель, срок_действия_лицензии, оплачено, остаток, примечание FROM лицензии'
         cur.execute(s)
         list_licences = cur.fetchall()
         return render_template('home_editor.html', username=session['username'], list_licences = list_licences)
     return redirect(url_for('login'))
- 
+
+@app.route('/show_licence', methods=['GET', 'POST'])
+def show_licence():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM лицензии')
+    data = cur.fetchall()
+    return render_template('add_licence.html', data=data)
+
 @app.route('/add_licence', methods=['POST'])
 def add_licence():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    if request.method== 'POST':
-        номер_пп = request.form['номер_пп']
+    if request.method == 'POST':
         наименование_ПО = request.form['наименование_ПО']
-        вендор = request.form['вендор']
-        начало_действия_лицензии = request.form['начало_действия_лицензии']
+        контрагент = request.form['контрагент']
+        дата_начала_списания = request.form['дата_начала_списания']
+        дата_окончания_списания = request.form['дата_окончания_списания']
         счёт_списания = request.form['счёт_списания']
-        заказчик_ПО = request.form['заказчик_ПО']
+        стоимость_ПО = request.form['стоимость_ПО']
+        количество = request.form['количество']
+        итоговая_стоимость_ПО = request.form['итоговая_стоимость_ПО']
         признак_ПО = request.form['признак_ПО']
-        количество_ПО = int(request.form['количество_ПО'])
-        оплачено = bool(request.form.get('оплачено'))
+        страна_производитель = request.form['страна_производитель']
+        срок_действия_лицензии = request.form['срок_действия_лицензии']
+        оплачено = request.form['оплачено']
+        остаток = request.form['остаток']
         примечание = request.form['примечание']
         cur.execute('SELECT 1 FROM Справочник_ПО WHERE наименование_ПО=%s AND признак_ПО=%s', (наименование_ПО, признак_ПО))
         lic_exists = cur.fetchone()
         if lic_exists:
             cur.execute('SELECT стоимость_за_единицу FROM Справочник_ПО WHERE наименование_ПО=%s AND признак_ПО=%s',(наименование_ПО, признак_ПО,))
             inst = cur.fetchone()
-            стоимость_за_единицу = inst['стоимость_за_единицу']
-            if not количество_ПО:
+            стоимость_ПО = inst['стоимость_за_единицу']
+            if not количество:
                 flash('Пожалуйста, введите количество ПО!')
-                return redirect(url_for('home'))
-            if not начало_действия_лицензии:
+                return render_template('add_licence.html')
+            if not дата_начала_списания:
                 flash('Пожалуйста, заполните все поля формы!')
-                return redirect(url_for('home'))
-            if признак_ПО == 'Новое':
-                итоговая_стоимость = стоимость_за_единицу * количество_ПО
-            elif признак_ПО == 'Техподдержка':
-                итоговая_стоимость = стоимость_за_единицу * количество_ПО * 1.2
+                return render_template('add_licence.html')
+            if итоговая_стоимость_ПО == стоимость_ПО * количество:
+                признак_ПО = 'Новое'
             else:
-                итоговая_стоимость = стоимость_за_единицу * количество_ПО
-            if счёт_списания == '12':
-                начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
-                окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365)).strftime('%Y-%m-%d')
-            elif счёт_списания == '36':
-                начало_действия_лицензии_date = datetime.strptime(начало_действия_лицензии, '%Y-%m-%d').date()
-                окончание_действия_лицензии = (начало_действия_лицензии_date + timedelta(days=365 * 3)).strftime('%Y-%m-%d')
+                признак_ПО = 'Техподдержка'
             if оплачено:
                 остаток = 0
             elif счёт_списания == '12' and not оплачено:
-                остаток = итоговая_стоимость
+                остаток = итоговая_стоимость_ПО
             elif счёт_списания == '36' and not оплачено:
-                окончание_действия_лицензии_date = datetime.strptime(окончание_действия_лицензии, '%Y-%m-%d').date()
+                окончание_действия_лицензии_date = datetime.strptime(дата_окончания_списания, '%Y-%m-%d').date()
                 срок_действия_мес = (окончание_действия_лицензии_date - date.today()).days / 30
-                мес_стоимость = итоговая_стоимость / 36
+                мес_стоимость = итоговая_стоимость_ПО / 36
                 остаток = round(мес_стоимость * срок_действия_мес, 2)
             else:
                 остаток = 0
             cur.execute(
-                "INSERT INTO лицензии (номер_пп, наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, срок_действия_лицензии, оплачено, остаток, примечание) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval, %s, %s, %s)",
+                "INSERT INTO лицензии (наименование_ПО, контрагент, дата_начала_списания, дата_окончания_списания, счёт_списания, стоимость_ПО, количество, итоговая_стоимость_ПО, признак_ПО, страна_производитель, срок_действия_лицензии, оплачено, остаток, примечание) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, GREATEST(to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW(), interval '0 seconds'), %s, %s, %s)",
                 (
-                    номер_пп, наименование_ПО, вендор, начало_действия_лицензии, 
-                    окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, 
-                    итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, 
-                    окончание_действия_лицензии, оплачено, остаток, примечание
+                    наименование_ПО, контрагент, дата_начала_списания, дата_окончания_списания, счёт_списания, стоимость_ПО,
+                    количество, итоговая_стоимость_ПО, признак_ПО, страна_производитель, срок_действия_лицензии, оплачено,
+                    остаток, примечание
                 )
             )
-            conn2.commit()
             flash('Запись была успешно добавлена!')
+            conn2.commit()
             return redirect(url_for('home'))
         else:
             flash('Такого ПО не существует в справочнике ПО')
-            return redirect(url_for('home'))
+            return render_template('add_licence.html')
+        return render_template('add_licence.html')
+    
+@app.route('/editor_show_licence', methods=['GET', 'POST'])
+def editor_show_licence():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM  лицензии')
+    data = cur.fetchall()
+    return render_template('editor_add_licence.html', data=data)
 
 @app.route('/editor_add_licence', methods=['POST'])
 def editor_add_licence():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method== 'POST':
-        номер_пп = request.form['номер_пп']
         наименование_ПО = request.form['наименование_ПО']
         вендор = request.form['вендор']
         начало_действия_лицензии = request.form['начало_действия_лицензии']
@@ -259,10 +788,10 @@ def editor_add_licence():
             стоимость_за_единицу = lic['стоимость_за_единицу']
             if not количество_ПО:
                 flash('Пожалуйста, введите количество ПО!')
-                return redirect(url_for('home_editor'))
+                return render_template('editor_add_licence.html')
             if not начало_действия_лицензии:
                 flash('Пожалуйста, заполните все поля формы!')
-                return(redirect(url_for('home_editor')))
+                return render_template('editor_add_licence.html')
             if признак_ПО == 'Новое':
                 итоговая_стоимость = стоимость_за_единицу * количество_ПО
             elif признак_ПО == 'Техподдержка':
@@ -287,9 +816,9 @@ def editor_add_licence():
             else:
                 остаток = 0
             cur.execute(
-                "INSERT INTO лицензии (номер_пп, наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, срок_действия_лицензии, оплачено, остаток, примечание) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval, %s, %s, %s)",
+                "INSERT INTO лицензии (наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, срок_действия_лицензии, оплачено, остаток, примечание) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, GREATEST(to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW(), interval '0 seconds'), %s, %s, %s)",
                 (
-                    номер_пп, наименование_ПО, вендор, начало_действия_лицензии, 
+                    наименование_ПО, вендор, начало_действия_лицензии, 
                     окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, 
                     итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, 
                     окончание_действия_лицензии, оплачено, остаток, примечание
@@ -300,12 +829,12 @@ def editor_add_licence():
             return redirect(url_for('home_editor'))
         else:
             flash('Такого ПО нет в справочнике ПО!')
-            return redirect(url_for('home_editor'))
+            return render_template('editor_add_licence.html')
     
 @app.route('/edit/<id>', methods=['POST', 'GET'])
 def get_licence(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM лицензии WHERE номер_пп = %s', (id,))
+    cur.execute('SELECT наименование_ПО, контрагент, дата_начала_списания, дата_окончания_списания, счёт_списания, стоимость_ПО, количество, итоговая_стоимость_ПО, признак_ПО, страна_производитель, срок_действия_лицензии, оплачено, остаток, примечание FROM лицензии WHERE номер = %s', (id,))
     data = cur.fetchall()
     cur.close()
     return render_template('edit.html', licence = data[0])
@@ -313,7 +842,7 @@ def get_licence(id):
 @app.route('/editor_edit/<id>', methods=['POST', 'GET'])
 def editor_get_licence(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM лицензии WHERE номер_пп=%s', (id,))
+    cur.execute('SELECT наименование_ПО, контрагент, дата_начала_списания, дата_окончания_списания, счёт_списания, стоимость_ПО, количество, итоговая_стоимость_ПО, признак_ПО, страна_производитель, срок_действия_лицензии, оплачено, остаток, примечание FROM лицензии WHERE номер=%s', (id,))
     data = cur.fetchall()
     cur.close()
     return render_template('editor_edit.html', licence=data[0])
@@ -377,7 +906,7 @@ def update_licence(id):
                         заказчик_ПО=%s,
                         признак_ПО=%s,
                         количество_ПО=%s,
-                        срок_действия_лицензии=(to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval,
+                        срок_действия_лицензии=GREATEST(to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW(), interval '0 seconds'),
                         оплачено=%s,
                         остаток=%s,
                         примечание=%s
@@ -449,7 +978,7 @@ def editor_update_licence(id):
                         заказчик_ПО=%s,
                         признак_ПО=%s,
                         количество_ПО=%s,
-                        срок_действия_лицензии=(to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval,
+                        срок_действия_лицензии=GREATEST(to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW(), interval '0 seconds'),
                         оплачено=%s,
                         остаток=%s,
                         примечание=%s
@@ -461,22 +990,44 @@ def editor_update_licence(id):
         else:
             flash('Такого ПО нет в справочнике ПО!')
             return redirect(url_for('editor_get_licence', id=id))
-    
-@app.route('/delete/<string:id>', methods=['POST', 'GET'])
-def delete_licence(id):
+          
+@app.route('/delete', methods=['POST', 'GET'])
+def delete_licence():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM лицензии WHERE номер_пп = {0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удалена!')
-    return redirect(url_for('home'))
+    if request.method == 'POST':
+        for id in request.form.getlist('delete_checkbox'):
+            cur.execute('DELETE FROM лицензии WHERE номер_пп = %s', (id, ))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('home'))
 
-@app.route('/editor_delete/<string:id>', methods=['POST', 'GET'])
-def editor_delete_licence(id):
+@app.route('/editor_delete', methods=['POST', 'GET'])
+def editor_delete_licence():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM лицензии WHERE номер_пп = {0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удалена!')
-    return redirect(url_for('home_editor'))
+    if request.method == 'POST':
+        for id in request.form.getlist('editor_delete_checkbox'):
+            cur.execute('DELETE FROM лицензии WHERE номер_пп = %s', (id, ))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('home_editor'))
+    
+@app.route('/delete_all_info', methods=['POST', 'GET'])
+def delete_all_info():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM лицензии')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('home'))
+
+@app.route('/editor_delete_all_info', methods=['POST', 'GET'])
+def editor_delete_all_info():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM лицензии')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('home_editor'))
                 
 @app.route('/profile')
 def profile(): 
@@ -505,6 +1056,65 @@ def editor_profile():
         account = cur.fetchone()
         return render_template('editor_profile.html', account=account)
     return redirect(url_for('login'))
+
+@app.route('/types')
+@role_required('admin')
+def types():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if 'loggedin' in session:
+        string = 'SELECT * FROM Виды_ПО'
+        cur.execute(string)
+        list_types = cur.fetchall()
+        return render_template('types.html', list_types=list_types)
+    return redirect(url_for('login'))
+
+@app.route('/editor_types')
+@role_required('editor')
+def editor_types():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if 'loggedin' in session:
+        string = 'SELECT * FROM Виды_ПО'
+        cur.execute(string)
+        list_types = cur.fetchall()
+        return render_template('editor_types.html', list_types = list_types)
+    return redirect(url_for('login'))
+
+@app.route('/show_types', methods=['POST', 'GET'])
+def show_types():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT наименование_ПО, вид_ПО FROM Виды_ПО')
+    list_types = cur.fetchall()
+    return render_template('show_types.html', list_types=list_types)
+
+@app.route('/editor_show_types', methods=['POST', 'GET'])
+def editor_show_types():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT наименование_ПО, вид_ПО FROM Виды_ПО')
+    list_types = cur.fetchall()
+    return render_template('editor_show_types.html', list_types=list_types)
+
+@app.route('/add_types', methods=['POST'])
+def add_types():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        наименование_ПО = request.form['наименование_ПО']
+        вид_ПО = request.form['вид_ПО']
+        cur.execute("INSERT INTO Виды_ПО (наименование_ПО, вид_ПО) VALUES(%s,%s)", (наименование_ПО, вид_ПО))
+        conn2.commit()
+        flash('Запись успешно создана!')
+        return redirect(url_for('types'))
+    
+@app.route('/editor_add_types', methods=['POST'])
+def editor_add_types():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        наименование_ПО = request.form['наименование_ПО']
+        вид_ПО = request.form['вид_ПО']
+        cur.execute('INSERT INTO Виды_ПО (наименование_ПО, вид_ПО) VALUES (%s, %s)', (наименование_ПО, вид_ПО))
+        conn2.commit()
+        flash('Запись успешно создана!')
+        return redirect(url_for('editor_types'))
+    
  
 @app.route('/software')
 @role_required('admin')
@@ -517,6 +1127,13 @@ def software_list():
         return render_template('software.html', list_software=list_software)
     return redirect(url_for('login'))
 
+@app.route('/show_software', methods=['GET', 'POST'])
+def show_software():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Справочник_ПО')
+    soft = cur.fetchall()
+    return render_template('show_software.html', soft=soft)
+
 @app.route('/editor_software')
 @role_required('editor')
 def editor_software_list():
@@ -527,6 +1144,13 @@ def editor_software_list():
         list_software = cur.fetchall()
         return render_template('editor_software.html', list_software=list_software)
     return redirect(url_for('login'))
+
+@app.route('/editor_show_software', methods=['GET', 'POST'])
+def editor_show_software():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Справочник_ПО')
+    soft = cur.fetchall()
+    return render_template('editor_add_software.html', soft=soft)
 
 @app.route('/support_software')
 @role_required('support')
@@ -555,7 +1179,7 @@ def add_software():
         soft = cur.fetchone()
         if soft:
             flash('Запись с такими данными уже существует!')
-            return redirect(url_for('software_list'))
+            return render_template('add_software.html')
         cur.execute("INSERT INTO Справочник_ПО (код_ПО, наименование_ПО, описание_ПО, ссылка_на_сайт_ПО, вендор, стоимость_за_единицу, признак_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)", (код_ПО, наименование_ПО, описание_ПО, ссылка_на_сайт_ПО, вендор, стоимость_за_единицу, признак_ПО, примечание))
         conn2.commit()
         flash('Запись успешно создана!')
@@ -577,7 +1201,7 @@ def editor_add_software():
         soft = cur.fetchone()
         if soft:
             flash('Запись с такими данными уже существует!')
-            return redirect(url_for('editor_software_list'))
+            return render_template('editor_add_software.html')
         cur.execute("INSERT INTO Справочник_ПО (код_ПО, наименование_ПО, описание_ПО, ссылка_на_сайт_ПО, вендор, стоимость_за_единицу, признак_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)", (код_ПО, наименование_ПО, описание_ПО, ссылка_на_сайт_ПО, вендор, стоимость_за_единицу, признак_ПО, примечание))
         conn2.commit()
         flash('Запись успешно создана!')
@@ -652,21 +1276,43 @@ def editor_update_software(id):
         return redirect(url_for('editor_software_list'))
     
     
-@app.route('/delete_software/<string:id>', methods=['POST', 'GET'])
-def delete_software(id):
+@app.route('/delete_software', methods=['POST', 'GET'])
+def delete_software():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM Справочник_ПО WHERE код_ПО = {0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удалена!')
-    return redirect(url_for('software_list'))
+    if request.method=='POST':
+        for id in request.form.getlist('delete_software_checkbox'):
+            cur.execute('DELETE FROM Справочник_ПО WHERE код_ПО = %s', (id, ))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('software_list'))
+    
+@app.route('/delete_all_software', methods=['POST', 'GET'])
+def delete_all_software():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM Справочник_ПО')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('software_list'))
+    
+@app.route('/editor_delete_all_software', methods=['POST', 'GET'])
+def editor_delete_all_software():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM Справочник_ПО')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('editor_software_list'))
 
-@app.route('/editor_delete_software/<string:id>' ,methods=['POST', 'GET'])
-def editor_delete_software(id):
+@app.route('/editor_delete_software' ,methods=['POST', 'GET'])
+def editor_delete_software():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM Справочник_ПО WHERE код_ПО = {0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удалена!')
-    return redirect(url_for('editor_software_list'))
+    if request.method == 'POST':
+        for id in request.form.getlist('editor_delete_software_checkbox'):
+            cur.execute('DELETE FROM Справочник_ПО WHERE код_ПО = %s', (id,))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('editor_software_list'))
 
 @app.route('/download_software/report/excel')
 def download_software_report():
@@ -731,6 +1377,20 @@ def support_vendor_list():
         list_vendor = cur.fetchall()
         return render_template('support_vendor.html', list_vendor=list_vendor)
     return redirect(url_for('login'))
+
+@app.route('/show_vendor', methods=['GET', 'POST'])
+def show_vendor():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Справочник_производителей_ПО')
+    list_vendor = cur.fetchall()
+    return render_template('add_vendor.html', list_vendor=list_vendor)
+
+@app.route('/editor_show_vendor', methods=['GET', 'POST'])
+def editor_show_vendor():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Справочник_производителей_ПО')
+    list_vendor = cur.fetchall()
+    return render_template('editor_add_vendor.html', list_vendor=list_vendor)
 
 @app.route('/add_vendor', methods=['POST'])
 def add_vendor():
@@ -816,22 +1476,44 @@ def editor_update_vendor(id):
         conn2.commit()
         return redirect(url_for('editor_vendor_list'))
 
-@app.route('/delete_vendor/<string:id>', methods=['POST', 'GET'])
-def delete_vendor(id):
+@app.route('/delete_vendor', methods=['POST', 'GET'])
+def delete_vendor():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM Справочник_производителей_ПО WHERE код_производителя={0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удалена!')
-    return redirect(url_for('vendor_list'))
+    if request.method == 'POST':
+        for id in request.form.getlist('add_vendor_checkbox'):
+            cur.execute('DELETE FROM Справочник_производителей_ПО WHERE код_производителя=%s', (id,))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('vendor_list'))
 
-@app.route('/editor_delete_vendor/<string:id>', methods=['POST', 'GET'])
-def editor_delete_vendor(id):
+@app.route('/editor_delete_vendor', methods=['POST', 'GET'])
+def editor_delete_vendor():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM Справочник_производителей_ПО WHERE код_производителя={0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удалена!')
-    return redirect(url_for('editor_vendor_list'))
-
+    if request.method == 'POST':
+        for id in request.form.getlist('editor_add_vendor_checkbox'):
+            cur.execute('DELETE FROM Справочник_производителей_ПО WHERE код_производителя=%s', (id,))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('editor_vendor_list'))
+    
+@app.route('/delete_all_vendor', methods=['POST', 'GET'])
+def delete_all_vendor():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM Справочник_производителей_ПО')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('vendor_list'))
+    
+@app.route('/editor_delete_all_vnedor', methods=['POST', 'GET'])
+def editor_delete_all_vendor():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM Справочник_производителей_ПО')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('editor_vendor_list'))
+    
 @app.route('/download_vendor/report/excel')
 def download_vendor_report():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -889,6 +1571,48 @@ def support_customer_list():
         list_customer = cur.fetchall()
         return render_template('support_customer.html', list_customer=list_customer)
     return redirect(url_for('login'))
+
+@app.route('/show_customer', methods=['GET', 'POST'])
+def show_customer():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Справочник_заказчиков_ПО')
+    list_customer = cur.fetchall()
+    return render_template('add_customer.html', list_customer=list_customer)
+
+@app.route('/show_software_byid/<software>', methods=['POST', 'GET'])
+def show_software_byid(software):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT наименование_ПО, вид_ПО FROM Виды_ПО WHERE наименование_ПО=%s', (software,))
+    list_software = cur.fetchall()
+    return render_template('software_byid.html', list_software=list_software)
+
+@app.route('/editor_show_software_byid/<software>', methods=['POST', 'GET'])
+def editor_show_software_byid(software):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT наименование_ПО, вид_ПО FROM Виды_ПО WHERE наименование_ПО=%s', (software,))
+    list_software = cur.fetchall()
+    return render_template('editor_software_byid.html', list_software=list_software)
+
+@app.route('/show_customer_byid/<customer>', methods=['POST', 'GET'])
+def show_customer_byid(customer):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT наименование_контрагента, договор, примечание FROM Контрагенты WHERE наименование_контрагента=%s', (customer,))
+    list_customer = cur.fetchall()
+    return render_template('customer_description.html', list_customer=list_customer, customer=customer)
+
+@app.route('/editor_show_customer_byid/<customer>', methods=['POST', 'GET'])
+def editor_show_customer_by_id(customer):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT наименование_контрагента, договор, примечание FROM Контрагенты WHERE наименование_контрагента=%s', (customer,))
+    list_customer = cur.fetchall()
+    return render_template('editor_customer_description.html', list_customer=list_customer, customer=customer)
+
+@app.route('/editor_show_customer', methods=['GET', 'POST'])
+def editor_show_customer():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Контрагенты')
+    list_customer=cur.fetchall()
+    return render_template('editor_add_customer.html', list_customer=list_customer)
 
 @app.route('/add_customer', methods=['POST'])
 def add_customer():
@@ -975,21 +1699,43 @@ def editor_update_customer(id):
         conn2.commit()
         return redirect(url_for('editor_customer_list'))
     
-@app.route('/delete_customer/<string:id>', methods=['POST', 'GET'])
-def delete_customer(id):
+@app.route('/delete_customer', methods=['POST', 'GET'])
+def delete_customer():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM Справочник_заказчиков_ПО WHERE код_заказчика={0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удалена!')
-    return redirect(url_for('customer_list'))
+    if request.method == 'POST':
+        for id in request.form.getlist('add_customer_checkbox'):
+            cur.execute('DELETE FROM Справочник_заказчиков_ПО WHERE код_заказчика=%s', (id,))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('customer_list'))
+    
+@app.route('/delete_all_customer', methods=['POST', 'GET'])
+def delete_all_customer():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM Справочник_заказчиков_ПО')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('customer_list'))
+    
+@app.route('/editor_delete_all_customer', methods=['POST', 'GET'])
+def editor_delete_all_customer():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM Справочник_заказчиков_ПО')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('editor_customer_list'))
 
-@app.route('/editor_delete_customer/<string:id>', methods=['POST', 'GET'])
-def editor_delete_customer(id):
+@app.route('/editor_delete_customer', methods=['POST', 'GET'])
+def editor_delete_customer():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM Справочник_заказчиков_ПО WHERE код_заказчика={0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удалена!')
-    return redirect(url_for('editor_customer_list'))
+    if request.method == 'POST':
+        for id in request.form.getlist('editor_add_customer_checkbox'):
+            cur.execute('DELETE FROM Справочник_заказчиков_ПО WHERE код_заказчика=%s', (id,))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('editor_customer_list'))
 
 @app.route('/download_customer/report/excel')
 def download_customer_report():
@@ -1048,6 +1794,21 @@ def support_licence_list():
         list_licence = cur.fetchall()
         return render_template('support_licence.html', list_licence=list_licence)
     return redirect(url_for('login'))
+
+@app.route('/show_licence_list', methods=['GET', 'POST'])
+def show_licence_list():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Справочник_лицензий')
+    list_licence = cur.fetchall()
+    return render_template('add_licence_to_list.html', list_licence=list_licence)
+
+@app.route('/editor_show_licence_list', methods=['GET', 'POST'])
+def editor_show_licence_list():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Справочник_лицензий')
+    list_licence = cur.fetchall()
+    return render_template('editor_add_licence_to_list.html', list_licence=list_licence)
+
     
 @app.route('/add_licence_to_list', methods=['POST'])
 def add_licence_to_list():
@@ -1135,28 +1896,50 @@ def editor_update_licence_list(id):
         conn2.commit()
         return redirect(url_for('editor_licence_list'))
     
-@app.route('/delete_licence/<string:id>', methods=['POST', 'GET'])
-def delete_licence_from_list(id):
+@app.route('/delete_licence', methods=['POST', 'GET'])
+def delete_licence_from_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM Справочник_лицензий WHERE код_лицензии={0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удалена!')
-    return redirect(url_for('licence_list'))
+    if request.method == 'POST':
+        for id in request.form.getlist('add_licence_to_list_checkbox'):
+            cur.execute('DELETE FROM Справочник_лицензий WHERE код_лицензии=%s', (id,))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('licence_list'))
 
-@app.route('/editor_delete_licence/<string:id>', methods=['POST', 'GET'])
-def editor_delete_licence_from_list(id):
+@app.route('/editor_delete_licence', methods=['POST', 'GET'])
+def editor_delete_licence_from_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM Справочник_лицензий WHERE код_лицензии={0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удалена!')
-    return redirect(url_for('editor_licence_list'))
+    if request.method == 'POST':
+        for id in request.form.getlist('editor_add_licence_to_list_checkbox'):
+            cur.execute('DELETE FROM Справочник_лицензий WHERE код_лицензии=%s', (id,))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('editor_licence_list'))
+    
+@app.route('/delete_all_licence', methods=['POST', 'GET'])
+def delete_all_licence():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM Справочник_лицензий')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('licence_list'))
+    
+@app.route('/editor_delete_all_licence', methods=['POST', 'GET'])
+def editor_delete_all_licence():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM Справочник_лицензий')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('editor_licence_list'))
 
 @app.route('/partners_list')
 @role_required('admin')
 def partners_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
-        string = "SELECT * FROM Контрагенты"
+        string = "SELECT наименование_контрагента, договор, примечание FROM Контрагенты"
         cur.execute(string)
         partner_list = cur.fetchall()
         return render_template('partner.html', partner_list=partner_list)
@@ -1167,7 +1950,7 @@ def partners_list():
 def editor_partners_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
-        string = "SELECT * FROM Контрагенты"
+        string = "SELECT наименование_контрагента, договор, примечание FROM Контрагенты"
         cur.execute(string)
         partner_list = cur.fetchall()
         return render_template('editor_partner.html', partner_list=partner_list)
@@ -1178,21 +1961,34 @@ def editor_partners_list():
 def support_partners_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
-        string='SELECT * FROM Контрагенты'
+        string='SELECT наименование_контрагента, договор, примечание FROM Контрагенты'
         cur.execute(string)
         partner_list = cur.fetchall()
         return render_template('support_partner.html', partner_list=partner_list)
     return redirect(url_for('login'))
 
+@app.route('/show_partners_list', methods=['GET', 'POST'])
+def show_partners_list():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT наименование_контрагента, договор, примечание FROM Контрагенты')
+    partner_list = cur.fetchall()
+    return render_template('show_partners_list.html', partner_list=partner_list)
+
+@app.route('/editor_show_partners_list', methods=['GET', 'POST'])
+def editor_show_partners_list():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT наименование_контрагента, договор, примечание FROM Контрагенты')
+    partner_list = cur.fetchall()
+    return render_template('editor_show_partners_list.html', partner_list=partner_list)
+
 @app.route('/add_partner', methods=['POST'])
 def add_partner():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
-        код_контрагента = request.form['код_контрагента']
         наименование_контрагента = request.form['наименование_контрагента']
         договор = request.form['договор']
         примечание = request.form['примечание']
-        cur.execute('INSERT INTO Контрагенты (код_контрагента, наименование_контрагента, договор, примечание) VALUES(%s,%s,%s,%s)', (код_контрагента, наименование_контрагента, договор, примечание))
+        cur.execute('INSERT INTO Контрагенты (наименование_контрагента, договор, примечание) VALUES(%s,%s,%s)', (наименование_контрагента, договор, примечание))
         conn2.commit()
         flash('Запись успешно создана!')
         return redirect(url_for('partners_list'))
@@ -1201,11 +1997,10 @@ def add_partner():
 def editor_add_partner():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
-        код_контрагента = request.form['код_контрагента']
         наименование_контрагента = request.form['наименование_контрагента']
         договор = request.form['договор']
         примечание = request.form['примечание']
-        cur.execute('INSERT INTO Контрагенты (код_контрагента, наименование_контрагента, договор, примечание) VALUES(%s,%s,%s,%s)', (код_контрагента, наименование_контрагента, договор, примечание))
+        cur.execute('INSERT INTO Контрагенты (наименование_контрагента, договор, примечание) VALUES(%s,%s,%s)', (наименование_контрагента, договор, примечание))
         conn2.commit()
         flash('Запись успешно создана!')
         return redirect(url_for('editor_partners_list'))
@@ -1213,14 +2008,14 @@ def editor_add_partner():
 @app.route('/edit_partner/<id>', methods=['POST', 'GET'])
 def edit_partner(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Контрагенты WHERE код_контрагента=%s', (id,))
+    cur.execute('SELECT * FROM Контрагенты WHERE наименование_контрагента = %s', (id,))
     partners = cur.fetchall()
     return render_template('edit_partner.html', partner = partners[0])
 
 @app.route('/editor_edit_partner/<id>', methods=['POST', 'GET'])
 def editor_edit_partner(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Контрагенты WHERE код_контрагента=%s', (id,))
+    cur.execute('SELECT * FROM Контрагенты WHERE наименование_контрагента =%s', (id,))
     partners=cur.fetchall()
     return render_template('editor_edit_partner.html', partner=partners[0])
 
@@ -1258,20 +2053,42 @@ def editor_update_partner(id):
         conn2.commit()
         return redirect(url_for('editor_partners_list'))
     
-@app.route('/delete_partner/<string:id>', methods=['POST', 'GET'])
-def delete_partner(id):
+@app.route('/delete_partner', methods=['POST', 'GET'])
+def delete_partner():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM Контрагенты WHERE код_контрагента={0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удалена!')
+    if request.method == 'POST':
+        for id in request.form.getlist('delete_partners_checkbox'):
+            cur.execute('DELETE FROM Контрагенты WHERE наименование_контрагента=%s', (id,))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('partners_list'))
+
+@app.route('/editor_delete_partner', methods=['POST', 'GET'])
+def editor_delete_partner():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        for id in request.form.getlist('editor_delete_partners_checkbox'):
+            cur.execute('DELETE FROM Контрагенты WHERE наименование_контрагента=%s', (id,))
+            conn2.commit()
+            flash('Запись успешно удалена!')
+            return redirect(url_for('editor_partners_list'))
+        
+@app.route('/delete_all_partner', methods=['POST', 'GET'])
+def delete_all_partner():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM Контрагенты')
+        conn2.commit()
+    flash('Все записи были успешно удалены!')
     return redirect(url_for('partners_list'))
 
-@app.route('/editor_delete_partner/<string:id>', methods=['POST', 'GET'])
-def editor_delete_partner(id):
+@app.route('/editor_delete_all_partner', methods=['POST', 'GET'])
+def editor_delete_all_partner():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM Контрагенты WHERE код_контрагента={0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удалена!')
+    if request.method == 'POST':
+        cur.execute('DELETE FROM Контрагенты')
+        conn2.commit()
+    flash('Все записи успешно удалены!')
     return redirect(url_for('editor_partners_list'))
 
 @app.route('/download_partner/report/excel')
@@ -1332,38 +2149,38 @@ def download_report():
     output = io.BytesIO()
     workbook = xlwt.Workbook()
     sh = workbook.add_sheet('Отчет')
-    sh.write(0, 0, 'Номер пп')
-    sh.write(0, 1, 'Наименование ПО')
-    sh.write(0, 2, 'Вендор')
-    sh.write(0, 3, 'Начало действия лицензии')
-    sh.write(0, 4, 'Окончание действия лицензии')
-    sh.write(0, 5, 'Счёт списания')
-    sh.write(0, 6, 'Стоимость за единицу')
-    sh.write(0, 7, 'Итоговая стоимость')
-    sh.write(0, 8, 'Заказчик ПО')
-    sh.write(0, 9, 'Признак ПО')
-    sh.write(0, 10, 'Количество ПО')
-    sh.write(0, 11, 'Срок действия лицензии')
-    sh.write(0, 12, 'Оплачено')
-    sh.write(0, 13, 'Остаток')
-    sh.write(0, 14, 'Примечание')
+    sh.write(0, 0, 'Наименование ПО')
+    sh.write(0, 1, 'Вендор')
+    sh.write(0, 2, 'Начало действия лицензии')
+    sh.write(0, 3, 'Окончание действия лицензии')
+    sh.write(0, 4, 'Счёт списания')
+    sh.write(0, 5, 'Стоимость за единицу')
+    sh.write(0, 6, 'Итоговая стоимость')
+    sh.write(0, 7, 'Заказчик ПО')
+    sh.write(0, 8, 'Признак ПО')
+    sh.write(0, 9, 'Количество ПО')
+    sh.write(0, 10, 'Срок действия лицензии')
+    sh.write(0, 11, 'Оплачено')
+    sh.write(0, 12, 'Остаток')
+    sh.write(0, 13, 'Примечание')
+    sh.write(0, 14, 'Номер пп')
     idx = 0
     for row in result:
-        sh.write(idx+1, 0, str(row['номер_пп']))
-        sh.write(idx+1, 1, row['наименование_ПО'])
-        sh.write(idx+1, 2, row['вендор'])
-        sh.write(idx+1, 3, row['начало_действия_лицензии'])
-        sh.write(idx+1, 4, row['окончание_действия_лицензии'])
-        sh.write(idx+1, 5, row['счёт_списания'])
-        sh.write(idx+1, 6, row['стоимость_за_единицу'])
-        sh.write(idx+1, 7, row['итоговая_стоимость'])
-        sh.write(idx+1, 8, row['заказчик_ПО'])
-        sh.write(idx+1, 9, row['признак_ПО'])
-        sh.write(idx+1, 10, row['количество_ПО'])
-        sh.write(idx+1, 11, str(row['срок_действия_лицензии']))
-        sh.write(idx+1, 12, row['оплачено'])
-        sh.write(idx+1, 13, row['остаток'])
-        sh.write(idx+1, 14, row['примечание'])
+        sh.write(idx+1, 0, row['наименование_ПО'])
+        sh.write(idx+1, 1, row['вендор'])
+        sh.write(idx+1, 2, row['начало_действия_лицензии'])
+        sh.write(idx+1, 3, row['окончание_действия_лицензии'])
+        sh.write(idx+1, 4, row['счёт_списания'])
+        sh.write(idx+1, 5, row['стоимость_за_единицу'])
+        sh.write(idx+1, 6, row['итоговая_стоимость'])
+        sh.write(idx+1, 7, row['заказчик_ПО'])
+        sh.write(idx+1, 8, row['признак_ПО'])
+        sh.write(idx+1, 9, row['количество_ПО'])
+        sh.write(idx+1, 10, str(row['срок_действия_лицензии']))
+        sh.write(idx+1, 11, row['оплачено'])
+        sh.write(idx+1, 12, row['остаток'])
+        sh.write(idx+1, 13, row['примечание'])
+        sh.write(idx+1, 14, str(row['номер_пп']))
         idx += 1
     workbook.save(output)
     output.seek(0)
@@ -1397,11 +2214,24 @@ def install_software():
     list_installation = cur.fetchall()
     return render_template('install.html', list_installation=list_installation)
 
+@app.route('/show_installation', methods=['GET', 'POST'])
+def show_installation():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Установка_ПО')
+    list_installation = cur.fetchall()
+    return render_template('add_install.html', list_installation=list_installation)
+
+@app.route('/support_show_installation', methods=['GET', 'POST'])
+def support_show_installation():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Установка_ПО')
+    list_installation = cur.fetchall()
+    return render_template('support_add_install.html', list_installation=list_installation)
+
 @app.route('/admin_add_installation', methods=['POST'])
 def admin_add_installation():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
-        код_установки = request.form['код_установки']
         наименование_ПО = request.form['наименование_ПО']
         тип_лицензии = request.form.get('тип_лицензии')
         ФИО = request.form['ФИО']
@@ -1449,7 +2279,7 @@ def admin_add_installation():
            flash('Превышено количество доступных лицензий!', 'warning')
            return redirect(url_for('install_software'))
         else:
-            cur.execute('INSERT INTO Установка_ПО (код_установки, наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (код_установки, наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание))
+            cur.execute('INSERT INTO Установка_ПО (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание))
             conn2.commit()
             flash('Запись успешно создана!')
             return redirect(url_for('install_software'))
@@ -1458,7 +2288,6 @@ def admin_add_installation():
 def add_installation():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
-        код_установки = request.form['код_установки']
         наименование_ПО = request.form['наименование_ПО']
         тип_лицензии = request.form.get('тип_лицензии')
         ФИО = request.form['ФИО']
@@ -1500,7 +2329,7 @@ def add_installation():
            flash('Превышено количество доступных лицензий!', 'warning')
            return redirect(url_for('support_install_software'))
         else:
-            cur.execute('INSERT INTO Установка_ПО (код_установки, наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (код_установки, наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание))
+            cur.execute('INSERT INTO Установка_ПО (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание))
             conn2.commit()
             flash('Запись успешно создана!')
             return redirect(url_for('support_install_software'))
@@ -1518,8 +2347,7 @@ def admin_edit_installation(id):
     cur.execute("SELECT * FROM Установка_ПО WHERE код_установки=%s", (id,))
     installations = cur.fetchall()
     return render_template('admin_edit_installation.html', installation = installations[0])
-
-
+                    
 @app.route('/update_installation/<id>', methods=['POST'])
 def update_installation(id):
     if request.method == 'POST':
@@ -1944,76 +2772,93 @@ def admin_update_installation(id):
         conn2.commit()
         return redirect(url_for('install_software'))
     
-@app.route('/delete_installation/<string:id>', methods=['POST', 'GET'])
-def delete_installation(id):
+@app.route('/delete_installation', methods=['POST', 'GET'])
+def delete_installation():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT наименование_ПО, тип_лицензии, число_установленных_лицензий FROM Установка_ПО WHERE код_установки=%s', (id,))
-    installation_info = cur.fetchone()
-    if installation_info:
-        число_установленных_лицензий = installation_info['число_установленных_лицензий']
-        if число_установленных_лицензий > 0:
-            cur.execute(
-                """
-                UPDATE Установка_ПО
-                SET число_установленных_лицензий = число_установленных_лицензий - 1 
-                WHERE код_установки=%s;
-                """,
-                (id,),
-            )
-            conn2.commit()
+    if request.method == 'POST':
+        for id in request.form.getlist('support_delete_installation_checkbox'):
+            cur.execute('SELECT наименование_ПО, тип_лицензии, число_установленных_лицензий FROM Установка_ПО WHERE код_установки=%s', (id,))
+            installation_info = cur.fetchone()
+            if installation_info:
+                наименование_ПО = installation_info['наименование_ПО']
+                тип_лицензии = installation_info['тип_лицензии']
+                число_установленных_лицензий = installation_info['число_установленных_лицензий']
+                if число_установленных_лицензий > 0:
+                    cur.execute(
+                        """
+                        UPDATE Установка_ПО
+                        SET число_установленных_лицензий = число_установленных_лицензий - 1 
+                        WHERE наименование_ПО=%s AND тип_лицензии=%s;
+                        """, (наименование_ПО, тип_лицензии,))
+                    cur.execute('DELETE FROM Установка_ПО WHERE код_установки=%s',(id,))
+                    conn2.commit()
+            
+                    flash('Запись успешно удалена!')
+                else:
+                    cur.execute("""UPDATE Установка_ПО
+                                SET число_установленных_лицензий = 0
+                                WHERE наименование_ПО=%s AND тип_лицензии=%s;""", (наименование_ПО, тип_лицензии))
+                    cur.execute('DELETE FROM Установка_ПО WHERE код_установки=%s', (id,))
+                    conn2.commit()
+                    flash('Запись успешно удалена!')
+            else:
+                flash('Запись не найдена!')
     
-            cur.execute('DELETE FROM Установка_ПО WHERE код_установки={0}'.format(id))
-            conn2.commit()
-    
-            flash('Запись успешно удалена!')
-        else:
-            cur.execute("""UPDATE Установка_ПО
-                        SET число_установленных_лицензий = 0
-                        WHERE код_установки=%s;""", (id,))
-            conn2.commit()
-            cur.execute('DELETE FROM Установка_ПО WHERE код_установки={0}'.format(id))
-            conn2.commit()
-            flash('Запись успешно удалена!')
-    else:
-        flash('Запись не найдена!')
+        return redirect(url_for('support_install_software'))
 
-    return redirect(url_for('support_install_software'))
-
-@app.route('/admin_delete_installation/<string:id>', methods=['POST', 'GET'])
-def admin_delete_installation(id):
+@app.route('/admin_delete_installation', methods=['POST', 'GET'])
+def admin_delete_installation():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT наименование_ПО, тип_лицензии, число_установленных_лицензий FROM Установка_ПО WHERE код_установки=%s', (id,))
-    installation_info = cur.fetchone()
-    if installation_info:
-        число_установленных_лицензий = installation_info['число_установленных_лицензий']
-        if число_установленных_лицензий > 0:
-            cur.execute(
-                """
-                UPDATE Установка_ПО
-                SET число_установленных_лицензий = число_установленных_лицензий - 1 
-                WHERE код_установки=%s;
-                """,
-                (id,),
-            )
-            conn2.commit()
+    if request.method == 'POST':
+        for id in request.form.getlist('admin_delete_installation_checkbox'):
+            cur.execute('SELECT наименование_ПО, тип_лицензии, число_установленных_лицензий FROM Установка_ПО WHERE код_установки=%s', (id,))
+            installation_info = cur.fetchone()
+            if installation_info:
+                число_установленных_лицензий = installation_info['число_установленных_лицензий']
+                наименование_ПО = installation_info['наименование_ПО']
+                тип_лицензии = installation_info['тип_лицензии']
+                if число_установленных_лицензий > 0:
+                    cur.execute('DELETE FROM Установка_ПО WHERE код_установки=%s', (id,))
+                    cur.execute(
+                        """
+                        UPDATE Установка_ПО
+                        SET число_установленных_лицензий = число_установленных_лицензий - 1 
+                        WHERE наименование_ПО=%s AND тип_лицензии=%s;
+                        """,
+                        (наименование_ПО, тип_лицензии,),
+                    )
+                    conn2.commit()
+            
+                    flash('Запись успешно удалена!')
+                else:
+                    cur.execute('DELETE FROM Установка_ПО WHERE код_установки=%s', (id,))
+                    cur.execute("""UPDATE Установка_ПО
+                                SET число_установленных_лицензий = 0
+                                WHERE наименование_ПО=%s AND тип_лицензии=%s;""", (наименование_ПО, тип_лицензии,))
+                    conn2.commit()
+                    flash('Запись успешно удалена!')
+            else:
+                flash('Запись не найдена!')
+        return redirect(url_for('install_software'))
     
-            cur.execute('DELETE FROM Установка_ПО WHERE код_установки={0}'.format(id))
-            conn2.commit()
+@app.route('/support_delete_all_install', methods=['POST', 'GET'])
+def support_delete_all_install():
+    cur = conn2.cursor(curso_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM Установка_ПО')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('support_install_software'))
     
-            flash('Запись успешно удалена!')
-        else:
-            cur.execute("""UPDATE Установка_ПО
-                        SET число_установленных_лицензий = 0
-                        WHERE код_установки=%s;""", (id,))
-            conn2.commit()
-            cur.execute('DELETE FROM Установка_ПО WHERE код_установки={0}'.format(id))
-            conn2.commit()
-            flash('Запись успешно удалена!')
-    else:
-        flash('Запись не найдена!')
-
-    return redirect(url_for('install_software'))
-
+@app.route('/delete_all_install', methods=['POST', 'GET'])
+def delete_all_install():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method=='POST':
+        cur.execute('DELETE FROM Установка_ПО')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('install_software'))
+    
 @app.route('/download/software_install_report/excel')
 def download_software_install_report():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2086,6 +2931,13 @@ def view_number_licences():
         return render_template('support_number.html', list_number=list_number)
     return redirect(url_for('login'))
 
+@app.route('/show_number_licences', methods=['GET', 'POST'])
+def show_number_licences():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Учет_лицензий')
+    list_number = cur.fetchall()
+    return render_template('add_number_licences.html', list_number=list_number)
+
 @app.route('/add_number', methods=['POST'])
 def add_number():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2127,13 +2979,24 @@ def update_number(id):
         conn2.commit()
         return redirect(url_for('number_licences'))
     
-@app.route('/delete_number/<string:id>', methods=['POST', 'GET'])
-def delete_number(id):
+@app.route('/delete_number', methods=['POST', 'GET'])
+def delete_number():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('DELETE FROM Учет_лицензий WHERE номер_заявки={0}'.format(id))
-    conn2.commit()
-    flash('Запись успешно удалена!')
-    return redirect(url_for('number_licences'))
+    if request.method == 'POST':
+        for id in request.form.getlist('delete_number_checkbox'):
+            cur.execute('DELETE FROM Учет_лицензий WHERE номер_заявки= %s', (id,))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('number_licences'))
+    
+@app.route('/delete_all_number', methods=['POST', 'GET'])
+def delete_all_number():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM Учет_лицензий')
+        conn2.commit()
+        flash('Все записи были успешно удалены!')
+        return redirect(url_for('number_licences'))
 
 @app.route('/download/number_report/excel')
 def download_number_report():
@@ -2602,7 +3465,7 @@ def profile_editor_change_password(email):
 @app.route('/page/<software>')
 def show_installation_details(software):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT код_установки, ФИО, ip_адрес, наименование_машины, дата_установки_ПО, тип_лицензии FROM Установка_ПО WHERE наименование_ПО=%s AND чекбокс=True", (software,))
+    cur.execute("SELECT наименование_ПО, ФИО, отдел, ip_адрес, наименование_машины, дата_установки_ПО, тип_лицензии FROM Установка_ПО WHERE наименование_ПО=%s AND чекбокс=True", (software,))
     list_installation = cur.fetchall()
     return render_template('software_description.html', list_installation=list_installation, software=software)
 
@@ -2610,7 +3473,7 @@ def show_installation_details(software):
 def support_show_installation_details(software):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("""
-            SELECT код_установки, ФИО, ip_адрес, наименование_машины, дата_установки_ПО, тип_лицензии
+            SELECT наименование_ПО, ФИО, отдел, ip_адрес, наименование_машины, дата_установки_ПО, тип_лицензии
             FROM Установка_ПО 
             WHERE наименование_ПО = %s AND чекбокс=True
         """, (software,))
@@ -2621,25 +3484,27 @@ def support_show_installation_details(software):
 @app.route('/download/soft_report/excel/<software>')
 def download_soft_report(software):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT код_установки, ФИО, ip_адрес, наименование_машины, дата_установки_ПО, тип_лицензии FROM Установка_ПО WHERE наименование_ПО=%s AND чекбокс=True', (software,))
+    cur.execute('SELECT код_установки, ФИО, отдел, ip_адрес, наименование_машины, дата_установки_ПО, тип_лицензии FROM Установка_ПО WHERE наименование_ПО=%s AND чекбокс=True', (software,))
     result = cur.fetchall()
     output = io.BytesIO()
     workbook = xlwt.Workbook()
     sh = workbook.add_sheet('Отчет')
     sh.write(0, 0, 'Код установки')
     sh.write(0, 1, 'ФИО')
-    sh.write(0, 2, 'IP адрес')
-    sh.write(0, 3, 'Наименование машины')
-    sh.write(0, 4, 'Дата установки ПО')
-    sh.write(0, 5, 'Тип лицензии')
+    sh.write(0, 2, 'Отдел')
+    sh.write(0, 3, 'IP адрес')
+    sh.write(0, 4, 'Наименование машины')
+    sh.write(0, 5, 'Дата установки ПО')
+    sh.write(0, 6, 'Тип лицензии')
     idx = 0
     for row in result:
         sh.write(idx+1, 0, str(row['код_установки']))
         sh.write(idx+1, 1, row['ФИО'])
-        sh.write(idx+1, 2, row['ip_адрес'])
-        sh.write(idx+1, 3, row['наименование_машины'])
-        sh.write(idx+1, 4, row['дата_установки_ПО'])
-        sh.write(idx+1, 5, row['тип_лицензии'])
+        sh.write(idx+1, 2, row['отдел'])
+        sh.write(idx+1, 3, row['ip_адрес'])
+        sh.write(idx+1, 4, row['наименование_машины'])
+        sh.write(idx+1, 5, row['дата_установки_ПО'])
+        sh.write(idx+1, 6, row['тип_лицензии'])
         idx += 1
     workbook.save(output)
     output.seek(0)
@@ -2655,7 +3520,7 @@ def upload_data():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-1):
                     if len(row) == 15: 
                         data.append(row)
                     else:
@@ -2663,7 +3528,7 @@ def upload_data():
                         return redirect(url_for('home'))
                 for row in data:
                     cur.execute(
-                        "INSERT INTO лицензии (номер_пп, наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, срок_действия_лицензии, оплачено, остаток, примечание) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval, %s, %s, %s)",
+                        "INSERT INTO лицензии (наименование_ПО, вендор, начало_действия_лицензии, окончание_действия_лицензии, счёт_списания, стоимость_за_единицу, итоговая_стоимость, заказчик_ПО, признак_ПО, количество_ПО, срок_действия_лицензии, оплачено, остаток, примечание, номер_пп) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (to_timestamp(CAST(%s AS text), 'YYYY-MM-DD') - NOW())::interval, %s, %s, %s, %s)",
                         (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14])
                     )
                 conn2.commit()
@@ -2689,7 +3554,7 @@ def editor_upload_data():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-1):
                     if len(row) == 15: 
                         data.append(row)
                     else:
@@ -2723,7 +3588,7 @@ def upload_licence():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):#костыль
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-1):#костыль
                     data.append(row)
                 for row in data:
                     cur.execute('INSERT INTO Справочник_лицензий (код_лицензии, наименование_лицензии, тип_лицензии, счёт_списания, версия_лицензии, примечание) VALUES(%s,%s,%s,%s,%s,%s)', (row[0], row[1], row[2], row[3], row[4], row[5]))
@@ -2750,7 +3615,7 @@ def editor_upload_licence():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-1):
                     data.append(row)
                 for row in data:
                     cur.execute('INSERT INTO Справочник_лицензий (код_лицензии, наименование_лицензии, тип_лицензии, счёт_списания, версия_лицензии, примечание) VALUES(%s,%s,%s,%s,%s,%s)', (row[0], row[1], row[2], row[3], row[4], row[5]))
@@ -2777,7 +3642,7 @@ def upload_software():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-2):
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-2):
                     data.append(row)
                 for row in data:
                     print(row)
@@ -2805,7 +3670,7 @@ def editor_upload_software():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-2):
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-2):
                     data.append(row)
                 for row in data:
                     print(row)
@@ -2833,7 +3698,7 @@ def upload_customer():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-1):
                     data.append(row)
                 for row in data:
                     print(row)
@@ -2861,7 +3726,7 @@ def editor_upload_customer():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-1):
                     data.append(row)
                 for row in data:
                     print(row)
@@ -2889,7 +3754,7 @@ def upload_vendor():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-1):
                     data.append(row)
                 for row in data:
                     print(row)
@@ -2917,7 +3782,7 @@ def editor_upload_vendor():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-1):
                     data.append(row)
                 for row in data:
                     print(row)
@@ -2945,7 +3810,7 @@ def upload_installation():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-1):
                     data.append(row)
                 for row in data:
                     print(row)
@@ -2973,7 +3838,7 @@ def support_upload_installation():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-1):
                     data.append(row)
                 for row in data:
                     print(row)
@@ -3001,7 +3866,7 @@ def upload_number():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-1):
                     data.append(row)
                 for row in data:
                     print(row)
@@ -3029,7 +3894,7 @@ def upload_partner():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-1):
                     data.append(row)
                 for row in data:
                     print(row)
@@ -3057,7 +3922,7 @@ def editor_upload_partner():
                 workbook = openpyxl.load_workbook(file)
                 sheet = workbook.active
                 data = []
-                for row in sheet.iter_rows(values_only=True, max_row=sheet.max_row-1):
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-1):
                     data.append(row)
                 for row in data:
                     print(row)

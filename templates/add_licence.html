@@ -1,0 +1,67 @@
+{% extends 'layout.html' %}
+{% block title %}Добавление лицензии в базу данных{% endblock %}
+{% block content %}
+<div class="row">
+<div class="col-md-4">
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">x</span>
+        </button>
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+      <div class="card card-body">
+    <form action="{{ url_for('add_licence') }}" method="POST">
+        <div class="form-group">
+            <input type="text" class="form-control" name="наименование_ПО" placeholder="Наименование ПО">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" name="контрагент" placeholder="Контрагент">
+        </div>
+        <div class="form-group">
+            <p>Начало действия лицензии:</p>
+            <input type="date" class="form-control" name="дата_начала_списания" placeholder="Дата начала списания">
+        </div>
+        <div class="form-group">
+          <p>Окончание действия лицензии:</p>
+          <input type="date" class="form-control" name="дата_окончания_списания" placeholder="Дата окончания списания">
+        </div>
+        <div class="form-group">
+            <p>Счёт списания:</p>
+            <select class="form-control" name="счёт_списания">
+              <option value="12">12</option>
+              <option value="36">36</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <p>Признак ПО:</p>
+            <select class="form-control" name="признак_ПО">
+              <option value="Новое">Новое</option>
+              <option value="Техподдержка">Техподдержка</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <input type="number" class="form-control" name="количество" placeholder="Количество лицензий">
+        </div>
+        <div class="form-group">
+            <label for="оплачено">
+                <input type="checkbox" class="form-control" id="оплачено" name="оплачено">
+            </label>
+            ПО оплачено?
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" name="примечание" placeholder="Примечание">
+        </div>
+        <button type = "submit" class="btn btn-primary btn-block">
+            Сохранить
+        </button>
+    </form>
+</div>
+</div>
+</div>
+{% endblock %}

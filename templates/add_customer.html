@@ -1,0 +1,40 @@
+{% extends 'layout.html' %}
+{% block title %}Добавление покупателя{% endblock %}
+{% block content %}
+<div class="col-md-4">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{message}}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">x</span>
+      </button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <div class="card card-body">
+      <form action="{{url_for('add_customer')}}" method="POST">
+        <div class="form-group">
+          <input type="number" class="form-control" name="код_заказчика" placeholder="Код заказчика">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="заказчик_ПО" placeholder="Заказчик ПО">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="описание_заказчика" placeholder="Описание заказчика">
+        </div>
+        <div class="form-group">
+          <input type="url" class="form-control" name="ссылка_на_сайт_заказчика" placeholder="Ссылка на сайт заказчика">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="примечание" placeholder="Примечание">
+        </div>
+        <button class="btn btn-primary btn-block">
+          Сохранить
+        </button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

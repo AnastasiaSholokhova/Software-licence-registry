@@ -1,0 +1,68 @@
+{% extends 'support_layout.html' %}
+  
+{% block title %}Домашняя страница{% endblock %}
+  
+{% block content %}
+<div class="row"><h2>Добро пожаловать, {{ username }}!</h2></div>
+<div class="row"><h3>Реестр лицензий ПО</h3></div>
+<div class="row">
+    <div class="table-responsitive">
+      <table id="example" class="table table-bordered" style="width:65%">
+        <thead>
+          <tr>
+            <th>Статья затрат</th>
+            <th>Наименование ПО (БУ)</th>
+            <th>Наименование ПО</th>
+            <th>Краткое наименование ПО</th>
+            <th>Количество</th>
+            <th>Код</th>
+            <th>Филиал</th>
+            <th>Счет затрат</th>
+            <th>Вид деятельности</th>
+            <th>Стоимость ПО (всего) без НДС</th>
+            <th>Стоимость ПО (всего) с НДС</th>
+            <th>Срок полезного использования (мес.)</th>
+            <th>Дата начала списания</th>
+            <th>Дата окончания списания</th>
+            <th>Договор/счет</th>
+            <th>Контрагент</th>
+            <th>Первичный документ</th>
+            <th>Страна-производитель</th>
+            <th>Правообладатель</th>
+            <th>Включен в реестр Российского ПО Да/нет</th>
+            <th>Срок предоставления права</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in list_total %}
+        <tr>
+          <td>{{row[0]}}</td>
+          <td>{{row[1]}}</td>
+          <td>{{row[2]}}</td>
+          <td>{{row[3]}}</td>
+          <td>{{row[4]}}</td>
+          <td>{{row[5]}}</td>
+          <td>{{row[6]}}</td>
+          <td>{{row[7]}}</td>
+          <td>{{row[8]}}</td>
+          <td>{{row[9]}}</td>
+          <td>{{row[10]}}</td>
+          <td>{{row[11]}}</td>
+          <td>{{row[12]}}</td>
+          <td>{{row[13]}}</td>
+          <td>{{row[14]}}</td>
+          <td>{{row[15]}}</td>
+          <td>{{row[16]}}</td>
+          <td>{{row[17]}}</td>
+          <td>{{row[18]}}</td>
+          <td>{{row[19]}}</td>
+          <td>{{row[20]}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<a href="{{url_for('download_total_list') }}">Сгенерировать отчет в Excel</a>
+{% endblock %}
+

@@ -1,7 +1,8 @@
 {% extends "editor_layout.html" %}
-{% block body %}
+{% block title %}Редактирование ПО{% endblock %}
+{% block content %}
   <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-4">
       {% with messages = get_flashed_messages() %}
       {% if messages %}
       {% for message in messages %}

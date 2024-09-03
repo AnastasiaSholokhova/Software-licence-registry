@@ -1,0 +1,66 @@
+{% extends 'layout.html' %}
+{% block title %} Справочник видов ПО {% endblock %}
+{% block content %}
+<div class="row"><h3>Справочник видов ПО</h3></div>
+<div class="btn-toolbar" role="toolbar">
+  <form action = "{{ url_for('show_types') }}" method="POST">
+    <button type="submit" class="btn btn-success btn-sm mr-2" aria=pressed="true">Новая запись</button>
+  </form>
+  <form  method = "POST" action="">
+    <button type="submit" class="btn btn-secondary btn-sm mr-2" aria-pressed="true">Удалить все записи</button>
+  </form>
+<form method="POST" action="">
+  <div align="right" class="padding:10px;">
+    {% with messages = get_flashed_messages() %}
+          {% if messages %}
+         {% for message in messages %}
+         <div class="alert alert-danger" role="alert">
+         {{ message }}
+         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+           <span aria-hidden="true">x</span>
+         </button>
+         </div>
+         {% endfor %}
+         {% endif %}
+        {% endwith %}
+      <input type="submit" class="btn btn-primary" value="Удалить выбранные значения">
+    </div>
+        <table id="example" class="table table-bordered" style="width:65%">
+          <thead>
+            <tr>
+              <th>Наименование ПО</th>
+              <th>Вид ПО</th>
+              <th>Панель управления</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in list_total %}
+          <tr>
+            <td>{{row[0]}}</td>
+            <td>{{row[1]}}</td>
+            <td width="70">
+              <a href="" class="btn btn-secondary btn-sm" aria-pressed="true">Редактировать</a>
+              <input type="checkbox" name="delete_types_checkbox" value="{{row[0]}}">
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+        <script>
+    $(document).ready(function(){
+        $('#partner_table').DataTable({
+      "aLengthMenu": [[3, 5, 10, 25, -1], [3, 5, 10, 25, "All"]],
+      "iDisplayLength": -1
+      }
+     );
+     });
+    </script>
+    </div>
+</form>
+<a href="{{url_for('download_total_list')}}">Сгенерировать отчет по общей информации</a>
+<form action="{{url_for('upload_total')}}" method="POST" enctype="multipart/form-data">
+  <input type="file" name="file" accept=".xlsx">
+    <button class="submit">Загрузить файл</button>
+  </input>
+</form>
+{% endblock %}

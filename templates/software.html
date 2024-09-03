@@ -4,58 +4,27 @@
   
 {% block content %}
 <div class="row"><h3>Справочник ПО</h3></div>
-<div class="row">
-  <div class="col-md-4">
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-      {{message}}
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">x</span>
-      </button>
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-    <div class="card card-body">
-      <form action="{{url_for('add_software')}}" method="POST">
-        <div class="form-group">
-          <input type="number" class="form-control" name="код_ПО" placeholder="Код ПО">
-        </div>
-        <div class="form-group">
-          <input type="text" class="form-control" name="наименование_ПО" placeholder="Наименование ПО">
-        </div>
-        <div class="form-group">
-          <input type="text" class="form-control" name="описание_ПО" placeholder="Описание ПО">
-        </div>
-        <div class="form-group">
-          <input type="url" class="form-control" name="ссылка_на_сайт_ПО" placeholder="Ссылка на сайт ПО">
-        </div>
-        <div class="form-group">
-          <input type="text" class="form-control" name="вендор" placeholder="Вендор">
-        </div>
-        <div class="form-group">
-          <input type="number" class="form-control" name="стоимость_за_единицу" placeholder="Стоимость за единицу">
-        </div>
-        <div class="form-group">
-          <p>Признак ПО:</p>
-          <select class="form-control" name="признак_ПО">
-            <option value="Новое">Новое</option>
-            <option value="Техподдержка">Техподдержка</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <input type="text" class="form-control" name="примечание" placeholder="Примечание">
-        </div>
-        <button class="btn btn-primary btn-block">
-          Сохранить
-        </button>
-      </form>
-    </div>
-  </div>
-  <div class="col-md-8">
-    <table id="software_table" table class="table table-striped table-bordered" style="width:70%">
+<div class="btn-toolbar" role="toolbar">
+  <form action="{{ url_for('show_software') }}" method="POST">
+      <button type="submit" class="btn btn-success btn-sm mr-2" aria-pressed="true">Новая запись</button>
+  </form>
+  <form method="POST" action="{{ url_for ('delete_all_software') }}"
+    <button type="submit" class="btn btn-secondary btn-sm mr-2" aria-pressed="true">Удалить все записи</button>
+  </form>
+</div>
+<form method="POST" action="/delete_software">
+  <div class="table-responsive">
+    <div align="right" class="padding:10px;">
+      {% with messages = get_flashed_messages() %}
+          {% if messages %}
+         {% for message in messages %}
+         <div class="alert alert-danger" role="alert">{{ message }}</div>
+         {% endfor %}
+         {% endif %}
+        {% endwith %}
+        <input type="submit" class="btn btn-primary" value="Удалить выбранные значения" aria-pressed="true">
+       </div>
+    <table id="software_table" table class="table table-bordered" style="width:70%">
       <thead>
         <tr>
           <th>Код ПО</th>
@@ -81,14 +50,14 @@
           <td>{{row[6]}}</td>
           <td>{{row[7]}}</td>
           <td width="130">
-            <a href="/edit_software/{{row[0]}}" class="btn btn-secondary btn-sm">Редактировать</a>
-            <a href="/delete_software/{{row[0]}}" class="btn btn-danger btn-delete btn-sm">Удалить</a>
+            <a href="/edit_software/{{row[0]}}" class="btn btn-secondary btn-sm" aria-pressed="true">Редактировать</a>
+            <input type="checkbox" name="delete_software_checkbox" value="{{row[0]}}">
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-        <script>
+    <script>
     $(document).ready(function(){
         $('#software_table').DataTable({
       "aLengthMenu": [[3, 5, 10, 25, -1], [3, 5, 10, 25, "All"]],
@@ -98,6 +67,7 @@
      });
     </script>
   </div>
+  </form>
 </div>
 <a href="{{url_for('download_software_report')}}">Сгенерировать справочник ПО</a>
 <form action="{{url_for('upload_software')}}" method="POST" enctype="multipart/form-data">
@@ -105,5 +75,4 @@
     <button type="submit">Отправить файл</button>
   </input>
 </form>
-</div>
 {% endblock %}

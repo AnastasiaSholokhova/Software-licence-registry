@@ -5,85 +5,44 @@
 {% block content %}
 <div class="row"><h2>Добро пожаловать, {{ username }}!</h2></div>
 <div class="row"><h3>Реестр лицензий ПО</h3></div>
-  <div class="row">
-    <div class="col-md-4">
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-      {% for message in messages %}
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{message}}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">x</span>
-        </button>
-      </div>
-      {% endfor %}
-      {% endif %}
-      {% endwith %}
-      <div class="card card-body">
-    <form action="{{url_for('add_licence')}}" method="POST">
-        <div class="form-group">
-            <input type="number" class="form-control" name="номер_пп" placeholder="Номер пп">
-        </div>
-        <div class="form-group">
-            <input type="text" class="form-control" name="наименование_ПО" placeholder="Наименование ПО">
-        </div>
-        <div class="form-group">
-            <input type="text" class="form-control" name="вендор" placeholder="Вендор">
-        </div>
-        <div class="form-group">
-            <p>Начало действия лицензии:</p>
-            <input type="date" class="form-control" name="начало_действия_лицензии" placeholder="Начало действия лицензии">
-        </div>
-        <div class="form-group">
-            <p>Счёт списания:</p>
-            <select class="form-control" name="счёт_списания">
-              <option value="12">12</option>
-              <option value="36">36</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <input type="text" class="form-control" name="заказчик_ПО" placeholder="Заказчик ПО">
-        </div>
-        <div class="form-group">
-            <p>Признак ПО:</p>
-            <select class="form-control" name="признак_ПО">
-              <option value="Новое">Новое</option>
-              <option value="Техподдержка">Техподдержка</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <input type="number" class="form-control" name="количество_ПО" placeholder="Количество лицензий">
-        </div>
-        <div class="form-group">
-            <label for="оплачено">
-                <input type="checkbox" class="form-control" id="оплачено" name="оплачено">
-            </label>
-            ПО оплачено?
-        </div>
-        <div class="form-group">
-            <input type="text" class="form-control" name="примечание" placeholder="Примечание">
-        </div>
-        <button class="btn btn-primary btn-block">
-            Сохранить
-        </button>
-    </form>
+<div class="btn-toolbar" role="toolbar">
+  <form action="{{ url_for('show_licence') }}" method="POST">
+      <button type="submit" class="btn btn-success btn-sm mr-2" aria-pressed="true">Новая запись</button>
+  </form>
+  <form method="POST" action="{{ url_for('delete_all_info') }}">
+    <button type="submit" class="btn btn-secondary btn-sm mr-2" aria-pressed="true">Удалить все записи</button>
+  </form>
 </div>
-    </div>
-    <div class="col-md-8">
-      <table id="example" class="table table-striped table-bordered" style="width:65%">
+<form method="POST" action="/delete">
+    <div class="table-responsitive">
+      <div align="right" style="padding:10px;">
+    {% with messages = get_flashed_messages() %}
+          {% if messages %}
+         {% for message in messages %}
+         <div class="alert alert-danger" role="alert">
+         {{ message }}
+         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+           <span aria-hidden="true">x</span>
+         </button>
+         </div>
+         {% endfor %}
+         {% endif %}
+        {% endwith %}
+        <input type="submit" value="Удалить выбранные значения" class="btn btn-primary" aria-pressed="true">
+        </div>
+      <table id="example" class="table table-bordered" style="width:65%">
         <thead>
           <tr>
-            <th>Номер пп</th>
             <th>Наименование ПО</th>
-            <th>Вендор</th>
-            <th>Начало действия лицензии</th>
-            <th>Окончание действия лицензии</th>
-            <th>Счёт списания</th>
-            <th>Стоимость за единицу</th>
-            <th>Итоговая стоимость</th>
-            <th>Заказчик ПО</th>
+            <th>Контрагент</th>
+            <th>Дата начала списания</th>
+            <th>Дата окончания списания</th>
+            <th>Срок полезного использования (мес)</th>
+            <th>Стоимость ПО (всего) без НДС</th>
+            <th>Количество</th>
+            <th>Стоимость ПО (всего) с НДС</th>
             <th>Признак ПО</th>
-            <th>Количество ПО</th>
+            <th>Страна производитель</th>
             <th>Срок действия лицензии</th>
             <th>Оплачено</th>
             <th>Остаток</th>
@@ -108,22 +67,22 @@
           <td>{{row[11]}}</td>
           <td>{{row[12]}}</td>
           <td>{{row[13]}}</td>
-          <td>{{row[14]}}</td>
           <td width="70">
-            <a href="/edit/{{row[0]}}" class="btn btn-secondary btn-sm">Редактировать</a>
-            <a href="/delete/{{row[0]}}" class="btn btn-danger btn-delete btn-sm">Удалить</a>
+            <a href="/edit/{{row[14]}}" class="btn btn-secondary btn-sm" aria-pressed="true">Редактировать</a>
+            <input type="checkbox" name="delete_checkbox" value="{{row[14]}}">
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+  </form>
   </div>
+</div>
 <a href="{{url_for('download_report') }}">Сгенерировать отчет в Excel</a>
 <form action="{{url_for('upload_data')}}" method="POST" enctype="multipart/form-data">
   <input type="file" name="file" accept=".xlsx">
     <button type="submit">Отправить файл</button>
   </input>
 </form>
-</div>
 {% endblock %}

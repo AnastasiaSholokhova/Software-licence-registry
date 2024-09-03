@@ -1,7 +1,8 @@
 {% extends "editor_layout.html" %}
-{% block body %}
+{% block title %}Редактирование контрагентов{% endblock %}
+{% block content %}
   <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-4">
       <div class="card card-body">
         <form action="/editor_update_partner/{{partner.код_контрагента}}" method="POST">
           <div class="form-group">
