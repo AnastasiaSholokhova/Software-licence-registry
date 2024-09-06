@@ -31,7 +31,6 @@
     <table id="customer_table" table class="table table-bordered" style="width:70%">
       <thead>
         <tr>
-          <th>Код заказчика</th>
           <th>Заказчик ПО</th>
           <th>Описание заказчика</th>
           <th>Ссылка на сайт заказчика</th>
@@ -46,7 +45,6 @@
           <td>{{row[1]}}</td>
           <td>{{row[2]}}</td>
           <td>{{row[3]}}</td>
-          <td>{{row[4]}}</td>
           <td width="130">
             <a href="/edit_customer/{{row[0]}}" class="btn btn-secondary btn-sm" aria-pressed="true">Редактировать</a>
             <input type="checkbox" name="add_customer_checkbox" value="{{row[0]}}">
@@ -64,7 +62,6 @@
      );
      });
     </script>
-  </div>
 </form>
 <a href="{{url_for('download_customer_report')}}">Сгенерировать справочник заказчиков</a>
 <form action="{{url_for('upload_customer') }}" method="POST" enctype="multipart/form-data">

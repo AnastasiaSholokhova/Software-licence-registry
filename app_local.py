@@ -559,7 +559,7 @@ def update_total(id):
                     правообладатель=%s,
                     включен_в_реестр=%s,
                     срок_предоставления_права=%s
-                    WHERE код_ПО=%s
+                    WHERE код=%s
                     """, (статья_затрат, наименование_ПО_БУ, наименование_ПО, краткое_наименование_ПО, количество, код, филиал, счет_затрат, вид_деятельности, стоимость_ПО_без_ндс, стоимость_ПО_с_ндс, срок_полезного_использования_мес,
                     дата_начала_списания, дата_окончания_списания, договор_счет, контрагент, первичный_документ, страна_производитель, правообладатель, включен_в_реестр, срок_предоставления_права, id))
         flash("Запись успешно обновлена!")
@@ -614,7 +614,7 @@ def editor_update_total(id):
                     правообладатель=%s,
                     включен_в_реестр=%s,
                     срок_предоставления_права=%s
-                    WHERE код_ПО=%s
+                    WHERE код=%s
                     """, (статья_затрат, наименование_ПО_БУ, наименование_ПО, краткое_наименование_ПО, количество, код, филиал, счет_затрат, вид_деятельности, стоимость_ПО_без_ндс, стоимость_ПО_с_ндс, срок_полезного_использования_мес,
                     дата_начала_списания, дата_окончания_списания, договор_счет, контрагент, первичный_документ, страна_производитель, правообладатель, включен_в_реестр, срок_предоставления_права, id))
         flash("Запись успешно обновлена!")
@@ -626,7 +626,7 @@ def delete_total():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
         for id in request.form.getlist('delete_total_checkbox'):
-            cur.execute('DELETE FROM общая_информация WHERE код_ПО = %s', (id,))
+            cur.execute('DELETE FROM общая_информация WHERE код = %s', (id,))
             conn2.commit()
         flash('Запись успешно удалена!')
         return redirect(url_for('total'))
@@ -636,7 +636,7 @@ def editor_delete_total():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
         for id in request.form.getlist('editor_delete_total_checkbox'):
-            cur.execute('DELETE FROM общая_информация WHERE код_ПО = %s', (id,))
+            cur.execute('DELETE FROM общая_информация WHERE код = %s', (id,))
             conn2.commit()
         flash('Запись успешно удалена!')
         return redirect(url_for('editor_total'))
@@ -1077,6 +1077,17 @@ def editor_types():
         cur.execute(string)
         list_types = cur.fetchall()
         return render_template('editor_types.html', list_types = list_types)
+    return redirect(url_for('login'))
+
+@app.route('/support_types')
+@role_required('support')
+def support_types():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if 'loggedin' in session:
+        string = 'SELECT * FROM Виды_ПО'
+        cur.execute(string)
+        list_types = cur.fetchall()
+        return render_template('support_types.html', list_type=list_types)
     return redirect(url_for('login'))
 
 @app.route('/show_types', methods=['POST', 'GET'])
@@ -1544,7 +1555,7 @@ def download_vendor_report():
 def customer_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
-        string='SELECT * FROM Справочник_заказчиков_ПО'
+        string='SELECT заказчик_ПО, описание_заказчика, ссылка_на_сайт_заказчика, примечание FROM Справочник_заказчиков_ПО'
         cur.execute(string)
         list_customer = cur.fetchall()
         return render_template('customer.html', list_customer=list_customer)
@@ -1555,7 +1566,7 @@ def customer_list():
 def editor_customer_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
-        string= 'SELECT * FROM Справочник_заказчиков_ПО'
+        string= 'SELECT заказчик_ПО, описание_заказчика, ссылка_на_сайт_заказчика, примечание FROM Справочник_заказчиков_ПО'
         cur.execute(string)
         list_customer = cur.fetchall()
         return render_template('editor_customer.html', list_customer=list_customer)
@@ -1566,7 +1577,7 @@ def editor_customer_list():
 def support_customer_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
-        string='SELECT * FROM Справочник_заказчиков_ПО'
+        string='SELECT заказчик_ПО, описание_заказчика, ссылка_на_сайт_заказчика, примечание FROM Справочник_заказчиков_ПО'
         cur.execute(string)
         list_customer = cur.fetchall()
         return render_template('support_customer.html', list_customer=list_customer)
@@ -1575,7 +1586,7 @@ def support_customer_list():
 @app.route('/show_customer', methods=['GET', 'POST'])
 def show_customer():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Справочник_заказчиков_ПО')
+    cur.execute('SELECT заказчик_ПО, описание_заказчика, ссылка_на_сайт_заказчика, примечание FROM Справочник_заказчиков_ПО')
     list_customer = cur.fetchall()
     return render_template('add_customer.html', list_customer=list_customer)
 
@@ -1610,7 +1621,7 @@ def editor_show_customer_by_id(customer):
 @app.route('/editor_show_customer', methods=['GET', 'POST'])
 def editor_show_customer():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Контрагенты')
+    cur.execute('SELECT наименование_контрагента, договор, примечание FROM Контрагенты')
     list_customer=cur.fetchall()
     return render_template('editor_add_customer.html', list_customer=list_customer)
 
@@ -1618,12 +1629,17 @@ def editor_show_customer():
 def add_customer():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
-        код_заказчика = request.form['код_заказчика']
         заказчик_ПО = request.form['заказчик_ПО']
         описание_заказчика = request.form['описание_заказчика']
         ссылка_на_сайт_заказчика = request.form['ссылка_на_сайт_заказчика']
         примечание = request.form['примечание']
-        cur.execute('INSERT INTO Справочник_заказчиков_ПО (код_заказчика, заказчик_ПО, описание_заказчика, ссылка_на_сайт_заказчика, примечание) VALUES(%s,%s,%s,%s,%s)', (код_заказчика, заказчик_ПО, описание_заказчика, ссылка_на_сайт_заказчика, примечание))
+        cur.execute('SELECT COUNT(*) AS count FROM Справочник_заказчиков_ПО WHERE заказчик_ПО=%s', (заказчик_ПО, ))
+        cust = cur.fetchone()['count']
+        if cust > 0:
+            flash('Такой заказчик ПО уже существует!')
+            return redirect(url_for('show_customer'))
+        else:
+            cur.execute('INSERT INTO Справочник_заказчиков_ПО (заказчик_ПО, описание_заказчика, ссылка_на_сайт_заказчика, примечание) VALUES(%s,%s,%s,%s)', (заказчик_ПО, описание_заказчика, ссылка_на_сайт_заказчика, примечание))
         conn2.commit()
         flash('Запись успешно создана!')
         return redirect(url_for('customer_list'))
@@ -1632,12 +1648,17 @@ def add_customer():
 def editor_add_customer():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
-        код_заказчика = request.form['код_заказчика']
         заказчик_ПО = request.form['заказчик_ПО']
         описание_заказчика = request.form['описание_заказчика']
         ссылка_на_сайт_заказчика = request.form['ссылка_на_сайт_заказчика']
         примечание = request.form['примечание']
-        cur.execute('INSERT INTO Справочник_заказчиков_ПО (код_заказчика, заказчик_ПО, описание_заказчика, ссылка_на_сайт_заказчика, примечание) VALUES(%s,%s,%s,%s,%s)', (код_заказчика, заказчик_ПО, описание_заказчика, ссылка_на_сайт_заказчика, примечание))
+        cur.execute('SELECT COUNT(*) AS count FROM Справочник_заказчиков_ПО WHERE заказчик_ПО=%s', (заказчик_ПО, ))
+        cust = cur.fetchone()['count']
+        if cust > 0:
+            flash('Такой заказчик ПО уже существует!')
+            return redirect(url_for('editor_show_customer'))
+        else:
+            cur.execute('INSERT INTO Справочник_заказчиков_ПО (заказчик_ПО, описание_заказчика, ссылка_на_сайт_заказчика, примечание) VALUES(%s,%s,%s,%s)', (заказчик_ПО, описание_заказчика, ссылка_на_сайт_заказчика, примечание))
         conn2.commit()
         flash('Запись успешно создана!')
         return redirect(url_for('editor_customer_list'))
@@ -1646,7 +1667,7 @@ def editor_add_customer():
 @app.route('/edit_customer/<id>', methods=['POST','GET'])
 def edit_customer(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Справочник_заказчиков_ПО WHERE код_заказчика=%s', (id,))
+    cur.execute('SELECT * FROM Справочник_заказчиков_ПО WHERE заказчик_ПО=%s', (id,))
     customers = cur.fetchall()
     cur.close()
     return render_template('edit_customer.html', customer=customers[0])
@@ -1654,7 +1675,7 @@ def edit_customer(id):
 @app.route('/editor_edit_customer/<id>', methods=['POST', 'GET'])
 def editor_edit_customer(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Справочник_заказчиков_ПО WHERE код_заказчика=%s', (id,))
+    cur.execute('SELECT * FROM Справочник_заказчиков_ПО WHERE заказчик_ПО=%s', (id,))
     customers = cur.fetchall()
     cur.close()
     return render_template('editor_edit_customer.html', customer=customers[0])
@@ -1704,7 +1725,7 @@ def delete_customer():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
         for id in request.form.getlist('add_customer_checkbox'):
-            cur.execute('DELETE FROM Справочник_заказчиков_ПО WHERE код_заказчика=%s', (id,))
+            cur.execute('DELETE FROM Справочник_заказчиков_ПО WHERE заказчик_ПО=%s', (id,))
             conn2.commit()
         flash('Запись успешно удалена!')
         return redirect(url_for('customer_list'))
@@ -1732,7 +1753,7 @@ def editor_delete_customer():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
         for id in request.form.getlist('editor_add_customer_checkbox'):
-            cur.execute('DELETE FROM Справочник_заказчиков_ПО WHERE код_заказчика=%s', (id,))
+            cur.execute('DELETE FROM Справочник_заказчиков_ПО WHERE заказчик_ПО=%s', (id,))
             conn2.commit()
         flash('Запись успешно удалена!')
         return redirect(url_for('editor_customer_list'))
@@ -1745,18 +1766,16 @@ def download_customer_report():
     output_customer = io.BytesIO()
     workbook_customer = xlwt.Workbook()
     sh_customer = workbook_customer.add_sheet('Отчет по заказчикам')
-    sh_customer.write(0, 0, 'Код заказчика')
-    sh_customer.write(0, 1, 'Заказчик ПО')
-    sh_customer.write(0, 2, 'Описание заказчика')
-    sh_customer.write(0, 3, 'Ссылка на сайт заказчика')
-    sh_customer.write(0, 4, 'Примечание')
+    sh_customer.write(0, 0, 'Заказчик ПО')
+    sh_customer.write(0, 1, 'Описание заказчика')
+    sh_customer.write(0, 2, 'Ссылка на сайт заказчика')
+    sh_customer.write(0, 3, 'Примечание')
     idx = 0
     for row in result_customer:
-        sh_customer.write(idx+1, 0, str(row['код_заказчика']))
-        sh_customer.write(idx+1, 1, row['заказчик_ПО'])
-        sh_customer.write(idx+1, 2, row['описание_заказчика'])
-        sh_customer.write(idx+1, 3, row['ссылка_на_сайт_заказчика'])
-        sh_customer.write(idx+1, 4, row['примечание'])
+        sh_customer.write(idx+1, 0, row['заказчик_ПО'])
+        sh_customer.write(idx+1, 1, row['описание_заказчика'])
+        sh_customer.write(idx+1, 2, row['ссылка_на_сайт_заказчика'])
+        sh_customer.write(idx+1, 3, row['примечание'])
         idx += 1
     workbook_customer.save(output_customer)
     output_customer.seek(0)
@@ -2235,6 +2254,7 @@ def admin_add_installation():
         наименование_ПО = request.form['наименование_ПО']
         тип_лицензии = request.form.get('тип_лицензии')
         ФИО = request.form['ФИО']
+        отдел = request.form['отдел']
         ip_адрес = request.form['ip_адрес']
         наименование_машины = request.form['наименование_машины']
         чекбокс = bool(request.form.get('чекбокс'))
@@ -2279,7 +2299,7 @@ def admin_add_installation():
            flash('Превышено количество доступных лицензий!', 'warning')
            return redirect(url_for('install_software'))
         else:
-            cur.execute('INSERT INTO Установка_ПО (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание))
+            cur.execute('INSERT INTO Установка_ПО (наименование_ПО, тип_лицензии, ФИО, отдел, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (наименование_ПО, тип_лицензии, ФИО, отдел, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание))
             conn2.commit()
             flash('Запись успешно создана!')
             return redirect(url_for('install_software'))
@@ -2291,6 +2311,7 @@ def add_installation():
         наименование_ПО = request.form['наименование_ПО']
         тип_лицензии = request.form.get('тип_лицензии')
         ФИО = request.form['ФИО']
+        отдел = request.form['отдел']
         ip_адрес = request.form['ip_адрес']
         наименование_машины = request.form['наименование_машины']
         чекбокс = bool(request.form.get('чекбокс'))
@@ -2329,7 +2350,7 @@ def add_installation():
            flash('Превышено количество доступных лицензий!', 'warning')
            return redirect(url_for('support_install_software'))
         else:
-            cur.execute('INSERT INTO Установка_ПО (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание))
+            cur.execute('INSERT INTO Установка_ПО (наименование_ПО, тип_лицензии, ФИО, отдел, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (наименование_ПО, тип_лицензии, ФИО, отдел, ip_адрес, наименование_машины, чекбокс, общее_количество, число_установленных_лицензий, дата_установки_ПО, чекбокс_условно_бесплатное_ПО, примечание))
             conn2.commit()
             flash('Запись успешно создана!')
             return redirect(url_for('support_install_software'))
@@ -2354,6 +2375,7 @@ def update_installation(id):
         наименование_ПО = request.form['наименование_ПО']
         тип_лицензии = request.form['тип_лицензии']
         ФИО = request.form['ФИО']
+        отдел = request.form['отдел']
         ip_адрес = request.form['ip_адрес']
         наименование_машины = request.form['наименование_машины']
         чекбокс = bool(request.form.get('чекбокс'))
@@ -2434,6 +2456,7 @@ def update_installation(id):
                             SET наименование_ПО=%s,
                             тип_лицензии=%s,
                             ФИО=%s,
+                            отдел=%s,
                             ip_адрес=%s,
                             наименование_машины=%s,
                             чекбокс=%s,
@@ -2442,7 +2465,7 @@ def update_installation(id):
                             чекбокс_условно_бесплатное_ПО=%s,
                             примечание=%s
                             WHERE код_установки=%s
-                            """, (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины,
+                            """, (наименование_ПО, тип_лицензии, ФИО, отдел, ip_адрес, наименование_машины,
                                    чекбокс, общее_количество,
                                    дата_установки_ПО, 
                                    чекбокс_условно_бесплатное_ПО, примечание, id))
@@ -2541,6 +2564,7 @@ def update_installation(id):
                     SET наименование_ПО=%s,
                     тип_лицензии=%s,
                     ФИО=%s,
+                    отдел=%s,
                     ip_адрес=%s,
                     наименование_машины=%s,
                     чекбокс=%s,
@@ -2549,7 +2573,7 @@ def update_installation(id):
                     чекбокс_условно_бесплатное_ПО=%s,
                     примечание=%s
                     WHERE код_установки=%s
-                    """, (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины,
+                    """, (наименование_ПО, тип_лицензии, ФИО, отдел, ip_адрес, наименование_машины,
                            чекбокс, общее_количество,
                            дата_установки_ПО, 
                            чекбокс_условно_бесплатное_ПО, примечание, id))
@@ -2564,6 +2588,7 @@ def admin_update_installation(id):
         наименование_ПО = request.form['наименование_ПО']
         тип_лицензии = request.form['тип_лицензии']
         ФИО = request.form['ФИО']
+        отдел = request.form['отдел']
         ip_адрес = request.form['ip_адрес']
         наименование_машины = request.form['наименование_машины']
         чекбокс = bool(request.form.get('чекбокс'))
@@ -2644,6 +2669,7 @@ def admin_update_installation(id):
                             SET наименование_ПО=%s,
                             тип_лицензии=%s,
                             ФИО=%s,
+                            отдел=%s,
                             ip_адрес=%s,
                             наименование_машины=%s,
                             чекбокс=%s,
@@ -2652,7 +2678,7 @@ def admin_update_installation(id):
                             чекбокс_условно_бесплатное_ПО=%s,
                             примечание=%s
                             WHERE код_установки=%s
-                            """, (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины,
+                            """, (наименование_ПО, тип_лицензии, ФИО, отдел, ip_адрес, наименование_машины,
                                    чекбокс, общее_количество,
                                    дата_установки_ПО, 
                                    чекбокс_условно_бесплатное_ПО, примечание, id))
@@ -2755,6 +2781,7 @@ def admin_update_installation(id):
                     SET наименование_ПО=%s,
                     тип_лицензии=%s,
                     ФИО=%s,
+                    отдел=%s,
                     ip_адрес=%s,
                     наименование_машины=%s,
                     чекбокс=%s,
@@ -2763,7 +2790,7 @@ def admin_update_installation(id):
                     чекбокс_условно_бесплатное_ПО=%s,
                     примечание=%s
                     WHERE код_установки=%s
-                    """, (наименование_ПО, тип_лицензии, ФИО, ip_адрес, наименование_машины,
+                    """, (наименование_ПО, тип_лицензии, ФИО, отдел, ip_адрес, наименование_машины,
                            чекбокс, общее_количество,
                            дата_установки_ПО, 
                            чекбокс_условно_бесплатное_ПО, примечание, id))
@@ -2871,28 +2898,30 @@ def download_software_install_report():
     sh.write(0, 1, 'Наименование ПО')
     sh.write(0, 2, 'Тип лицензии')
     sh.write(0, 3, 'ФИО')
-    sh.write(0, 4, 'IP адрес')
-    sh.write(0, 5, 'Наименование машины')
-    sh.write(0, 6, 'Чекбокс')
-    sh.write(0, 7, 'Общее количество')
-    sh.write(0, 8, 'Число установленных лицензий')
-    sh.write(0, 9, 'Дата установки ПО')
-    sh.write(0, 10, 'Чекбокс условно-бесплатное ПО')
-    sh.write(0, 11, 'Примечание')
+    sh.write(0, 4, 'Отдел')
+    sh.write(0, 5, 'IP адрес')
+    sh.write(0, 6, 'Наименование машины')
+    sh.write(0, 7, 'Чекбокс')
+    sh.write(0, 8, 'Общее количество')
+    sh.write(0, 9, 'Число установленных лицензий')
+    sh.write(0, 10, 'Дата установки ПО')
+    sh.write(0, 11, 'Чекбокс условно-бесплатное ПО')
+    sh.write(0, 12, 'Примечание')
     idx = 0
     for row in result:
         sh.write(idx+1, 0, str(row['код_установки']))
         sh.write(idx+1, 1, row['наименование_ПО'])
         sh.write(idx+1, 2, row['тип_лицензии'])
         sh.write(idx+1, 3, row['ФИО'])
-        sh.write(idx+1, 4, row['ip_адрес'])
-        sh.write(idx+1, 5, row['наименование_машины'])
-        sh.write(idx+1, 6, row['чекбокс'])
-        sh.write(idx+1, 7, row['общее_количество'])
-        sh.write(idx+1, 8, row['число_установленных_лицензий'])
-        sh.write(idx+1, 9, row['дата_установки_ПО'])
-        sh.write(idx+1, 10, row['чекбокс_условно_бесплатное_ПО'])
-        sh.write(idx+1, 11, row['примечание'])
+        sh.write(idx+1, 4, row['отдел'])
+        sh.write(idx+1, 5, row['ip_адрес'])
+        sh.write(idx+1, 6, row['наименование_машины'])
+        sh.write(idx+1, 7, row['чекбокс'])
+        sh.write(idx+1, 8, row['общее_количество'])
+        sh.write(idx+1, 9, row['число_установленных_лицензий'])
+        sh.write(idx+1, 10, row['дата_установки_ПО'])
+        sh.write(idx+1, 11, row['чекбокс_условно_бесплатное_ПО'])
+        sh.write(idx+1, 12, row['примечание'])
         idx += 1
     workbook.save(output)
     output.seek(0)
