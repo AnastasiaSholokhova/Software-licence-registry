@@ -76,7 +76,7 @@
             <td>{{row[14]}}</td>
             <td class="name-link" data-name="{{row[15]}}">
               <a target="_blank" href="/editor_show_customer_byid/{{row[15]}}">
-            {{row[13]}}
+            {{row[15]}}
               </a>
             </td>
             <td>{{row[16]}}</td>
@@ -85,8 +85,8 @@
             <td>{{row[19]}}</td>
             <td>{{row[20]}}</td>
             <td width="70">
-              <a href="/editor_edit_total/{{row[0]}}" class="btn btn-secondary btn-sm" aria-pressed="true">Редактировать</a>
-              <input type="checkbox" name="editor_delete_total_checkbox" value="{{row[0]}}">
+              <a href="/editor_edit_total/{{row[5]}}" class="btn btn-secondary btn-sm" aria-pressed="true">Редактировать</a>
+              <input type="checkbox" name="editor_delete_total_checkbox" value="{{row[5]}}">
             </td>
           </tr>
           {% endfor %}
@@ -104,7 +104,7 @@
     </div>
 </form>
 <a href="{{url_for('download_total_list')}}">Сгенерировать отчет по общей информации</a>
-<form action="{{url_for('editor_upload_total')}}" method="POST" enctype="multipart/form-data">
+<form action="{{url_for('upload_total')}}" method="POST" enctype="multipart/form-data">
   <input type="file" name="file" accept=".xlsx">
     <button class="submit">Загрузить файл</button>
   </input>

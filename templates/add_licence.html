@@ -1,34 +1,31 @@
 {% extends 'layout.html' %}
-{% block title %}Добавление лицензии в базу данных{% endblock %}
+{% block title %}Добавление производителя{% endblock %}
 {% block content %}
-<div class="row">
 <div class="col-md-4">
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-      {% for message in messages %}
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{message}}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">x</span>
-        </button>
-      </div>
-      {% endfor %}
-      {% endif %}
-      {% endwith %}
-      <div class="card card-body">
-    <form action="{{ url_for('add_licence') }}" method="POST">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{message}}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">x</span>
+      </button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <div class="card card-body">
+      <form action="{{url_for('add_licence')}}" method="POST">
         <div class="form-group">
-            <input type="text" class="form-control" name="наименование_ПО" placeholder="Наименование ПО">
+          <input type="text" class="form-control" name="наименование_ПО" placeholder="Наименование ПО">
         </div>
         <div class="form-group">
-            <input type="text" class="form-control" name="контрагент" placeholder="Контрагент">
+          <input type="text" class="form-control" name="контрагент" placeholder="Контрагент">
         </div>
         <div class="form-group">
-            <p>Начало действия лицензии:</p>
-            <input type="date" class="form-control" name="дата_начала_списания" placeholder="Дата начала списания">
+          <input type="date" class="form-control" name="дата_начала_списания" placeholder="Дата начала списания">
         </div>
         <div class="form-group">
-          <p>Окончание действия лицензии:</p>
           <input type="date" class="form-control" name="дата_окончания_списания" placeholder="Дата окончания списания">
         </div>
         <div class="form-group">
@@ -39,14 +36,13 @@
             </select>
         </div>
         <div class="form-group">
-            <p>Признак ПО:</p>
-            <select class="form-control" name="признак_ПО">
-              <option value="Новое">Новое</option>
-              <option value="Техподдержка">Техподдержка</option>
-            </select>
+          <input type="number" class="form-control" name="итоговая_стоимость_ПО" placeholder="Итоговая стоимость ПО">
         </div>
         <div class="form-group">
-            <input type="number" class="form-control" name="количество" placeholder="Количество лицензий">
+          <input type="number" class="form-control" name="количество" placeholder="Количество">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="страна_производитель" placeholder="Страна-производитель">
         </div>
         <div class="form-group">
             <label for="оплачено">
@@ -55,13 +51,15 @@
             ПО оплачено?
         </div>
         <div class="form-group">
-            <input type="text" class="form-control" name="примечание" placeholder="Примечание">
+          <input type="text" class="form-control" name="примечание" placeholder="Примечание">
         </div>
-        <button type = "submit" class="btn btn-primary btn-block">
-            Сохранить
+        <div class="form-group">
+          <input type="text" class="form-control" name="код" placeholder="Код">
+        </div>
+        <button class="btn btn-primary btn-block">
+          Сохранить
         </button>
-    </form>
-</div>
-</div>
-</div>
+      </form>
+    </div>
+  </div>
 {% endblock %}

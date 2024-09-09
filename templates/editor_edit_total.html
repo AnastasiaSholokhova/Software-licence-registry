@@ -16,14 +16,22 @@
       {% endif %}
       {% endwith %}
       <div class="card card-body">
-        <form action="/editor_update_total/{{total.код_ПО}}" method="POST">
+        <form method="POST" action="{{ url_for('editor_update_total', id="{{total.код}}")}}">
           <div class="form-group">
             <label for="статья_затрат"><b>Статья затрат:</b></label>
             <input type="text" name="статья_затрат" value="{{total.статья_затрат}}" class="form-control">
           </div>
           <div class="form-group">
+            <label for="наименование_ПО_БУ"><b>Наименование ПО (БУ):</b></label>
+            <input type="text" name="наименование_ПО_БУ" value="{{total.наименование_ПО_БУ}}" class="form-control">
+          </div>
+          <div class="form-group">
             <label for="наименование_ПО"><b>Наименование ПО:</b></label>
             <input type="text" name="наименование_ПО" value="{{total.наименование_ПО}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="краткое_наименование_ПО"><b>Краткое наименование ПО:</b></label>
+            <input type="text" name="краткое_наименование_ПО" value="{{total.краткое_наименование_ПО}}" class="form-control">
           </div>
           <div class="form-group">
             <label for="количество"><b>Количество:</b></label>

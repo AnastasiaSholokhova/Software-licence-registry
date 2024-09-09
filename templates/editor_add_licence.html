@@ -21,11 +21,15 @@
             <input type="text" class="form-control" name="наименование_ПО" placeholder="Наименование ПО">
         </div>
         <div class="form-group">
-            <input type="text" class="form-control" name="вендор" placeholder="Вендор">
+            <input type="text" class="form-control" name="контрагент" placeholder="Контрагент">
         </div>
         <div class="form-group">
-            <p>Начало действия лицензии:</p>
-            <input type="date" class="form-control" name="начало_действия_лицензии" placeholder="Начало действия лицензии">
+            <p>Дата начала списания:</p>
+            <input type="date" class="form-control" name="дата_начала_списания" placeholder="Дата начала списания">
+        </div>
+        <div class="form-group">
+          <p>Дата окончания списания:</p>
+          <input type="date" class="form-control" name="дата_окончания_списания" placeholder="Дата окончания списания">
         </div>
         <div class="form-group">
             <p>Счёт списания:</p>
@@ -35,17 +39,13 @@
             </select>
         </div>
         <div class="form-group">
-            <input type="text" class="form-control" name="заказчик_ПО" placeholder="Заказчик ПО">
+          <input type="number" class="form-control" name="итоговая_стоимость_ПО" placeholder="Итоговая стоимость ПО">
         </div>
         <div class="form-group">
-            <p>Признак ПО:</p>
-            <select class="form-control" name="признак_ПО">
-              <option value="Новое">Новое</option>
-              <option value="Техподдержка">Техподдержка</option>
-            </select>
+            <input type="numberr" class="form-control" name="количество" placeholder="Количество">
         </div>
         <div class="form-group">
-            <input type="number" class="form-control" name="количество_ПО" placeholder="Количество лицензий">
+          <input type="text" class="form-control" name="страна_производитель" placeholder="Страна-производитель">
         </div>
         <div class="form-group">
             <label for="оплачено">
@@ -55,6 +55,9 @@
         </div>
         <div class="form-group">
             <input type="text" class="form-control" name="примечание" placeholder="Примечание">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="код" placeholder="Код">
         </div>
         <button type = "submit" class="btn btn-primary btn-block">
             Сохранить
