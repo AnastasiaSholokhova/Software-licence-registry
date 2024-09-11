@@ -1,15 +1,15 @@
 {% extends 'layout.html' %}
-{% block title %} Справочник контрагентов {% endblock %}
+{% block title %} Справочник договоров {% endblock %}
 {% block content %}
-<div class="row"><h3>Справочник контрагентов</h3></div>
+<div class="row"><h3>Справочник договоров</h3></div>
 <div class="btn-toolbar" role="toolbar">
-  <form action = "{{ url_for('show_partners_list') }}" method="POST">
+  <form action = "{{ url_for('show_contracts') }}" method="POST">
     <button type="submit" class="btn btn-success btn-sm mr-2" aria=pressed="true">Новая запись</button>
   </form>
-  <form  method = "POST" action="{{ url_for('delete_all_partner') }}">
+  <form  method = "POST" action="{{ url_for('delete_all_contract') }}">
     <button type="submit" class="btn btn-secondary btn-sm mr-2" aria-pressed="true">Удалить все записи</button>
   </form>
-<form method="POST" action="/delete_partner">
+<form method="POST" action="/delete_contract">
   <div align="right" class="padding:10px;">
     {% with messages = get_flashed_messages() %}
           {% if messages %}
@@ -25,32 +25,36 @@
         {% endwith %}
       <input type="submit" class="btn btn-primary" value="Удалить выбранные значения">
     </div>
-    <table id="partner_table" table class="table table-striped table-bordered" style="width:70%">
+    <table id="contract_table" table class="table table-striped table-bordered" style="width:70%">
       <thead>
         <tr>
-          <th>Наименование контрагента</th>
-          <th>Краткое наименование предприятия</th>
-          <th>Полное наименование предприятия</th>
-          <th>ИНН</th>
-          <th>КПП</th>
-          <th>Юридический адрес</th>
-          <th>Фактический адрес</th>
-          <th>ОКПО</th>
-          <th>ОГРН</th>
-          <th>Телефон</th>
-          <th>Email</th>
-          <th>Ссылка на сайт контрагента</th>
+          <th>Код договора</th>
+          <th>Тип договора</th>
+          <th>Регистрационный номер</th>
+          <th>Контрагент</th>
+          <th>Статус</th>
+          <th>Предмет договора</th>
+          <th>Дата договора</th>
+          <th>Дата начала действия договора</th>
+          <th>Дата окончания действия договора</th>
+          <th>Сумма без ндс</th>
+          <th>Сумма с ндс</th>
+          <th>Филиал</th>
           <th>Примечание</th>
           <th>Панель управления</th>
         </tr>
       </thead>
       <tbody>
-        {% for row in partner_list %}
+        {% for row in contract_list %}
         <tr>
           <td>{{row[0]}}</td>
           <td>{{row[1]}}</td>
           <td>{{row[2]}}</td>
-          <td>{{row[3]}}</td>
+          <td class="name-link" data-name="{{row[3]}}">
+            <a target="_blank" href="/show_customer_byid/{{row[3]}}">
+            {{row[3]}}
+            </a>
+          </td>
           <td>{{row[4]}}</td>
           <td>{{row[5]}}</td>
           <td>{{row[6]}}</td>
@@ -61,8 +65,8 @@
           <td>{{row[11]}}</td>
           <td>{{row[12]}}</td>
           <td width="130">
-            <a href="/edit_partner/{{row[0]}}" class="btn btn-secondary btn-sm" aria-pressed="true">Редактировать</a>
-            <input type="checkbox" name="delete_partners_checkbox" value="{{row[0]}}">
+            <a href="/edit_contract/{{row[0]}}" class="btn btn-secondary btn-sm" aria-pressed="true">Редактировать</a>
+            <input type="checkbox" name="delete_contracts_checkbox" value="{{row[0]}}">
           </td>
         </tr>
         {% endfor %}
@@ -79,8 +83,8 @@
     </script>
     </div>
 </form>
-<a href="{{url_for('download_partner_report')}}">Сгенерировать отчет по контрагентам</a>
-<form action="{{url_for('upload_partner')}}" method="POST" enctype="multipart/form-data">
+<a href="{{url_for('download_contract_report')}}">Сгенерировать отчет по договорам</a>
+<form action="{{url_for('upload_contract')}}" method="POST" enctype="multipart/form-data">
   <input type="file" name="file" accept=".xlsx">
     <button class="submit">Загрузить файл</button>
   </input>

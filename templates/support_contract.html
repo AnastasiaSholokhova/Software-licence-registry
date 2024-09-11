@@ -1,0 +1,56 @@
+{% extends 'support_layout.html' %}
+{% block title %} Справочник договоров {% endblock %}
+{% block content %}
+<div class="row"><h3>Справочник договоров</h3></div>
+<div class="btn-toolbar" role="toolbar">
+    <table id="contract_table" table class="table table-striped table-bordered" style="width:70%">
+      <thead>
+        <tr>
+          <th>Код договора</th>
+          <th>Тип договора</th>
+          <th>Регистрационный номер</th>
+          <th>Контрагент</th>
+          <th>Статус</th>
+          <th>Предмет договора</th>
+          <th>Дата договора</th>
+          <th>Дата начала действия договора</th>
+          <th>Дата окончания действия договора</th>
+          <th>Сумма без ндс</th>
+          <th>Сумма с ндс</th>
+          <th>Филиал</th>
+          <th>Примечание</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in contract_list %}
+        <tr>
+          <td>{{row[0]}}</td>
+          <td>{{row[1]}}</td>
+          <td>{{row[2]}}</td>
+          <td>{{row[3]}}</td>
+          <td>{{row[4]}}</td>
+          <td>{{row[5]}}</td>
+          <td>{{row[6]}}</td>
+          <td>{{row[7]}}</td>
+          <td>{{row[8]}}</td>
+          <td>{{row[9]}}</td>
+          <td>{{row[10]}}</td>
+          <td>{{row[11]}}</td>
+          <td>{{row[12]}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+        <script>
+    $(document).ready(function(){
+        $('#partner_table').DataTable({
+      "aLengthMenu": [[3, 5, 10, 25, -1], [3, 5, 10, 25, "All"]],
+      "iDisplayLength": -1
+      }
+     );
+     });
+    </script>
+    </div>
+<a href="{{url_for('download_contract_report')}}">Сгенерировать отчет по договорам</a>
+{% endblock %}
+

@@ -1635,21 +1635,21 @@ def editor_show_software_byid(software):
 @app.route('/show_customer_byid/<customer>', methods=['POST', 'GET'])
 def show_customer_byid(customer):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT наименование_контрагента, договор, примечание FROM Контрагенты WHERE наименование_контрагента=%s', (customer,))
+    cur.execute('SELECT наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание FROM Контрагенты WHERE наименование_контрагента=%s', (customer,))
     list_customer = cur.fetchall()
     return render_template('customer_description.html', list_customer=list_customer, customer=customer)
 
 @app.route('/editor_show_customer_byid/<customer>', methods=['POST', 'GET'])
 def editor_show_customer_by_id(customer):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT наименование_контрагента, договор, примечание FROM Контрагенты WHERE наименование_контрагента=%s', (customer,))
+    cur.execute('SELECT наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание FROM Контрагенты WHERE наименование_контрагента=%s', (customer,))
     list_customer = cur.fetchall()
     return render_template('editor_customer_description.html', list_customer=list_customer, customer=customer)
 
 @app.route('/editor_show_customer', methods=['GET', 'POST'])
 def editor_show_customer():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT наименование_контрагента, договор, примечание FROM Контрагенты')
+    cur.execute('SELECT * FROM Контрагенты')
     list_customer=cur.fetchall()
     return render_template('editor_add_customer.html', list_customer=list_customer)
 
@@ -1986,7 +1986,7 @@ def editor_delete_all_licence():
 def partners_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
-        string = "SELECT наименование_контрагента, договор, примечание FROM Контрагенты"
+        string = "SELECT наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание FROM Контрагенты"
         cur.execute(string)
         partner_list = cur.fetchall()
         return render_template('partner.html', partner_list=partner_list)
@@ -1997,7 +1997,7 @@ def partners_list():
 def editor_partners_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
-        string = "SELECT наименование_контрагента, договор, примечание FROM Контрагенты"
+        string = "SELECT наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание FROM Контрагенты"
         cur.execute(string)
         partner_list = cur.fetchall()
         return render_template('editor_partner.html', partner_list=partner_list)
@@ -2008,7 +2008,7 @@ def editor_partners_list():
 def support_partners_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if 'loggedin' in session:
-        string='SELECT наименование_контрагента, договор, примечание FROM Контрагенты'
+        string="SELECT наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание FROM Контрагенты"
         cur.execute(string)
         partner_list = cur.fetchall()
         return render_template('support_partner.html', partner_list=partner_list)
@@ -2017,14 +2017,14 @@ def support_partners_list():
 @app.route('/show_partners_list', methods=['GET', 'POST'])
 def show_partners_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT наименование_контрагента, договор, примечание FROM Контрагенты')
+    cur.execute("SELECT наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание FROM Контрагенты")
     partner_list = cur.fetchall()
     return render_template('show_partners_list.html', partner_list=partner_list)
 
 @app.route('/editor_show_partners_list', methods=['GET', 'POST'])
 def editor_show_partners_list():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT наименование_контрагента, договор, примечание FROM Контрагенты')
+    cur.execute("SELECT наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание FROM Контрагенты")
     partner_list = cur.fetchall()
     return render_template('editor_show_partners_list.html', partner_list=partner_list)
 
@@ -2033,9 +2033,19 @@ def add_partner():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
         наименование_контрагента = request.form['наименование_контрагента']
-        договор = request.form['договор']
+        краткое_наименование_предприятия = request.form['краткое_наименование_предприятия']
+        полное_наименование_предприятия = request.form['полное_наименование_предприятия']
+        ИНН = request.form['ИНН']
+        КПП = request.form['КПП']
+        юридический_адрес = request.form['юридический_адрес']
+        фактический_адрес = request.form['фактический_адрес']
+        ОКПО = request.form['ОКПО']
+        ОГРН = request.form['ОГРН']
+        телефон = request.form['телефон']
+        email = request.form['email']
+        ссылка_на_сайт_контрагента = request.form['ссылка_на_сайт_контрагента']
         примечание = request.form['примечание']
-        cur.execute('INSERT INTO Контрагенты (наименование_контрагента, договор, примечание) VALUES(%s,%s,%s)', (наименование_контрагента, договор, примечание))
+        cur.execute('INSERT INTO Контрагенты (наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание))
         conn2.commit()
         flash('Запись успешно создана!')
         return redirect(url_for('partners_list'))
@@ -2045,9 +2055,19 @@ def editor_add_partner():
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST':
         наименование_контрагента = request.form['наименование_контрагента']
-        договор = request.form['договор']
+        краткое_наименование_предприятия = request.form['краткое_наименование_предприятия']
+        полное_наименование_предприятия = request.form['полное_наименование_предприятия']
+        ИНН = request.form['ИНН']
+        КПП = request.form['КПП']
+        юридический_адрес = request.form['юридический_адрес']
+        фактический_адрес = request.form['фактический_адрес']
+        ОКПО = request.form['ОКПО']
+        ОГРН = request.form['ОГРН']
+        телефон = request.form['телефон']
+        email = request.form['email']
+        ссылка_на_сайт_контрагента = request.form['ссылка_на_сайт_контрагента']
         примечание = request.form['примечание']
-        cur.execute('INSERT INTO Контрагенты (наименование_контрагента, договор, примечание) VALUES(%s,%s,%s)', (наименование_контрагента, договор, примечание))
+        cur.execute('INSERT INTO Контрагенты (наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание))
         conn2.commit()
         flash('Запись успешно создана!')
         return redirect(url_for('editor_partners_list'))
@@ -2055,14 +2075,14 @@ def editor_add_partner():
 @app.route('/edit_partner/<id>', methods=['POST', 'GET'])
 def edit_partner(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Контрагенты WHERE наименование_контрагента = %s', (id,))
+    cur.execute('SELECT наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание FROM Контрагенты WHERE наименование_контрагента = %s', (id,))
     partners = cur.fetchall()
     return render_template('edit_partner.html', partner = partners[0])
 
 @app.route('/editor_edit_partner/<id>', methods=['POST', 'GET'])
 def editor_edit_partner(id):
     cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * FROM Контрагенты WHERE наименование_контрагента =%s', (id,))
+    cur.execute('SELECT наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание FROM Контрагенты WHERE наименование_контрагента =%s', (id,))
     partners=cur.fetchall()
     return render_template('editor_edit_partner.html', partner=partners[0])
 
@@ -2070,15 +2090,35 @@ def editor_edit_partner(id):
 def update_partner(id):
     if request.method == 'POST':
         наименование_контрагента = request.form['наименование_контрагента']
-        договор = request.form['договор']
+        краткое_наименование_предприятия = request.form['краткое_наименование_предприятия']
+        полное_наименование_предприятия = request.form['полное_наименование_предприятия']
+        ИНН = request.form['ИНН']
+        КПП = request.form['КПП']
+        юридический_адрес = request.form['юридический_адрес']
+        фактический_адрес = request.form['фактический_адрес']
+        ОКПО = request.form['ОКПО']
+        ОГРН = request.form['ОГРН']
+        телефон = request.form['телефон']
+        email = request.form['email']
+        ссылка_на_сайт_контрагента = request.form['ссылка_на_сайт_контрагента']
         примечание = request.form['примечание']
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute(""" UPDATE Контрагенты
                     SET наименование_контрагента=%s,
-                    договор=%s,
+                    краткое_наименование_предприятия=%s,
+                    полное_наименование_предприятия=%s,
+                    ИНН=%s,
+                    КПП=%s,
+                    юридический_адрес=%s,
+                    фактический_адрес=%s,
+                    ОКПО=%s,
+                    ОГРН=%s,
+                    телефон=%s,
+                    email=%s,
+                    ссылка_на_сайт_контрагента=%s,
                     примечание=%s
                     WHERE код_контрагента=%s
-                    """, (наименование_контрагента, договор, примечание, id))
+                    """, (наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание, id))
         flash('Запись успешно обновлена!')
         conn2.commit()
         return redirect(url_for('partners_list'))
@@ -2087,15 +2127,35 @@ def update_partner(id):
 def editor_update_partner(id):
     if request.method == 'POST':
         наименование_контрагента = request.form['наименование_контрагента']
-        договор = request.form['договор']
+        краткое_наименование_предприятия = request.form['краткое_наименование_предприятия']
+        полное_наименование_предприятия = request.form['полное_наименование_предприятия']
+        ИНН = request.form['ИНН']
+        КПП = request.form['КПП']
+        юридический_адрес = request.form['юридический_адрес']
+        фактический_адрес = request.form['фактический_адрес']
+        ОКПО = request.form['ОКПО']
+        ОГРН = request.form['ОГРН']
+        телефон = request.form['телефон']
+        email = request.form['email']
+        ссылка_на_сайт_контрагента = request.form['ссылка_на_сайт_контрагента']
         примечание = request.form['примечание']
         cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute(""" UPDATE Контрагенты
                     SET наименование_контрагента=%s,
-                    договор=%s,
+                    краткое_наименование_предприятия=%s,
+                    полное_наименование_предприятия=%s,
+                    ИНН=%s,
+                    КПП=%s,
+                    юридический_адрес=%s,
+                    фактический_адрес=%s,
+                    ОКПО=%s,
+                    ОГРН=%s,
+                    телефон=%s,
+                    email=%s,
+                    ссылка_на_сайт_контрагента=%s,
                     примечание=%s
                     WHERE код_контрагента=%s
-                    """, (наименование_контрагента, договор, примечание, id))
+                    """, (наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН, телефон, email, ссылка_на_сайт_контрагента, примечание, id))
         flash('Запись успешно обновлена!')
         conn2.commit()
         return redirect(url_for('editor_partners_list'))
@@ -2148,14 +2208,34 @@ def download_partner_report():
     sh_partner = workbook_partner.add_sheet('Отчет по контрагентам')
     sh_partner.write(0, 0, 'Код контрагента')
     sh_partner.write(0, 1, 'Наименование контрагента')
-    sh_partner.write(0, 2, 'Договор')
-    sh_partner.write(0, 3, 'Примечание')
+    sh_partner.write(0, 2, 'Краткое наименование предприятия')
+    sh_partner.write(0, 3, 'Полное наименование предприятия')
+    sh_partner.write(0, 4, 'ИНН')
+    sh_partner.write(0, 5, 'КПП')
+    sh_partner.write(0, 6, 'Юридический адрес')
+    sh_partner.write(0, 7, 'Фактический адрес')
+    sh_partner.write(0, 8, 'ОКПО')
+    sh_partner.write(0, 9, 'ОГРН')
+    sh_partner.write(0, 10, 'телефон')
+    sh_partner.write(0, 11, 'email')
+    sh_partner.write(0, 12, 'ссылка_на_сайт_контрагента')
+    sh_partner.write(0, 13, 'Примечание')
     idx = 0
     for row in result_partner:
         sh_partner.write(idx+1, 0, str(row['код_контрагента']))
         sh_partner.write(idx+1, 1, row['наименование_контрагента'])
-        sh_partner.write(idx+1, 2, row['договор'])
-        sh_partner.write(idx+1, 3, row['примечание'])
+        sh_partner.write(idx+1, 2, row['краткое_наименование_организации'])
+        sh_partner.write(idx+1, 3, row['полное_наименование_организации'])
+        sh_partner.write(idx+1, 4, row['ИНН'])
+        sh_partner.write(idx+1, 5, row['КПП'])
+        sh_partner.write(idx+1, 6, row['юридический_адрес'])
+        sh_partner.write(idx+1, 7, row['фактический_адрес'])
+        sh_partner.write(idx+1, 8, row['ОКПО'])
+        sh_partner.write(idx+1, 9, row['ОГРН'])
+        sh_partner.write(idx+1, 10, row['телефон'])
+        sh_partner.write(idx+1, 11, row['email'])
+        sh_partner.write(idx+1, 12, row['ссылка_на_сайт_контрагента'])
+        sh_partner.write(idx+1, 13, row['примечание'])
         idx += 1
     workbook_partner.save(output_partner)
     output_partner.seek(0)
@@ -2233,6 +2313,312 @@ def download_report():
     output.seek(0)
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=total_report.xls"})
 
+@app.route('/contracts')
+@role_required('admin')
+def contracts():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    string='SELECT * FROM Договоры'
+    cur.execute(string)
+    contract_list = cur.fetchall()
+    return render_template('contract.html', contract_list=contract_list)
+
+@app.route('/editor_contracts')
+@role_required('editor')
+def editor_contracts():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    string='SELECT * FROM Договоры'
+    cur.execute(string)
+    contract_list = cur.fetchall()
+    return render_template('editor_contract.html', contract_list=contract_list)
+
+@app.route('/support_contracts')
+@role_required('support')
+def support_contracts():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    string='SELECT * FROM Договоры'
+    cur.execute(string)
+    contract_list = cur.fetchall()
+    return render_template('support_contract.html', contract_list=contract_list)
+
+@app.route('/show_contracts', methods=['GET', 'POST'])
+def show_contracts():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    string='SELECT тип_договора, регистрационный_номер, контрагент, статус, предмет_договора, дата_договора, дата_начала_действия_договора, дата_окончания_действия_договора, сумма_без_ндс, сумма_с_ндс, филиал, примечание FROM Договоры'
+    cur.execute(string)
+    contract_list = cur.fetchall()
+    return render_template('add_contracts.html', contract_list=contract_list)
+
+@app.route('/editor_show_contract', methods=['GET', 'POST'])
+def editor_show_contracts():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    string='SELECT тип_договора, регистрационный_номер, контрагент, статус, предмет_договора, дата_договора, дата_начала_действия_договора, дата_окончания_действия_договора, сумма_без_ндс, сумма_с_ндс, филиал, примечание FROM Договоры'
+    cur.execute(string)
+    contract_list = cur.fetchall()
+    return render_template('editor_add_contracts.html', contract_list=contract_list)
+
+@app.route('/add_contracts', methods=['POST'])
+def add_contracts():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        тип_договора = request.form['тип_договора']
+        регистрационный_номер = request.form['регистрационный_номер']
+        контрагент = request.form['контрагент']
+        статус = request.form['статус']
+        предмет_договора = request.form['предмет_договора']
+        дата_договора = request.form['дата_договора']
+        дата_начала_действия_договора = request.form['дата_начала_действия_договора']
+        дата_окончания_действия_договора = request.form['дата_окончания_действия_договора']
+        сумма_без_ндс = request.form['сумма_без_ндс']
+        сумма_с_ндс = request.form['сумма_с_ндс']
+        филиал = request.form['филиал']
+        примечание = request.form['примечание']
+        cur.execute("""INSERT INTO Договоры (тип_договора, регистрационный_номер, контрагент, статус, предмет_договора,
+                    дата_договора, дата_начала_действия_договора, дата_окончания_действия_договора, сумма_без_ндс,
+                    сумма_с_ндс, филиал, примечание) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", (
+        тип_договора, регистрационный_номер, контрагент, статус, предмет_договора, дата_договора, дата_начала_действия_договора,
+        дата_окончания_действия_договора, сумма_без_ндс, сумма_с_ндс, филиал, примечание,))
+        conn2.commit()
+        flash('Запись была успешно создана!')
+        return redirect(url_for('contracts'))
+    
+@app.route('/editor_add_contract', methods=['POST'])
+def editor_add_contracts():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        тип_договора = request.form['тип_договора']
+        регистрационный_номер = request.form['регистрационный_номер']
+        контрагент = request.form['контрагент']
+        статус = request.form['статус']
+        предмет_договора = request.form['предмет_договора']
+        дата_договора = request.form['дата_договора']
+        дата_начала_действия_договора = request.form['дата_начала_действия_договора']
+        дата_окончания_действия_договора = request.form['дата_окончания_действия_договора']
+        сумма_без_ндс = request.form['сумма_без_ндс']
+        сумма_с_ндс = request.form['сумма_с_ндс']
+        филиал = request.form['филиал']
+        примечание = request.form['примечание']
+        cur.execute("""INSERT INTO Договоры (тип_договора, регистрационный_номер, контрагент, статус, предмет_договора,
+                    дата_договора, дата_начала_действия_договора, дата_окончания_действия_договора, сумма_без_ндс,
+                    сумма_с_ндс, филиал, примечание) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", (
+        тип_договора, регистрационный_номер, контрагент, статус, предмет_договора, дата_договора, дата_начала_действия_договора,
+        дата_окончания_действия_договора, сумма_без_ндс, сумма_с_ндс, филиал, примечание,))
+        conn2.commit()
+        flash('Запись была успешно создана!')
+        return redirect(url_for('editor_contracts'))
+    
+@app.route('/edit_contract/<id>', methods=['GET', 'POST'])
+def edit_contract(id):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Договоры WHERE код_договора=%s', (id,))
+    contract_list = cur.fetchall()
+    return render_template('edit_contracts.html', contract_list = contract_list[0])
+
+@app.route('/editor_edit_contract/<id>', methods=['GET', 'POST'])
+def editor_edit_contract(id):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Договоры WHERE код_договора=%s', (id,))
+    contract_list = cur.fetchall()
+    return render_template('editor_edit_contracts.html', contract_list = contract_list[0])
+
+@app.route('/update_contracts/<id>', methods=['POST'])
+def update_contracts(id):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        тип_договора = request.form['тип_договора']
+        регистрационный_номер = request.form['регистрационный_номер']
+        контрагент = request.form['контрагент']
+        статус = request.form['статус']
+        предмет_договора = request.form['предмет_договора']
+        дата_договора = request.form['дата_договора']
+        дата_начала_действия_договора = request.form['дата_начала_действия_договора']
+        дата_окончания_действия_договора = request.form['дата_окончания_действия_договора']
+        сумма_без_ндс = request.form['сумма_без_ндс']
+        сумма_с_ндс = request.form['сумма_с_ндс']
+        филиал = request.form['филиал']
+        примечание = request.form['примечание']
+        cur.execute("""UPDATE Договоры
+                    SET тип_договора=%s, регистрационный_номер=%s, контрагент=%s, статус=%s, предмет_договора=%s,
+                    дата_договора=%s, дата_начала_действия_договора=%s, дата_окончания_действия_договора=%s, сумма_без_ндс=%s,
+                    сумма_с_ндс=%s, филиал=%s, примечание=%s WHERE код_договора=%s""", (тип_договора, регистрационный_номер, контрагент, статус,
+                    предмет_договора, дата_договора, дата_начала_действия_договора, дата_окончания_действия_договора, сумма_без_ндс,
+                    сумма_с_ндс, филиал, примечание, id,))
+        conn2.commit()
+        flash('Запись была успешно изменена!')
+        return redirect(url_for('contracts'))
+    
+@app.route('/editor_update_contracts/<id>', methods=['POST'])
+def editor_update_contracts(id):
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        тип_договора = request.form['тип_договора']
+        регистрационный_номер = request.form['регистрационный_номер']
+        контрагент = request.form['контрагент']
+        статус = request.form['статус']
+        предмет_договора = request.form['предмет_договора']
+        дата_договора = request.form['дата_договора']
+        дата_начала_действия_договора = request.form['дата_начала_действия_договора']
+        дата_окончания_действия_договора = request.form['дата_окончания_действия_договора']
+        сумма_без_ндс = request.form['сумма_без_ндс']
+        сумма_с_ндс = request.form['сумма_с_ндс']
+        филиал = request.form['филиал']
+        примечание = request.form['примечание']
+        cur.execute("""UPDATE Договоры
+                    SET тип_договора=%s, регистрационный_номер=%s, контрагент=%s, статус=%s, предмет_договора=%s,
+                    дата_договора=%s, дата_начала_действия_договора=%s, дата_окончания_действия_договора=%s, сумма_без_ндс=%s,
+                    сумма_с_ндс=%s, филиал=%s, примечание=%s WHERE код_договора=%s""", (тип_договора, регистрационный_номер, контрагент, статус,
+                    предмет_договора, дата_договора, дата_начала_действия_договора, дата_окончания_действия_договора, сумма_без_ндс,
+                    сумма_с_ндс, филиал, примечание, id,))
+        conn2.commit()
+        flash('Запись была успешно изменена!')
+        return redirect(url_for('editor_contracts'))
+    
+@app.route('/delete_contract',methods=['GET', 'POST'])
+def delete_contract():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        for id in request.form.getlist('delete_contracts_checkbox'):
+            cur.execute('DELETE FROM Договоры WHERE код_договора=%s', (id,))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('contracts'))
+    
+@app.route('/editor_delete_contract', methods=['GET', 'POST'])
+def editor_delete_contract():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        for id in request.form.getlist('editor_delete_contracts_checkbox'):
+            cur.execute('DELETE FROM Договоры WHERE код_договора=%s', (id,))
+            conn2.commit()
+        flash('Запись успешно удалена!')
+        return redirect(url_for('editor_contracts'))
+    
+@app.route('/delete_all_contract', methods=['POST', 'GET'])
+def delete_all_contract():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM Договоры')
+        conn2.commit()
+    flash('Все записи успешно удалены!')
+    return redirect(url_for('contracts'))
+
+@app.route('/editor_delete_all_contracts', methods=['POST', 'GET'])
+def editor_delete_all_contracts():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        cur.execute('DELETE FROM Договоры')
+        conn2.commit()
+    flash('Все записи были успешно удалены!')
+    return redirect(url_for('editor_contracts'))
+
+@app.route('/download_contract/report/excel')
+def download_contract_report():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * FROM Договоры')
+    result_contract = cur.fetchall()
+    output_contract = io.BytesIO()
+    workbook_contract = xlwt.Workbook()
+    sh_contract = workbook_contract.add_sheet('Отчет по договорам')
+    sh_contract.write(0, 0, 'Код договора')
+    sh_contract.write(0, 1, 'Тип договора')
+    sh_contract.write(0, 2, 'Регистрационный номер')
+    sh_contract.write(0, 3, 'Контрагент')
+    sh_contract.write(0, 4, 'Статус')
+    sh_contract.write(0, 5, 'Предмет договора')
+    sh_contract.write(0, 6, 'Дата договора')
+    sh_contract.write(0, 7, 'Дата начала действия договора')
+    sh_contract.write(0, 8, 'Дата окончания действия договора')
+    sh_contract.write(0, 9, 'Сумма без НДС')
+    sh_contract.write(0, 10, 'Сумма с НДС')
+    sh_contract.write(0, 11, 'Филиал')
+    sh_contract.write(0, 12, 'Примечание')
+    idx = 0  
+    for row in result_contract:
+        sh_contract.write(idx+1, 0, str(row['код_договора']))
+        sh_contract.write(idx+1, 1, row['тип_договора'])
+        sh_contract.write(idx+1, 2, row['регистрационный_номер'])
+        sh_contract.write(idx+1, 3, row['контрагент'])
+        sh_contract.write(idx+1, 4, row['статус'])
+        sh_contract.write(idx+1, 5, row['предмет_договора'])
+        sh_contract.write(idx+1, 6, row['дата_договора'])
+        sh_contract.write(idx+1, 7, row['дата_начала_действия_договора'])
+        sh_contract.write(idx+1, 8, row['дата_окончания_действия_договора'])
+        sh_contract.write(idx+1, 9, row['сумма_без_ндс'])
+        sh_contract.write(idx+1, 10, row['сумма_с_ндс'])
+        sh_contract.write(idx+1, 11, row['филиал'])
+        sh_contract.write(idx+1, 12, row['примечание'])
+        idx += 1
+    workbook_contract.save(output_contract)
+    output_contract.seek(0)
+    return Response(output_contract, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=contract_report.xls"})
+
+@app.route('/upload_contract', methods=['POST', 'GET'])
+def upload_contract():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        file = request.files['file']
+        if file:
+            if file.filename.endswith("xlsx"):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                data = []
+                for row in sheet.iter_rows(values_only=True, min_row=5, max_row=sheet.max_row-1):
+                    data.append(row)
+                for row in data:
+                    cur.execute(
+                        "INSERT INTO Договоры (код_договора, тип_договора, регистрационный_номер, контрагент, статус, предмет_договора, дата_договора, дата_начала_действия_договора, дата_окончания_действия_договора, сумма_без_ндс, сумма_с_ндс, филиал, примечание) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                        (row[0], row[3], row[4], row[17], row[12], row[11], row[6], row[8], row[9], row[34], row[35], row[1], row[29])
+                    )
+                    cur.execute('SELECT COUNT(*) FROM Контрагенты WHERE наименование_контрагента=%s', (row[17],))
+                    count = cur.fetchone()[0]
+                    if count == 0:
+                        cur.execute('INSERT INTO Контрагенты(наименование_контрагента, телефон, email, ИНН, ОКПО, ОГРН) VALUES (%s, %s, %s, %s, %s, %s)', (row[17], row[30], row[31], row[18], row[20], row[19]))
+                conn2.commit()
+                flash('Файл успешно загружен!')
+                return redirect(url_for('contracts'))
+            else:
+                flash('Неверный тип файла')
+                return redirect(url_for('contracts'))
+        else:
+            flash('Файл не выбран!')
+            return redirect(url_for('contracts'))
+        return render_template('contract.html')
+    else:
+        return render_template('contract.html')  
+    
+@app.route('/editor_upload_contract', methods=['POST', 'GET'])
+def editor_upload_contract():
+    cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        file = request.files['file']
+        if file:
+            if file.filename.endswith("xlsx"):
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                data = []
+                for row in sheet.iter_rows(values_only=True, min_row=2, max_row=sheet.max_row-1):
+                    if len(row) == 15: 
+                        data.append(row)
+                    else:
+                        flash('Неправильный формат файла')
+                        return redirect(url_for('editor_contracts'))
+                for row in data:
+                    cur.execute(
+                        "INSERT INTO Договоры (код_договора, тип_договора, регистрационный_номер, контрагент, статус, предмет_договора, дата_договора, дата_начала_действия_договора, дата_окончания_действия_договора, сумма_без_ндс, сумма_с_ндс, филиал, примечание) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                        (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12])
+                    )
+                conn2.commit()
+                flash('Файл успешно загружен!')
+                return redirect(url_for('editor_contracts'))
+            else:
+                flash('Неверный тип файла')
+                return redirect(url_for('editor_contracts'))
+        else:
+            flash('Файл не выбран!')
+            return redirect(url_for('editor_contracts'))
+        return render_template('editor_contract.html')
+    else:
+        return render_template('editor_contract.html')  
+    
 @app.route('/support_install_software')
 @role_required('support')
 def support_install_software():

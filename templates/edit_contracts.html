@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block title %}Редактирование договоров{% endblock %}
+{% block content %}
+  <div class="row">
+    <div class="col-md-8">
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">x</span>
+        </button>
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+      <div class="card card-body">
+        <form action="/update_contracts/{{contract_list.код_договора}}" method="POST">
+          <div class="form-group">
+            <label for="тип_договора"><b>Тип договора:</b></label>
+            <input type="text" name="тип_договора" value="{{contract_list.тип_договора}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="регистрационный_номер"><b>Регистрационный номер:</b></label>
+            <input type="number" name="регистрационный_номер" value="{{contract_list.регистрационный_номер}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="контрагент"><b>Контрагент:</b></label>
+            <input type="text" name="контрагент" value="{{contract_list.контрагент}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="статус"><b>Статус:</b></label>
+            <input type="text" name="статус" value="{{contract_list.статус}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="предмет_договора"><b>Предмет договора:</b></label>
+            <input type="text" name="предмет_договора" value="{{contract_list.предмет_договора}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="дата_договора"><b>Дата договора:</b></label>
+            <input type="date" name="дата_договора" value="{{contract_list.дата_договора}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="дата_начала_действия_договора"><b>Дата начала действия договора:</b></label>
+            <input type="date" name="дата_начала_действия_договора" value="{{contract_list.дата_начала_действия_договора}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="дата_окончания_действия_договора"><b>Дата окончания действия договора:</b></label>
+            <input type="date" name="дата_окончания_действия_договора" value="{{contract_list.дата_окончания_действия_договора}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="сумма_без_ндс"><b>Сумма без НДС:</b></label>
+            <input type="number" name="сумма_без_ндс" value="{{contract_list.сумма_без_ндс}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="сумма_с_ндс"><b>Сумма с НДС:</b></label>
+            <input type="number" name="сумма_с_ндс" value="{{contract_list.сумма_с_ндс}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="филиал"><b>Филиал:</b></label>
+            <input type="text" name="филиал" value="{{contract_list.филиал}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="примечание"><b>Примечение:</b></label>
+            <input type="text" name="примечание" value="{{contract_list.примечание}}" class="form-control">
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary btn-block">
+              Обновить
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
