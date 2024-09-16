@@ -1,57 +1,101 @@
 {% extends 'support_layout.html' %}
 {% block title %} Справочник контрагентов {% endblock %}
 {% block content %}
-<div class="row"><h3>Справочник контрагентов</h3></div>
-  <div class="col-md-8">
-    <table id="partner_table" table class="table table-striped table-bordered" style="width:70%">
-      <thead>
-        <tr>
-          <th>Наименование контрагента</th>
-          <th>Краткое наименование предприятия</th>
-          <th>Полное наименование предприятия</th>
-          <th>ИНН</th>
-          <th>КПП</th>
-          <th>Юридический адрес</th>
-          <th>Фактический адрес</th>
-          <th>ОКПО</th>
-          <th>ОГРН</th>
-          <th>Телефон</th>
-          <th>Email</th>
-          <th>Ссылка на сайт контрагента</th>
-          <th>Примечание</th>
-          <th>Панель управления</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in partner_list %}
-        <tr>
-          <td>{{row[0]}}</td>
-          <td>{{row[1]}}</td>
-          <td>{{row[2]}}</td>
-          <td>{{row[3]}}</td>
-          <td>{{row[4]}}</td>
-          <td>{{row[5]}}</td>
-          <td>{{row[6]}}</td>
-          <td>{{row[7]}}</td>
-          <td>{{row[8]}}</td>
-          <td>{{row[9]}}</td>
-          <td>{{row[10]}}</td>
-          <td>{{row[11]}}</td>
-          <td>{{row[12]}}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-        <script>
-    $(document).ready(function(){
-        $('#partner_table').DataTable({
-      "aLengthMenu": [[3, 5, 10, 25, -1], [3, 5, 10, 25, "All"]],
-      "iDisplayLength": -1
-      }
-     );
-     });
-    </script>
-  </div>
+<div class="container">
+  <div class="main-content">
+    <div class="row"><h3>Справочник контрагентов</h3></div>
+      <div class="col-md-8">
+        <table id="partner_table" table class="table table-striped table-bordered" style="width:70%">
+          <thead>
+            <tr>
+              <th>Наименование контрагента</th>
+              <th>Краткое наименование предприятия</th>
+              <th>Полное наименование предприятия</th>
+              <th>ИНН</th>
+              <th>КПП</th>
+              <th>Юридический адрес</th>
+              <th>Фактический адрес</th>
+              <th>ОКПО</th>
+              <th>ОГРН</th>
+              <th>Телефон</th>
+              <th>Email</th>
+              <th>Ссылка на сайт контрагента</th>
+              <th>Примечание</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in partner_list %}
+            <tr>
+              <td>{{row[0]}}</td>
+              <td>{{row[1]}}</td>
+              <td>{{row[2]}}</td>
+              <td>{{row[3]}}</td>
+              <td>{{row[4]}}</td>
+              <td>{{row[5]}}</td>
+              <td>{{row[6]}}</td>
+              <td>{{row[7]}}</td>
+              <td>{{row[8]}}</td>
+              <td>{{row[9]}}</td>
+              <td>{{row[10]}}</td>
+              <td>{{row[11]}}</td>
+              <td>{{row[12]}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+            <script>
+        $(document).ready(function(){
+            $('#partner_table').DataTable({
+          "aLengthMenu": [[3, 5, 10, 25, -1], [3, 5, 10, 25, "All"]],
+          "iDisplayLength": -1
+          }
+         );
+         });
+        </script>
+      </div>
+      </div>
+      <div class="sidebar">
+    <h2>Расширенный поиск</h2>
+      <form id="search-form">
+        <div>
+          <label for="наименование_контрагента">Наименование контрагента</label>
+          <input type="text" id="наименование_контрагента" name="наименование_контрагента">
+        </div>
+        <div>
+          <label for="краткое_наименование_предприятия">Краткое наименование предприятия</label>
+          <input type="text" id="краткое_наименование_предприятия" name="краткое_наименование_предприятия">
+        </div>
+        <div>
+          <label for="полное_наименование_предприятия">Полное наименование предприятия</label>
+          <input type="text" id="полное_наименование_предприятия" name="полное_наименование_предприятия">
+        </div>
+        <div>
+          <label for="ИНН">ИНН</label>
+          <input type="number" id="ИНН" name="ИНН">
+        </div>
+        <div>
+          <label for="КПП">КПП</label>
+          <input type="number" id="КПП" name="КПП">
+        </div>
+        <div>
+          <label for="юридический_адрес">Юридический адрес</label>
+          <input type="text" id="юридический_адрес" name="юридический_адрес">
+        </div>
+        <div>
+          <label for="фактический_адрес">Фактический адрес</label>
+          <input type="text" id="фактический_адрес" name="фактический_адрес">
+        </div>
+        <div>
+          <label for="ОКПО">ОКПО</label>
+          <input type="number" id="ОКПО" name="ОКПО">
+        </div>
+        <div>
+          <label for="ОГРН">ОГРН</label>
+          <input type="number" id="ОГРН" name="ОГРН">
+        </div>
+     </form>
+   </div>
+</div>
 <a href="{{url_for('download_partner_report')}}">Сгенерировать отчет по контрагентам</a>
 </div>
 </div>

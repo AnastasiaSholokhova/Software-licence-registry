@@ -1,88 +1,129 @@
 {% extends 'layout.html' %}
 {% block title %} Справочник договоров {% endblock %}
 {% block content %}
-<div class="row"><h3>Справочник договоров</h3></div>
-<div class="btn-toolbar" role="toolbar">
-  <form action = "{{ url_for('show_contracts') }}" method="POST">
-    <button type="submit" class="btn btn-success btn-sm mr-2" aria=pressed="true">Новая запись</button>
-  </form>
-  <form  method = "POST" action="{{ url_for('delete_all_contract') }}">
-    <button type="submit" class="btn btn-secondary btn-sm mr-2" aria-pressed="true">Удалить все записи</button>
-  </form>
-<form method="POST" action="/delete_contract">
-  <div align="right" class="padding:10px;">
-    {% with messages = get_flashed_messages() %}
-          {% if messages %}
-         {% for message in messages %}
-         <div class="alert alert-danger" role="alert">
-         {{ message }}
-         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-           <span aria-hidden="true">x</span>
-         </button>
-         </div>
-         {% endfor %}
-         {% endif %}
-        {% endwith %}
-      <input type="submit" class="btn btn-primary" value="Удалить выбранные значения">
+<div class="container">
+  <div class="main-content">
+    <div class="row"><h3>Справочник договоров</h3></div>
+    <div class="btn-toolbar" role="toolbar">
+      <form action = "{{ url_for('show_contracts') }}" method="POST">
+        <button type="submit" class="btn btn-success btn-sm mr-2" aria=pressed="true">Новая запись</button>
+      </form>
+      <form  method = "POST" action="{{ url_for('delete_all_contract') }}">
+        <button type="submit" class="btn btn-secondary btn-sm mr-2" aria-pressed="true">Удалить все записи</button>
+      </form>
+    <form method="POST" action="/delete_contract">
+      <div align="right" class="padding:10px;">
+        {% with messages = get_flashed_messages() %}
+              {% if messages %}
+             {% for message in messages %}
+             <div class="alert alert-danger" role="alert">
+             {{ message }}
+             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+               <span aria-hidden="true">x</span>
+             </button>
+             </div>
+             {% endfor %}
+             {% endif %}
+            {% endwith %}
+          <input type="submit" class="btn btn-primary" value="Удалить выбранные значения">
+        </div>
+        <table id="contract_table" table class="table table-striped table-bordered" style="width:70%">
+          <thead>
+            <tr>
+              <th>Код договора</th>
+              <th>Тип договора</th>
+              <th>Регистрационный номер</th>
+              <th>Контрагент</th>
+              <th>Статус</th>
+              <th>Предмет договора</th>
+              <th>Дата договора</th>
+              <th>Дата начала действия договора</th>
+              <th>Дата окончания действия договора</th>
+              <th>Сумма без ндс</th>
+              <th>Сумма с ндс</th>
+              <th>Филиал</th>
+              <th>Примечание</th>
+              <th>Панель управления</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in contract_list %}
+            <tr>
+              <td>{{row[0]}}</td>
+              <td>{{row[1]}}</td>
+              <td>{{row[2]}}</td>
+              <td class="name-link" data-name="{{row[3]}}">
+                <a target="_blank" href="/show_customer_byid/{{row[3]}}">
+                {{row[3]}}
+                </a>
+              </td>
+              <td>{{row[4]}}</td>
+              <td>{{row[5]}}</td>
+              <td>{{row[6]}}</td>
+              <td>{{row[7]}}</td>
+              <td>{{row[8]}}</td>
+              <td>{{row[9]}}</td>
+              <td>{{row[10]}}</td>
+              <td>{{row[11]}}</td>
+              <td>{{row[12]}}</td>
+              <td width="130">
+                <a href="/edit_contract/{{row[0]}}" class="btn btn-secondary btn-sm" aria-pressed="true">Редактировать</a>
+                <input type="checkbox" name="delete_contracts_checkbox" value="{{row[0]}}">
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+            <script>
+        $(document).ready(function(){
+            $('#partner_table').DataTable({
+          "aLengthMenu": [[3, 5, 10, 25, -1], [3, 5, 10, 25, "All"]],
+          "iDisplayLength": -1
+          }
+         );
+         });
+        </script>
+        </div>
+    </form>
     </div>
-    <table id="contract_table" table class="table table-striped table-bordered" style="width:70%">
-      <thead>
-        <tr>
-          <th>Код договора</th>
-          <th>Тип договора</th>
-          <th>Регистрационный номер</th>
-          <th>Контрагент</th>
-          <th>Статус</th>
-          <th>Предмет договора</th>
-          <th>Дата договора</th>
-          <th>Дата начала действия договора</th>
-          <th>Дата окончания действия договора</th>
-          <th>Сумма без ндс</th>
-          <th>Сумма с ндс</th>
-          <th>Филиал</th>
-          <th>Примечание</th>
-          <th>Панель управления</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in contract_list %}
-        <tr>
-          <td>{{row[0]}}</td>
-          <td>{{row[1]}}</td>
-          <td>{{row[2]}}</td>
-          <td class="name-link" data-name="{{row[3]}}">
-            <a target="_blank" href="/show_customer_byid/{{row[3]}}">
-            {{row[3]}}
-            </a>
-          </td>
-          <td>{{row[4]}}</td>
-          <td>{{row[5]}}</td>
-          <td>{{row[6]}}</td>
-          <td>{{row[7]}}</td>
-          <td>{{row[8]}}</td>
-          <td>{{row[9]}}</td>
-          <td>{{row[10]}}</td>
-          <td>{{row[11]}}</td>
-          <td>{{row[12]}}</td>
-          <td width="130">
-            <a href="/edit_contract/{{row[0]}}" class="btn btn-secondary btn-sm" aria-pressed="true">Редактировать</a>
-            <input type="checkbox" name="delete_contracts_checkbox" value="{{row[0]}}">
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-        <script>
-    $(document).ready(function(){
-        $('#partner_table').DataTable({
-      "aLengthMenu": [[3, 5, 10, 25, -1], [3, 5, 10, 25, "All"]],
-      "iDisplayLength": -1
-      }
-     );
-     });
-    </script>
-    </div>
-</form>
+    <div class="sidebar">
+      <h2>Расширенный поиск</h2>
+      <form id="search-form">
+        <div>
+          <label for="код">Код договора</label>
+          <input type="text" id="код" name="код">
+        </div>
+        <div>
+          <label for="контрагент">Наименование контрагента</label>
+          <input type="text" id="контрагент" name="контрагент">
+        </div>
+        <div>
+          <label for="статус">Статус договора</label>
+          <input type="text" id="статус" name="статус">
+        </div>
+        <div>
+          <label for="предмет_договора">Предмет договора</label>
+          <input type="text" id="предмет_договора" name="предмет_договора">
+        </div>
+        <div>
+          <label for="дата_договора">Дата договора</label>
+          <input type="date" id="дата_договора" name="дата_договора">
+        </div>
+        <div>
+          <label for="дата_начала_действия_договора">Дата начала действия договора</label>
+          <input type="date" id="дата_начала_действия_договора" name="дата_начала_действия_договора">
+        </div>
+        <div>
+          <label for="дата_окончания_действия_договора">Дата окончания действия договора</label>
+          <input type="date" id="дата_окончания_действия_договора" name="дата_окончания_действия_договора">
+        </div>
+        <div>
+          <label for="филиал">Филиал</label>
+          <input type="text" id="филиал" name="филиал">
+        </div>
+      </form>
+      </div>
+</div>
 <a href="{{url_for('download_contract_report')}}">Сгенерировать отчет по договорам</a>
 <form action="{{url_for('upload_contract')}}" method="POST" enctype="multipart/form-data">
   <input type="file" name="file" accept=".xlsx">

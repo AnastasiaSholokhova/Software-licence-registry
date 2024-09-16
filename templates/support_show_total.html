@@ -3,65 +3,142 @@
 {% block title %}Домашняя страница{% endblock %}
   
 {% block content %}
-<div class="row"><h2>Добро пожаловать, {{ username }}!</h2></div>
-<div class="row"><h3>Реестр лицензий ПО</h3></div>
-<div class="row">
-    <div class="table-responsitive">
-      <table id="example" class="table table-bordered" style="width:65%">
-        <thead>
-          <tr>
-            <th>Статья затрат</th>
-            <th>Наименование ПО (БУ)</th>
-            <th>Наименование ПО</th>
-            <th>Краткое наименование ПО</th>
-            <th>Количество</th>
-            <th>Код</th>
-            <th>Филиал</th>
-            <th>Счет затрат</th>
-            <th>Вид деятельности</th>
-            <th>Стоимость ПО (всего) без НДС</th>
-            <th>Стоимость ПО (всего) с НДС</th>
-            <th>Срок полезного использования (мес.)</th>
-            <th>Дата начала списания</th>
-            <th>Дата окончания списания</th>
-            <th>Договор/счет</th>
-            <th>Контрагент</th>
-            <th>Первичный документ</th>
-            <th>Страна-производитель</th>
-            <th>Правообладатель</th>
-            <th>Включен в реестр Российского ПО Да/нет</th>
-            <th>Срок предоставления права</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in list_total %}
-        <tr>
-          <td>{{row[0]}}</td>
-          <td>{{row[1]}}</td>
-          <td>{{row[2]}}</td>
-          <td>{{row[3]}}</td>
-          <td>{{row[4]}}</td>
-          <td>{{row[5]}}</td>
-          <td>{{row[6]}}</td>
-          <td>{{row[7]}}</td>
-          <td>{{row[8]}}</td>
-          <td>{{row[9]}}</td>
-          <td>{{row[10]}}</td>
-          <td>{{row[11]}}</td>
-          <td>{{row[12]}}</td>
-          <td>{{row[13]}}</td>
-          <td>{{row[14]}}</td>
-          <td>{{row[15]}}</td>
-          <td>{{row[16]}}</td>
-          <td>{{row[17]}}</td>
-          <td>{{row[18]}}</td>
-          <td>{{row[19]}}</td>
-          <td>{{row[20]}}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+<div class="container">
+  <div class="main-content">
+    <div class="row"><h2>Добро пожаловать, {{ username }}!</h2></div>
+    <div class="row"><h3>Реестр лицензий ПО</h3></div>
+    <div class="row">
+        <div class="table-responsitive">
+          <table id="example" class="table table-bordered" style="width:65%">
+            <thead>
+              <tr>
+                <th>Статья затрат</th>
+                <th>Наименование ПО (БУ)</th>
+                <th>Наименование ПО</th>
+                <th>Краткое наименование ПО</th>
+                <th>Количество</th>
+                <th>Код</th>
+                <th>Филиал</th>
+                <th>Счет затрат</th>
+                <th>Вид деятельности</th>
+                <th>Стоимость ПО (всего) без НДС</th>
+                <th>Стоимость ПО (всего) с НДС</th>
+                <th>Срок полезного использования (мес.)</th>
+                <th>Дата начала списания</th>
+                <th>Дата окончания списания</th>
+                <th>Договор/счет</th>
+                <th>Контрагент</th>
+                <th>Первичный документ</th>
+                <th>Страна-производитель</th>
+                <th>Правообладатель</th>
+                <th>Включен в реестр Российского ПО Да/нет</th>
+                <th>Срок предоставления права</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in list_total %}
+            <tr>
+              <td>{{row[0]}}</td>
+              <td>{{row[1]}}</td>
+              <td>{{row[2]}}</td>
+              <td>{{row[3]}}</td>
+              <td>{{row[4]}}</td>
+              <td>{{row[5]}}</td>
+              <td>{{row[6]}}</td>
+              <td>{{row[7]}}</td>
+              <td>{{row[8]}}</td>
+              <td>{{row[9]}}</td>
+              <td>{{row[10]}}</td>
+              <td>{{row[11]}}</td>
+              <td>{{row[12]}}</td>
+              <td>{{row[13]}}</td>
+              <td>{{row[14]}}</td>
+              <td>{{row[15]}}</td>
+              <td>{{row[16]}}</td>
+              <td>{{row[17]}}</td>
+              <td>{{row[18]}}</td>
+              <td>{{row[19]}}</td>
+              <td>{{row[20]}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    </div>
+    <div class="sidebar">
+      <h2>Расширенный поиск</h2>
+        <form id="search-form">
+          <div>
+            <label for="статья_затрат">Статья затрат</label>
+            <input type="text" id="статья_затрат" name="статья_затрат">
+          </div>
+          <div>
+            <label for="наименование_ПО_БУ">Наименование ПО (БУ)</label>
+            <input type="text" id="наименование_ПО_БУ" name="наименование_ПО_БУ">
+          </div>
+          <div>
+            <label for="наименование_ПО">Наименование ПО</label>
+            <input type="text" id="наименование_ПО" name="наименование_ПО">
+          </div>
+          <div>
+            <label for="краткое_наименование_ПО">Краткое наименование ПО</label>
+            <input type="text" id="краткое_наименование_ПО" name="краткое_наименование_ПО">
+          </div>
+          <div>
+            <label for="код">Код</label>
+            <input type="text" id="код" name="код">
+          </div>
+          <div>
+            <label for="филиал">Филиал</label>
+            <input type="text" id="филиал" name="филиал">
+          </div>
+          <div>
+            <label for="счёт_затрат">Счёт затрат</label>
+            <input type="number" id="счёт_затрат" name="счёт_затрат">
+          </div>
+          <div>
+            <label for="вид_деятельности">Вид деятельности</label>
+            <input type="text" id="вид_деятельности" name="вид_деятельности">
+          </div>
+          <div>
+            <label for="срок_полезного_использования_мес">Срок полезного использования (мес.)</label>
+            <input type="number" id="срок_полезного_использования_мес" name="срок_полезного_использования_мес">
+          </div>
+          <div>
+            <label for="дата_начала_списания">Дата начала списания</label>
+            <input type="date" id="дата_начала_списания" name="дата_начала_списания">
+          </div>
+          <div>
+            <label for="дата_окончания_списания">Дата окончания списания</label>
+            <input type="date" id="дата_окончания_списания" name="дата_окончания_списания">
+          </div>
+          <div>
+            <label for="договор_счет">Договор/счет</label>
+            <input type="text" id="договор_счет" name="договор_счет">
+          </div>
+          <div>
+            <label for="контрагент">Контрагент</label>
+            <input type="text" id="контрагент" name="контрагент">
+          </div>
+          <div>
+            <label for="первичный_документ">Первичный документ</label>
+            <input type="text" id="первичный_документ" name="первичный_документ">
+          </div>
+          <div>
+            <label for="страна_производитель">Страна-производитель</label>
+            <input type="text" id="страна_производитель" name="страна_производитель">
+          </div>
+          <div>
+            <label for="правообладатель">Правообладатель</label>
+            <input type="text" id="правообладатель" name="правообладатель">
+          </div>
+          <div>
+            <label for="срок_предоставления_права">Срок предоставления права</label>
+            <input type="text" id="срок_предоставления_права" name="срок_предоставления_права">
+          </div>
+        </form>
+      </div>
 </div>
 <a href="{{url_for('download_total_list') }}">Сгенерировать отчет в Excel</a>
 {% endblock %}

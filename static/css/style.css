@@ -127,7 +127,20 @@ text-align: center;
     z-index: 1001;
     width: 100%;
   }
- 
+ .container {
+    display: flex;
+}
+
+.main-content {
+    flex: 3; /* 75% ширины */
+    padding: 20px;
+}
+
+.sidebar {
+    flex: 1; /* 25% ширины */
+    background-color: #f4f4f4; /* Цвет фона для боковой панели */
+    padding: 20px;
+}
 .site-header {
   background-color: #FFFFFF;
   -webkit-backdrop-filter: saturate(180%) blur(20px);

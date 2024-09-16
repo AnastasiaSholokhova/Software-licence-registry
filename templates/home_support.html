@@ -1,55 +1,99 @@
-{% extends 'support_layout.html' %}
-  
-{% block title %}Домашняя страница{% endblock %}
-  
-{% block content %}
-<div class="row"><h2>Добро пожаловать, {{ username }}!</h2></div>
-<div class="row"><h3>Реестр лицензий ПО</h3></div>
-    <div class="col-md-8">
-      <table id="example" class="table table-striped table-bordered" style="width:65%">
-        <thead>
-          <tr>
-            <th>Наименование ПО</th>
-            <th>Вендор</th>
-            <th>Начало действия лицензии</th>
-            <th>Окончание действия лицензии</th>
-            <th>Счёт списания</th>
-            <th>Стоимость за единицу</th>
-            <th>Итоговая стоимость</th>
-            <th>Заказчик ПО</th>
-            <th>Признак ПО</th>
-            <th>Количество лицензий</th>
-            <th>Срок действия лицензии</th>
-            <th>Оплачено</th>
-            <th>Остаток</th>
-            <th>Примечание</th>
-            <th>Код</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in list_licences %}
-        <tr>
-          <td>{{row[0]}}</td>
-          <td>{{row[1]}}</td>
-          <td>{{row[2]}}</td>
-          <td>{{row[3]}}</td>
-          <td>{{row[4]}}</td>
-          <td>{{row[5]}}</td>
-          <td>{{row[6]}}</td>
-          <td>{{row[7]}}</td>
-          <td>{{row[8]}}</td>
-          <td>{{row[9]}}</td>
-          <td>{{row[10]}}</td>
-          <td>{{row[11]}}</td>
-          <td>{{row[12]}}</td>
-          <td>{{row[13]}}</td>
-          <td>{{row[14]}}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  <a href="{{url_for('download_report') }}">Сгенерировать отчет в Excel</a>
-  </div>
+{% extends 'support_layout.html' %} 
+
+{% block title %}Домашняя страница{% endblock %} 
+
+{% block content %} 
+<div class="container"> 
+    <div class="main-content"> 
+        <div class="row"><h2>Добро пожаловать, {{ username }}!</h2></div> 
+        <div class="row"><h3>Реестр лицензий ПО</h3></div> 
+                <table id="example" class="table table-bordered" style="width:65%"> 
+                    <thead> 
+                        <tr> 
+                            <th>Наименование ПО</th> 
+                            <th>Контрагент</th> 
+                            <th>Дата начала списания</th> 
+                            <th>Дата окончания списания</th> 
+                            <th>Срок полезного использования (мес)</th> 
+                            <th>Стоимость ПО (всего) без НДС</th> 
+                            <th>Количество</th> 
+                            <th>Стоимость ПО (всего) с НДС</th> 
+                            <th>Признак ПО</th> 
+                            <th>Страна производитель</th> 
+                            <th>Срок действия лицензии</th> 
+                            <th>Оплачено</th> 
+                            <th>Остаток</th> 
+                            <th>Примечание</th> 
+                            <th>Код</th> 
+                        </tr> 
+                    </thead> 
+                    <tbody> 
+                        {% for row in list_licences %} 
+                        <tr> 
+                            <td>{{row[0]}}</td> 
+                            <td>{{row[1]}}</td> 
+                            <td>{{row[2]}}</td> 
+                            <td>{{row[3]}}</td> 
+                            <td>{{row[4]}}</td> 
+                            <td>{{row[5]}}</td> 
+                            <td>{{row[6]}}</td> 
+                            <td>{{row[7]}}</td> 
+                            <td>{{row[8]}}</td> 
+                            <td>{{row[9]}}</td> 
+                            <td>{{row[10]}}</td> 
+                            <td>{{row[11]}}</td> 
+                            <td>{{row[12]}}</td> 
+                            <td>{{row[13]}}</td> 
+                            <td>{{row[14]}}</td>                         
+                        </tr> 
+                        {% endfor %} 
+                    </tbody> 
+                </table>
+            </div>
+    <!-- Блок с фильтрами -->
+    <div class="sidebar"> 
+        <h2>Фильтры</h2>
+        <form id="search-form">
+          <div>
+            <label for="name">Наименование</label>
+            <input type="text" id="name" name="name">
+          </div>
+          <div>
+            <label for="counterparty">Контагент</label>
+            <input type="text" id="counterparty" name="counterparty">
+          </div>
+          <div>
+            <label for="datebeginning">Дата начала списания</label>
+            <input type="date" id="datebeginning" name="datebeginning">
+          </div>
+          <div>
+            <label for="dateending">Дата окончания списания</label>
+            <input type="date" id="dateending" name="dateending">
+          </div>
+          <div>
+            <label for="period">Срок полезного использования (мес)</label>
+            <input type="number" id="period" name="period">
+          </div>
+          <div>
+              <p><b>Тип ПО:</b></p>
+              <label for="new">Новое</label>
+              <input type="checkbox" id="new" name="type" value="new">
+          </div>
+          <div>
+              <label for="support">Техподдержка</label>
+              <input type="checkbox" id="support" name="type" value="support">
+          </div>
+          <div>
+            <label for="country">Страна-производитель</label>
+            <input type="text" id="country" name="country">
+          </div>
+          <div>
+            <label for="code">Код</label>
+            <input type="text" id="code" name="code">
+          </div>
+        </form>
+    </div>
 </div>
+
+<a href="{{url_for('download_report')}}">Сгенерировать отчет в Excel</a>
 {% endblock %}
