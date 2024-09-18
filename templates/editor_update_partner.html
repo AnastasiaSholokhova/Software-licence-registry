@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты поиска</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Результаты поиска контрагентов</h1>
+
+        {% if editor_filtered_partner %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Наименование контрагента</th>
+                        <th>Краткое наименование предприятия</th>
+                        <th>Полное наименование предприятия</th>
+                        <th>ИНН</th>
+                        <th>КПП</th>
+                        <th>Юридический адрес</th>
+                        <th>Фактический адрес</th>
+                        <th>ОКПО</th>
+                        <th>ОГРН</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for partner in editor_filtered_partner %}
+                        <tr>
+                            <td>{{ partner.наименование_контрагента }}</td>
+                            <td>{{ partner.краткое_наименование_предприятия }}</td>
+                            <td>{{ partner.полное_наименование_предприятия }}</td>
+                            <td>{{ partner.ИНН }}</td>
+                            <td>{{ partner.КПП }}</td>
+                            <td>{{ partner.юридический_адрес }}</td>
+                            <td>{{ partner.фактический_адрес }}</td>
+                            <td>{{ partner.ОКПО }}</td>
+                            <td>{{ partner.ОГРН }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Нет найденных контрагентов.</p>
+        {% endif %}
+        <form action="{{url_for('editor_export_partner')}}" method="POST">
+          <button type="submit" class="submit">Сгенерировать отчет по контрагентам</button>
+        </form>
+        <a href="/editor_partner_list" class="btn btn-primary">Назад к поиску</a>
+    </div>
+</body>
+</html>

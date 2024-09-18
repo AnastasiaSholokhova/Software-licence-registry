@@ -71,16 +71,9 @@
       </div>
       </form>
     </div>
-    <a href="{{url_for('download_software_report')}}">Сгенерировать справочник ПО</a>
-    <form action="{{url_for('upload_software')}}" method="POST" enctype="multipart/form-data">
-      <input type="file"  name="file" accept=".xlsx">
-        <button type="submit">Отправить файл</button>
-      </input>
-    </form>
-    </div>
     <div class="sidebar">
       <h2>Расширенный поиск</h2>
-        <form id="search-form">
+        <form action="{{url_for('submit_software') }}" method="POST">
           <div>
             <label for="код_ПО">Код ПО</label>
             <input type="number=" id="код_ПО" name="код_ПО">
@@ -94,13 +87,17 @@
             <input type="text" id="вендор" name="вендор">
           </div>
           <div>
-            <p><b>Признак ПО</b></p>
-            <label for="новое">Новое</label>
-            <input type="checkbox" id="новое" name="новое">
-            <label for="техподдержка">Техподдержка</label>
-            <input type="checkbox" id="техподдержка" name="техподдержка">
+            <label for="признак_ПО">Признак ПО</label>
+            <input type="text" id="признак_ПО" name="признак_ПО">
           </div>
+          <button class="submit">Обновить информацию</button>
         </form>
      </div>
 </div>
+<a href="{{url_for('download_software_report')}}">Сгенерировать справочник ПО</a>
+<form action="{{url_for('upload_software')}}" method="POST" enctype="multipart/form-data">
+      <input type="file"  name="file" accept=".xlsx">
+        <button type="submit">Отправить файл</button>
+      </input>
+</form>
 {% endblock %}

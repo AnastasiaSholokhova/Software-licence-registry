@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты поиска</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Результаты поиска лицензий</h1>
+
+        {% if filtered %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Наименование ПО</th> 
+                        <th>Контрагент</th> 
+                        <th>Дата начала списания</th> 
+                        <th>Дата окончания списания</th> 
+                        <th>Признак ПО</th> 
+                        <th>Страна производитель</th>  
+                        <th>Код</th> 
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lic in filtered %}
+                        <tr>
+                            <td>{{ lic.наименование_ПО }}</td>
+                            <td>{{ lic.контрагент }}</td>
+                            <td>{{ lic.дата_начала_списания }}</td>
+                            <td>{{ lic.дата_окончания_списания }}</td>
+                            <td>{{ lic.признак_ПО }}</td>
+                            <td>{{ lic.страна_производитель }}</td>
+                            <td>{{ lic.код }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Нет найденных лицензий.</p>
+        {% endif %}
+        <form action="{{url_for('export')}}" method="POST">
+          <button type="submit" class="submit">Сгенерировать отчет по лицензиям</button>
+        </form>
+        <a href="/contracts" class="btn btn-primary">Назад к поиску</a>
+    </div>
+</body>
+</html>

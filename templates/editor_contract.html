@@ -88,7 +88,7 @@
     </div>
     <div class="sidebar">
       <h2>Расширенный поиск</h2>
-      <form id="search-form">
+      <form action="{{ url_for('editor_submit_contract')}}" method="POST">
         <div>
           <label for="код">Код договора</label>
           <input type="text" id="код" name="код">
@@ -121,6 +121,7 @@
           <label for="филиал">Филиал</label>
           <input type="text" id="филиал" name="филиал">
         </div>
+        <button class="submit">Обновить информацию</button>
       </form>
       </div>
 </div>

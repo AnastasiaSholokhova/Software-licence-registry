@@ -1,4 +1,4 @@
-from flask import Flask, request, session, redirect, url_for, render_template, flash, Response
+from flask import Flask, request, session, redirect, url_for, render_template, flash, Response, send_file
 import psycopg2
 import psycopg2.extras
 import re 
@@ -14,6 +14,7 @@ import smtplib
 from email.mime.text import MIMEText
 import os
 import openpyxl
+import pandas as pd
 
 # инициализация приложения
 app = Flask(__name__)
@@ -3466,7 +3467,801 @@ def download_number_report():
     output.seek(0)
     return Response(output, mimetype="application/ms-excel", headers={"Content-Disposition":"attachment;filename=number_report.xls"})
 
+filtered_contracts = []
 
+@app.route('/submit_contract', methods=['POST', 'GET'])
+def submit_contract():
+    global filtered_contracts  
+    if request.method == 'POST':
+        код_договора = request.form.get('код_договора')
+        контрагент = request.form.get('контрагент')
+        статус = request.form.get('статус')
+        предмет_договора = request.form.get('предмет_договора')
+        дата_договора = request.form.get('дата_договора')
+        дата_начала_действия_договора = request.form.get('дата_начала_действия_договора')
+        дата_окончания_действия_договора = request.form.get('дата_окончания_действия_договора')
+        филиал = request.form.get('филиал')
+
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = "SELECT код_договора, контрагент, статус, предмет_договора, дата_договора, дата_начала_действия_договора, дата_окончания_действия_договора, филиал FROM Договоры WHERE "
+        params = []
+
+        if код_договора:
+            query += "код_договора ILIKE %s AND "
+            params.append(код_договора)
+        if контрагент:
+            query += "контрагент ILIKE %s AND "
+            params.append(контрагент)
+        if статус:
+            query += "статус ILIKE %s AND "
+            params.append(статус)
+        if предмет_договора:
+            query += "предмет_договора ILIKE %s AND "
+            params.append(f'%{предмет_договора}%')
+        if дата_договора:
+            query += "дата_договора = %s AND "
+            params.append(дата_договора)
+        if дата_начала_действия_договора:
+            query += "дата_начала_действия_договора = %s AND "
+            params.append(дата_начала_действия_договора)
+        if дата_окончания_действия_договора:
+            query += "дата_окончания_действия_договора = %s AND "
+            params.append(дата_окончания_действия_договора)
+        if филиал:
+            query += "филиал ILIKE %s AND "
+            params.append(f'%{филиал}%')
+
+        if len(params) > 0:
+            query = query[:-5] 
+        else:
+            return render_template('update_contract.html', filtered_contracts=[])
+
+        cur.execute(query, params)
+        filtered_contracts = cur.fetchall()  
+        cur.close()
+
+        return render_template('update_contract.html', filtered_contracts=filtered_contracts)
+
+    return render_template('update_contract.html', filtered_contracts=[])
+
+editor_filtered_contracts = []
+@app.route('/editor_submit_contract', methods=['POST', 'GET'])
+def editor_submit_contract():
+    global editor_filtered_contracts  
+    if request.method == 'POST':
+        код_договора = request.form.get('код_договора')
+        контрагент = request.form.get('контрагент')
+        статус = request.form.get('статус')
+        предмет_договора = request.form.get('предмет_договора')
+        дата_договора = request.form.get('дата_договора')
+        дата_начала_действия_договора = request.form.get('дата_начала_действия_договора')
+        дата_окончания_действия_договора = request.form.get('дата_окончания_действия_договора')
+        филиал = request.form.get('филиал')
+
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = "SELECT код_договора, контрагент, статус, предмет_договора, дата_договора, дата_начала_действия_договора, дата_окончания_действия_договора, филиал FROM Договоры WHERE "
+        editor_params = []
+
+        if код_договора:
+            query += "код_договора ILIKE %s AND "
+            editor_params.append(код_договора)
+        if контрагент:
+            query += "контрагент ILIKE %s AND "
+            editor_params.append(контрагент)
+        if статус:
+            query += "статус ILIKE %s AND "
+            editor_params.append(статус)
+        if предмет_договора:
+            query += "предмет_договора ILIKE %s AND "
+            editor_params.append(f'%{предмет_договора}%')
+        if дата_договора:
+            query += "дата_договора = %s AND "
+            editor_params.append(дата_договора)
+        if дата_начала_действия_договора:
+            query += "дата_начала_действия_договора = %s AND "
+            editor_params.append(дата_начала_действия_договора)
+        if дата_окончания_действия_договора:
+            query += "дата_окончания_действия_договора = %s AND "
+            editor_params.append(дата_окончания_действия_договора)
+        if филиал:
+            query += "филиал ILIKE %s AND "
+            editor_params.append(f'%{филиал}%')
+
+        if len(editor_params) > 0:
+            query = query[:-5] 
+        else:
+            return render_template('editor_update_contract.html', filtered_contracts=[])
+
+        cur.execute(query, editor_params)
+        editor_filtered_contracts = cur.fetchall()  
+        cur.close()
+
+        return render_template('editor_update_contract.html', editor_filtered_contracts=editor_filtered_contracts)
+
+    return render_template('editor_update_contract.html', editor_filtered_contracts=[])
+
+@app.route('/export_contracts', methods=['POST', 'GET'])
+def export_contracts():
+    global filtered_contracts 
+    if filtered_contracts:
+        df = pd.DataFrame(filtered_contracts)
+        excel_file_path = 'contracts.xlsx'
+        df.to_excel(excel_file_path, index=False)
+        return send_file(excel_file_path, as_attachment=True)
+    else:
+        return "Нет данных для экспорта.", 404 
+    
+@app.route('/editor_export_contracts', methods=['POST', 'GET'])
+def editor_export_contracts():
+    global editor_filtered_contracts
+    if editor_filtered_contracts:
+        df = pd.DataFrame(editor_filtered_contracts)
+        excel_file_path = 'contracts.xlsx'
+        df.to_excel(excel_file_path, index=False)
+        return send_file(excel_file_path, as_attachment=True)
+    else:
+        return "Нет данных для экспорта.", 404
+    
+filtered_total = []
+@app.route('/submit_total', methods=['POST', 'GET'])
+def submit_total():
+    global filtered_total  
+    if request.method == 'POST':
+        статья_затрат = request.form.get('статья_затрат')
+        наименование_ПО_БУ = request.form.get('наименование_ПО_БУ')
+        наименование_ПО = request.form.get('наименование_ПО')
+        краткое_наименование_ПО = request.form.get('краткое_наименование_ПО')
+        код = request.form.get('код')
+        филиал = request.form.get('филиал')
+        счёт_затрат = request.form.get('счёт_затрат')
+        вид_деятельности = request.form.get('вид_деятельности')
+        срок_полезного_использования_мес = request.form.get('срок_полезного_использования_мес')
+        дата_начала_списания = request.form.get('дата_начала_списания')
+        дата_окончания_списания = request.form.get('дата_окончания_списания')
+        договор_счет = request.form.get('договор_счет')
+        контрагент = request.form.get('контрагент')
+        первичный_документ = request.form.get('первичный_документ')
+        страна_производитель = request.form.get('страна_производитель')
+        правообладатель = request.form.get('правообладатель')
+        срок_предоставления_права = request.form.get('срок_предоставления_права')
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = "SELECT статья_затрат, наименование_ПО_БУ, наименование_ПО, краткое_наименование_ПО, код, филиал, счет_затрат, вид_деятельности, срок_полезного_использования_мес, дата_начала_списания, дата_окончания_списания, договор_счет, контрагент, первичный_документ, страна_производитель, правообладатель, срок_предоставления_права FROM общая_информация WHERE "
+        params_total = []
+        if статья_затрат:
+            query += "статья_затрат = %s AND "
+            params_total.append(f'%{статья_затрат}%')
+        if наименование_ПО_БУ:
+            query += "наименование_ПО_БУ = %s AND "
+            params_total.append(f'%{наименование_ПО_БУ}%')
+        if наименование_ПО:
+            query += "наименование_ПО = %s AND "
+            params_total.append(f'%{наименование_ПО}%')
+        if краткое_наименование_ПО: 
+            query += "краткое_наименование_ПО = %s AND "
+            params_total.append(f'%{краткое_наименование_ПО}%')
+        if код:
+            query += "код = %s AND "
+            params_total.append(f'%{код}%')
+        if филиал:
+            query += "филиал ILIKE %s AND "
+            params_total.append(f'%{филиал}%')
+        if счёт_затрат:
+            query += "счёт_затрат = %s AND "
+            params_total.append(счёт_затрат)
+        if вид_деятельности:
+            query += "вид_деятельности ILIKE %s AND "
+            params_total.append(f'%{вид_деятельности}%')
+        if срок_полезного_использования_мес:
+            query += "срок_полезного_использования_мес = %s AND "
+            params_total.append(срок_полезного_использования_мес)
+        if дата_начала_списания:
+            query += "дата_начала_списания = %s AND "
+            params_total.append(дата_начала_списания)
+        if дата_окончания_списания:
+            query += "дата_окончания_списания = %s AND "
+            params_total.append(дата_окончания_списания)
+        if договор_счет:
+            query += "договор_счет ILIKE %s AND "
+            params_total.append(f'%{договор_счет}%')
+        if контрагент:
+            query += "контрагент ILIKE %s AND "
+            params_total.append(f'%{контрагент}%')
+        if первичный_документ:
+            query += "первичный_документ ILIKE %s AND "
+            params_total.append(f'%{первичный_документ}%')
+        if страна_производитель:
+            query += "страна_производитель ILIKE %s AND "
+            params_total.append(f'%{страна_производитель}%')
+        if правообладатель:
+            query += "правообладатель ILIKE %s AND "
+            params_total.append(f'%{правообладатель}%')
+        if срок_предоставления_права:
+            query += "срок_предоставления_права ILIKE %s AND "
+            params_total.append(f'%{срок_предоставления_права}%')
+        if len(params_total) > 0:
+            query = query[:-5]  
+        else:
+            return render_template('update_total.html', filtered_total=[])
+
+        cur.execute(query, params_total)
+        filtered_total = cur.fetchall()  
+        cur.close()
+
+        return render_template('update_total.html', filtered_total=filtered_total)
+
+    return render_template('update_total.html', filtered_total=[])
+
+editor_filtered_total = []
+@app.route('/editor_submit_total', methods=['POST', 'GET'])
+def editor_submit_total():
+    global editor_filtered_total  
+    if request.method == 'POST':
+        статья_затрат = request.form.get('статья_затрат')
+        наименование_ПО_БУ = request.form.get('наименование_ПО_БУ')
+        наименование_ПО = request.form.get('наименование_ПО')
+        краткое_наименование_ПО = request.form.get('краткое_наименование_ПО')
+        код = request.form.get('код')
+        филиал = request.form.get('филиал')
+        счёт_затрат = request.form.get('счёт_затрат')
+        вид_деятельности = request.form.get('вид_деятельности')
+        срок_полезного_использования_мес = request.form.get('срок_полезного_использования_мес')
+        дата_начала_списания = request.form.get('дата_начала_списания')
+        дата_окончания_списания = request.form.get('дата_окончания_списания')
+        договор_счет = request.form.get('договор_счет')
+        контрагент = request.form.get('контрагент')
+        первичный_документ = request.form.get('первичный_документ')
+        страна_производитель = request.form.get('страна_производитель')
+        правообладатель = request.form.get('правообладатель')
+        срок_предоставления_права = request.form.get('срок_предоставления_права')
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = "SELECT статья_затрат, наименование_ПО_БУ, наименование_ПО, краткое_наименование_ПО, код, филиал, счет_затрат, вид_деятельности, срок_полезного_использования_мес, дата_начала_списания, дата_окончания_списания, договор_счет, контрагент, первичный_документ, страна_производитель, правообладатель, срок_предоставления_права FROM общая_информация WHERE "
+        editor_params_total = []
+        if статья_затрат:
+            query += "статья_затрат = %s AND "
+            editor_params_total.append(f'%{статья_затрат}%')
+        if наименование_ПО_БУ:
+            query += "наименование_ПО_БУ = %s AND "
+            editor_params_total.append(f'%{наименование_ПО_БУ}%')
+        if наименование_ПО:
+            query += "наименование_ПО = %s AND "
+            editor_params_total.append(f'%{наименование_ПО}%')
+        if краткое_наименование_ПО: 
+            query += "краткое_наименование_ПО = %s AND "
+            editor_params_total.append(f'%{краткое_наименование_ПО}%')
+        if код:
+            query += "код = %s AND "
+            editor_params_total.append(f'%{код}%')
+        if филиал:
+            query += "филиал ILIKE %s AND "
+            editor_params_total.append(f'%{филиал}%')
+        if счёт_затрат:
+            query += "счёт_затрат = %s AND "
+            editor_params_total.append(счёт_затрат)
+        if вид_деятельности:
+            query += "вид_деятельности ILIKE %s AND "
+            editor_params_total.append(f'%{вид_деятельности}%')
+        if срок_полезного_использования_мес:
+            query += "срок_полезного_использования_мес = %s AND "
+            editor_params_total.append(срок_полезного_использования_мес)
+        if дата_начала_списания:
+            query += "дата_начала_списания = %s AND "
+            editor_params_total.append(дата_начала_списания)
+        if дата_окончания_списания:
+            query += "дата_окончания_списания = %s AND "
+            editor_params_total.append(дата_окончания_списания)
+        if договор_счет:
+            query += "договор_счет ILIKE %s AND "
+            editor_params_total.append(f'%{договор_счет}%')
+        if контрагент:
+            query += "контрагент ILIKE %s AND "
+            editor_params_total.append(f'%{контрагент}%')
+        if первичный_документ:
+            query += "первичный_документ ILIKE %s AND "
+            editor_params_total.append(f'%{первичный_документ}%')
+        if страна_производитель:
+            query += "страна_производитель ILIKE %s AND "
+            editor_params_total.append(f'%{страна_производитель}%')
+        if правообладатель:
+            query += "правообладатель ILIKE %s AND "
+            editor_params_total.append(f'%{правообладатель}%')
+        if срок_предоставления_права:
+            query += "срок_предоставления_права ILIKE %s AND "
+            editor_params_total.append(f'%{срок_предоставления_права}%')
+        if len(editor_params_total) > 0:
+            query = query[:-5]  
+        else:
+            return render_template('editor_update_total.html', editor_filtered_total=[])
+
+        cur.execute(query, editor_params_total)
+        editor_filtered_total = cur.fetchall()  
+        cur.close()
+
+        return render_template('editor_update_total.html', editor_filtered_total=editor_filtered_total)
+
+    return render_template('editor_update_total.html', editor_filtered_total=[])
+
+@app.route('/export_total', methods=['POST', 'GET'])
+def export_total():
+    global filtered_total
+    if filtered_total:
+        df = pd.DataFrame(filtered_total)
+        excel_file_path ='total.xlsx'
+        df.to_excel(excel_file_path, index=False)
+        return send_file(excel_file_path, as_attachment=True)
+    else:
+        return "Нет данных для экспорта.", 404 
+    
+@app.route('/editor_export_total', methods=['POST', 'GET'])
+def editor_export_total():
+    global editor_filtered_total
+    if editor_filtered_total:
+        df = pd.DataFrame(editor_filtered_total)
+        excel_file_path = 'total.xlsx'
+        df.to_excel(excel_file_path, index=False)
+        return send_file(excel_file_path, as_attachment=True)
+    else:
+        return "Нет данных для экспорта.", 404
+
+filtered_partner = []
+@app.route('/submit_partner', methods=['POST', 'GET'])
+def submit_partner():
+    global filtered_partner
+    if request.method == 'POST':
+        наименование_контрагента = request.form.get('наименование_контрагента')
+        краткое_наименование_предприятия = request.form.get('краткое_наименование_предприятия')
+        полное_наименование_предприятия = request.form.get('полное_наименование_предприятия')
+        ИНН = request.form.get('ИНН')
+        КПП = request.form.get('КПП')
+        юридический_адрес = request.form.get('юридический_адрес')
+        фактический_адрес = request.form.get('фактический_адрес')
+        ОКПО = request.form.get('ОКПО')
+        ОГРН = request.form.get('ОГРН')
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = "SELECT наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН FROM Контрагенты WHERE "
+        partner_params = []
+        if наименование_контрагента:
+            query += "наименование_контрагента ILIKE %s AND "
+            partner_params.append(f'%{наименование_контрагента}%')
+        if краткое_наименование_предприятия:
+            query += "краткое_наименование_предприятия ILIKE %s AND "
+            partner_params.append(f'%{краткое_наименование_предприятия}%')
+        if полное_наименование_предприятия:
+            query += "полное_наименование_предприятия ILIKE %s AND "
+            partner_params.append(f'%{полное_наименование_предприятия}%')
+        if ИНН:
+            query += "ИНН = %s AND "
+            partner_params.append(ИНН)
+        if КПП:
+            query += "КПП = %s AND "
+            partner_params.append(КПП)
+        if юридический_адрес:
+            query += "юридический_адрес ILIKE %s AND "
+            partner_params.append(f'%{юридический_адрес}%')
+        if фактический_адрес:
+            query += "фактический_адрес ILIKE %s AND "
+            partner_params.append(f'%{фактический_адрес}%')
+        if ОКПО:
+            query += "ОКПО = %s AND "
+            partner_params.append(ОКПО)
+        if ОГРН:
+            query += "ОГРН = %s AND "
+            partner_params.append(ОГРН)
+        if len(partner_params) > 0:
+            query = query[:-5] 
+        else:
+            return render_template('update_partner.html', filtered_partner=[])
+
+        cur.execute(query, partner_params)
+        filtered_partner = cur.fetchall()  
+        cur.close()
+
+        return render_template('update_partner.html', filtered_partner=filtered_partner)
+
+    return render_template('update_partner.html', filtered_partner=[])
+
+editor_filtered_partner = []
+@app.route('/editor_submit_partner', methods=['POST', 'GET'])
+def editor_submit_partner():
+    global editor_filtered_partner
+    if request.method == 'POST':
+        наименование_контрагента = request.form.get('наименование_контрагента')
+        краткое_наименование_предприятия = request.form.get('краткое_наименование_предприятия')
+        полное_наименование_предприятия = request.form.get('полное_наименование_предприятия')
+        ИНН = request.form.get('ИНН')
+        КПП = request.form.get('КПП')
+        юридический_адрес = request.form.get('юридический_адрес')
+        фактический_адрес = request.form.get('фактический_адрес')
+        ОКПО = request.form.get('ОКПО')
+        ОГРН = request.form.get('ОГРН')
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = "SELECT наименование_контрагента, краткое_наименование_предприятия, полное_наименование_предприятия, ИНН, КПП, юридический_адрес, фактический_адрес, ОКПО, ОГРН FROM Контрагенты WHERE "
+        editor_partner_params = []
+        if наименование_контрагента:
+            query += "наименование_контрагента ILIKE %s AND "
+            editor_partner_params.append(f'%{наименование_контрагента}%')
+        if краткое_наименование_предприятия:
+            query += "краткое_наименование_предприятия ILIKE %s AND "
+            editor_partner_params.append(f'%{краткое_наименование_предприятия}%')
+        if полное_наименование_предприятия:
+            query += "полное_наименование_предприятия ILIKE %s AND "
+            editor_partner_params.append(f'%{полное_наименование_предприятия}%')
+        if ИНН:
+            query += "ИНН = %s AND "
+            editor_partner_params.append(ИНН)
+        if КПП:
+            query += "КПП = %s AND "
+            editor_partner_params.append(КПП)
+        if юридический_адрес:
+            query += "юридический_адрес ILIKE %s AND "
+            editor_partner_params.append(f'%{юридический_адрес}%')
+        if фактический_адрес:
+            query += "фактический_адрес ILIKE %s AND "
+            editor_partner_params.append(f'%{фактический_адрес}%')
+        if ОКПО:
+            query += "ОКПО = %s AND "
+            editor_partner_params.append(ОКПО)
+        if ОГРН:
+            query += "ОГРН = %s AND "
+            editor_partner_params.append(ОГРН)
+        if len(editor_partner_params) > 0:
+            query = query[:-5] 
+        else:
+            return render_template('editor_update_partner.html', editor_filtered_partner=[])
+
+        cur.execute(query, editor_partner_params)
+        editor_filtered_partner = cur.fetchall()  
+        cur.close()
+
+        return render_template('editor_update_partner.html', editor_filtered_partner=editor_filtered_partner)
+
+    return render_template('editor_update_partner.html', editor_filtered_partner=[])
+
+@app.route('/export_partner', methods=['POST', 'GET'])
+def export_partner():
+    global filtered_partner
+    if filtered_partner:
+        df = pd.DataFrame(filtered_partner)
+        excel_file_path ='partner.xlsx'
+        df.to_excel(excel_file_path, index=False)
+        return send_file(excel_file_path, as_attachment=True)
+    else:
+        return "Нет данных для экспорта.", 404 
+    
+@app.route('/editor_export_partner', methods=['POST', 'GET'])
+def editor_export_partner():
+    global editor_filtered_partner 
+    if editor_filtered_partner:
+        df = pd.DataFrame(editor_filtered_partner)
+        excel_file_path = 'partner.xlsx'
+        df.to_excel(excel_file_path, index=False)
+        return send_file(excel_file_path, as_attachment=True)
+    else:
+        return "Нет данных для экспорта.", 404
+
+filtered_number = []
+@app.route('/submit_number', methods=['POST', 'GET'])
+def submit_number():
+    global filtered_number
+    if request.method == 'POST':
+        номер_заявки = request.form.get('номер_заявки')
+        наименование_ПО = request.form.get('наименование_ПО')
+        тип_лицензии = request.form.get('тип_лицензии')
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = "SELECT номер_заявки, наименование_ПО, тип_лицензии FROM Учет_лицензий WHERE "
+        number_params = []
+        if номер_заявки:
+            query += "номер_заявки = %s AND "
+            number_params.append(номер_заявки)
+        if наименование_ПО:
+            query += "наименование_ПО ILIKE %s AND "
+            number_params.append(f'%{наименование_ПО}%')
+        if тип_лицензии:
+            query += "тип_лицензии ILIKE %s AND "
+            number_params.append(f'%{тип_лицензии}%')
+        if len(number_params) > 0:
+            query = query[:-5]
+        else: 
+            return render_template('update_number.html', filtered_number=[])
+        cur.execute(query, number_params)
+        filtered_number = cur.fetchall()
+        return render_template('update_number.html', filtered_number=filtered_number)
+    return render_template('update_number.html', filtered_number=[])
+
+editor_filtered_number = []
+@app.route('/editor_submit_number', methods=['POST', 'GET'])
+def editor_submit_number():
+    global editor_filtered_number
+    if request.method == 'POST':
+        номер_заявки = request.form.get('номер_заявки')
+        наименование_ПО = request.form.get('наименование_ПО')
+        тип_лицензии = request.form.get('тип_лицензии')
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = "SELECT номер_заявки, наименование_ПО, тип_лицензии FROM Учет_лицензий WHERE "
+        editor_number_params = []
+        if номер_заявки:
+            query += "номер_заявки = %s AND "
+            editor_number_params.append(номер_заявки)
+        if наименование_ПО:
+            query += "наименование_ПО ILIKE %s AND "
+            editor_number_params.append(f'%{наименование_ПО}%')
+        if тип_лицензии:
+            query += "тип_лицензии ILIKE %s AND "
+            editor_number_params.append(f'%{тип_лицензии}%')
+        if len(editor_number_params) > 0:
+            query = query[:-5]
+        else: 
+            return render_template('editor_update_number.html', editor_filtered_number=[])
+        cur.execute(query, editor_number_params)
+        editor_filtered_number = cur.fetchall()
+        return render_template('editor_update_number.html', editor_filtered_number=editor_filtered_number)
+    return render_template('editor_update_number.html', editor_filtered_number=[])
+
+@app.route('/export_number', methods=['POST', 'GET'])
+def export_number():
+     global filtered_number
+     if filtered_number:
+         df = pd.DataFrame(filtered_number)
+         excel_file_path ='number.xlsx'
+         df.to_excel(excel_file_path, index=False)
+         return send_file(excel_file_path, as_attachment=True)
+     else:
+         return "Нет данных для экспорта.", 404      
+     
+@app.route('/editor_export_number', methods=['POST', 'GET'])
+def editor_export_number():
+    global editor_filtered_number
+    if editor_filtered_number:
+        df = pd.DataFrame(editor_filtered_number)
+        excel_file_path = 'number.xlsx'
+        df.to_excel(excel_file_path, index=False)
+        return send_file(excel_file_path, as_attachment=True)
+    else:
+        return "Нет данных для экспорта.", 404
+    
+filtered_software = []
+@app.route('/submit_software', methods=['POST', 'GET'])
+def submit_software():
+    global filtered_software
+    if request.method == 'POST':
+        код_ПО = request.form.get('код_ПО')
+        наименование_ПО = request.form.get('наименование')
+        вендор = request.form.get('вендор')
+        признак_ПО = request.form.get('признак_ПО')
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = "SELECT код_ПО, наименование_ПО, вендор, признак_ПО FROM Справочник_ПО WHERE "
+        software_params = []
+        if код_ПО:
+            query += "код_ПО = %s AND "
+            software_params.append(код_ПО)
+        if наименование_ПО:
+            query += "наименование_ПО ILIKE %s AND "
+            software_params.append(f'%{наименование_ПО}%')
+        if вендор:
+            query += "вендор ILIKE %s AND "
+            software_params.append(f'%{вендор}%')
+        if признак_ПО:
+            query += "признак_ПО ILIKE %s AND "
+            software_params.append(f'%{признак_ПО}%')
+        if len(software_params) > 0:
+            query = query[:-5]
+        else:
+            return render_template('update_software.html', filtered_software=[])
+        cur.execute(query, software_params)
+        filtered_software = cur.fetchall()
+        return render_template('update_software.html', filtered_software=filtered_software)
+    return render_template('update_software.html', filtered_software=[])
+
+editor_filtered_software = []
+@app.route('/editor_submit_software', methods=['POST', 'GET'])
+def editor_submit_software():
+    global editor_filtered_software
+    if request.method == 'POST':
+        код_ПО = request.form.get('код_ПО')
+        наименование_ПО = request.form.get('наименование')
+        вендор = request.form.get('вендор')
+        признак_ПО = request.form.get('признак_ПО')
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = "SELECT код_ПО, наименование_ПО, вендор, признак_ПО FROM Справочник_ПО WHERE "
+        editor_software_params = []
+        if код_ПО:
+            query += "код_ПО = %s AND "
+            editor_software_params.append(код_ПО)
+        if наименование_ПО:
+            query += "наименование_ПО ILIKE %s AND "
+            editor_software_params.append(f'%{наименование_ПО}%')
+        if вендор:
+            query += "вендор ILIKE %s AND "
+            editor_software_params.append(f'%{вендор}%')
+        if признак_ПО:
+            query += "признак_ПО ILIKE %s AND "
+            editor_software_params.append(f'%{признак_ПО}%')
+        if len(editor_software_params) > 0:
+            query = query[:-5]
+        else:
+            return render_template('editor_update_software.html', editor_filtered_software=[])
+        cur.execute(query, editor_software_params)
+        editor_filtered_software = cur.fetchall()
+        return render_template('editor_update_software.html', editor_filtered_software=editor_filtered_software)
+    return render_template('editor_update_software.html', editor_filtered_software=[])
+
+@app.route('/export_software', methods=['POST', 'GET'])
+def export_software():
+     global filtered_software
+     if filtered_software:
+         df = pd.DataFrame(filtered_software)
+         excel_file_path ='software.xlsx'
+         df.to_excel(excel_file_path, index=False)
+         return send_file(excel_file_path, as_attachment=True)
+     else:
+         return "Нет данных для экспорта.", 404    
+     
+@app.route('/editor_export_software', methods=['POST', 'GET'])
+def editor_export_software():
+    global editor_filtered_software
+    if editor_filtered_software:
+        df = pd.DataFrame(editor_filtered_software)
+        excel_file_path = 'software.xlsx'
+        df.to_Excel(excel_file_path, index=False)
+        return send_file(excel_file_path, as_attachment=True)
+    else:
+        return "Нет данных для экспорта.", 404
+
+filtered = []
+@app.route('/submit', methods=['POST', 'GET'])
+def submit():
+     global filtered 
+     if request.method == 'POST':
+         наименование_ПО = request.form.get('наименование_ПО')
+         контрагент = request.form.get('контрагент')
+         дата_начала_списания = request.form.get('дата_начала_списания')
+         дата_окончания_списания = request.form.get('дата_окончания_списания')
+         признак_ПО = request.form.get('признак_ПО')
+         страна_производитель = request.form.get('страна_производитель')
+         код = request.form.get('код')
+         cur = conn2.cursor(cursor_factory = psycopg2.extras.DictCursor)
+         lic_params = []
+         query = "SELECT наименование_ПО, контрагент, дата_начала_списания, дата_окончания_списания, признак_ПО, страна_производитель, код FROM лицензии WHERE "
+         if наименование_ПО:
+             query += "наименование_ПО ILIKE %s AND "
+             lic_params.append(f'%{наименование_ПО}%')
+         if контрагент:
+             query += "контрагент ILIKE %s AND "
+             lic_params.append(f'%{контрагент}%')
+         if дата_начала_списания:
+             query += "дата_начала_списания = %s AND "
+             lic_params.append(дата_начала_списания)
+         if дата_окончания_списания:
+             query += "дата_окончания_списания = %s AND "
+             lic_params.append(дата_окончания_списания)
+         if признак_ПО:
+             query += "признак_ПО ILIKE %s AND "
+             lic_params.append(f'%{признак_ПО}%')
+         if страна_производитель:
+             query += "страна_производитель ILIKE %s AND "
+             lic_params.append(f'%{страна_производитель}%')
+         if код:
+             query += "код = %s AND "
+             lic_params.append(код)
+         if len(lic_params) > 0:
+             query = query[:-5]
+         else:
+             return render_template('update_lic.html', filtered=[])
+         cur.execute(query, lic_params)
+         filtered = cur.fetchall()
+         return render_template('update_lic.html', filtered=filtered)
+     return render_template('update_lic.html', filtered=[])
+ 
+editor_filtered = []
+@app.route('/editor_submit', methods=['POST', 'GET'])
+def editor_submit():
+    global editor_filtered 
+    if request.method == 'POST':
+        наименование_ПО = request.form.get('наименование_ПО')
+        контрагент = request.form.get('контрагент')
+        дата_начала_списания = request.form.get('дата_начала_списания')
+        дата_окончания_списания = request.form.get('дата_окончания_списания')
+        признак_ПО = request.form.get('признак_ПО')
+        страна_производитель = request.form.get('страна_производитель')
+        код = request.form.get('код')
+        cur = conn2.cursor(cursor_factory = psycopg2.extras.DictCursor)
+        editor_lic_params = []
+        query = "SELECT наименование_ПО, контрагент, дата_начала_списания, дата_окончания_списания, признак_ПО, страна_производитель, код FROM лицензии WHERE "
+        if наименование_ПО:
+            query += "наименование_ПО ILIKE %s AND "
+            editor_lic_params.append(f'%{наименование_ПО}%')
+        if контрагент:
+            query += "контрагент ILIKE %s AND "
+            editor_lic_params.append(f'%{контрагент}%')
+        if дата_начала_списания:
+            query += "дата_начала_списания = %s AND "
+            editor_lic_params.append(дата_начала_списания)
+        if дата_окончания_списания:
+            query += "дата_окончания_списания = %s AND "
+            editor_lic_params.append(дата_окончания_списания)
+        if признак_ПО:
+            query += "признак_ПО ILIKE %s AND "
+            editor_lic_params.append(f'%{признак_ПО}%')
+        if страна_производитель:
+            query += "страна_производитель ILIKE %s AND "
+            editor_lic_params.append(f'%{страна_производитель}%')
+        if код:
+            query += "код = %s AND "
+            editor_lic_params.append(код)
+        if len(editor_lic_params) > 0:
+            query = query[:-5]
+        else:
+            return render_template('editor_update_lic.html', editor_filtered=[])
+        cur.execute(query, editor_lic_params)
+        editor_filtered = cur.fetchall()
+        return render_template('editor_update_lic.html', editor_filtered=editor_filtered)
+    return render_template('editor_update_lic.html', editor_filtered=[])
+ 
+@app.route('/export', methods=['POST', 'GET'])
+def export():
+     global filtered
+     if filtered:
+         df = pd.DataFrame(filtered)
+         excel_file_path ='filtered_lic.xlsx'
+         df.to_excel(excel_file_path, index=False)
+         return send_file(excel_file_path, as_attachment=True)
+     else:
+         return "Нет данных для экспорта.", 404 
+     
+@app.route('/editor_export', methods=['POST', 'GET'])
+def editor_export():
+    global editor_filtered
+    if editor_filtered:
+        df = pd.DataFrame(editor_filtered)
+        excel_file_path = 'filtered_lic.html'
+        df.to_excel(excel_file_path, index=False)
+        return send_file(excel_file_path, as_attachment=True)
+    else:
+        return "Нет данных для экспорта.", 404
+
+filtered_install = []    
+@app.route('/submit_install', methods=['POST', 'GET'])
+def submit_install():
+    global filtered_install
+    if request.method == 'POST':
+        код_установки  = request.form.get('код_установки')
+        наименование_ПО = request.form.get('наименование_ПО')
+        тип_лицензии = request.form.get('тип_лицензии')
+        дата_установки_ПО = request.form.get('дата_установки_ПО')
+        install_params = []
+        cur = conn2.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = "SELECT код_установки, наименование_ПО, тип_лицензии, дата_установки_ПО FROM Установка_ПО WHERE "
+        if код_установки:
+            query += "код_установки = %s AND "
+            install_params.append(код_установки)
+        if наименование_ПО:
+            query += "наиенование_ПО ILIKE %s AND "
+            install_params.append(f'%{наименование_ПО}%')
+        if тип_лицензии:
+            query += "тип_лицензии ILIKE %s AND "
+            install_params.append(f'%{тип_лицензии}%')
+        if дата_установки_ПО:
+            query += "дата_установки_ПО = %s AND "
+            install_params.append(дата_установки_ПО)
+        if len(install_params) > 0:
+            query = query[:-5]
+        else:
+            return render_template('update_install.html', filtered_install=[])
+        cur.execute(query, install_params)
+        filtered_install = cur.fetchall()
+        return render_template('update_install.html', filtered_install=filtered_install)
+    return render_template('update_install.html', filtered_install=[])
+
+@app.route('/export_install', methods=['POST', 'GET'])
+def export_install():
+     global filtered_install
+     if filtered_install:
+         df = pd.DataFrame(filtered_install)
+         excel_file_path ='filtered_install.xlsx'
+         df.to_excel(excel_file_path, index=False)
+         return send_file(excel_file_path, as_attachment=True)
+     else:
+         return "Нет данных для экспорта.", 404 
+     
 @app.route('/user_change_password', methods = ['POST', 'GET'])
 def user_change_password():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)

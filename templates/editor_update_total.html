@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты поиска</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Результаты поиска общей информации</h1>
+
+        {% if editor_filtered_total %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Статья затрат</th>
+                        <th>Наименование ПО (БУ)</th>
+                        <th>Наименование ПО</th>
+                        <th>Краткое наименование ПО</th>
+                        <th>Код</th>
+                        <th>Филиал</th>
+                        <th>Вид деятельности</th>
+                        <th>Срок полезного использования (мес.)</th>
+                        <th>Дата начала списания</th>
+                        <th>Дата окончания списания</th>
+                        <th>Договор/счет</th>
+                        <th>Контрагент</th>
+                        <th>Первичный документ</th>
+                        <th>Страна-производитель</th>
+                        <th>Правообладатель</th>
+                        <th>Срок предоставления права</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for total in editor_filtered_total %}
+                        <tr>
+                            <td>{{ total.статья_затрат }}</td>
+                            <td>{{ total.наименование_ПО_БУ }}</td>
+                            <td>{{ total.наименование_ПО }}</td>
+                            <td>{{ total.краткое_наименование_ПО }}</td>
+                            <td>{{ total.код }}</td>
+                            <td>{{ total.филиал }}</td>
+                            <td>{{ total.счёт_затрат }}</td>
+                            <td>{{ total.вид_деятельности }}</td>
+                            <td>{{ total.срок_полезного_использования_мес }}</td>
+                            <td>{{ total.дата_начала_списания }}</td>
+                            <td>{{ total.дата_окончания_списания }}</td>
+                            <td>{{ total.договор_счет }}</td>
+                            <td>{{ total.контрагент }}</td>
+                            <td>{{ total.первичный_документ }}</td>
+                            <td>{{ total.страна_производитель }}</td>
+                            <td>{{ total.правообладатель }}</td>
+                            <td>{{ total.срок_предоставления_права }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Нет найденных данных.</p>
+        {% endif %}
+        <form action="{{url_for('editor_export_total')}}" method="POST">
+          <button type="submit" class="submit">Сгенерировать отчет по общей информации</button>
+        </form>
+        <a href="/editor_total" class="btn btn-primary">Назад к поиску</a>
+    </div>
+</body>
+</html>

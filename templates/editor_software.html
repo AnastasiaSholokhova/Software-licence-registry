@@ -71,10 +71,11 @@
         </script>
       </div>
     </div>
+    </form>
     </div>
     <div class="sidebar">
       <h2>Расширенный поиск</h2>
-        <form id="search-form">
+        <form action="{{url_for('editor_submit_software') }}" method="POST">
           <div>
             <label for="код_ПО">Код ПО</label>
             <input type="number=" id="код_ПО" name="код_ПО">
@@ -88,12 +89,10 @@
             <input type="text" id="вендор" name="вендор">
           </div>
           <div>
-            <p><b>Признак ПО</b></p>
-            <label for="новое">Новое</label>
-            <input type="checkbox" id="новое" name="новое">
-            <label for="техподдержка">Техподдержка</label>
-            <input type="checkbox" id="техподдержка" name="техподдержка">
+            <label for="признак_ПО">Признак ПО</label>
+            <input type="text" id="признак_ПО" name="признак_ПО">
           </div>
+          <button class="submit">Обновить информацию</button>
         </form>
      </div>
 </div>

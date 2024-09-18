@@ -82,7 +82,7 @@
     </div>
     <div class="sidebar">
       <h2>Расширенный поиск</h2>
-      <form id="search-form">
+      <form action ="{{url_for('submit_install') }}" method="POST">
         <div>
           <label for="код_установки">Код установки</label>
           <input type="text" id="код_установки" name="код_установки">
@@ -99,6 +99,7 @@
           <label for="дата_установки_ПО">Дата установки ПО</label>
           <input type="date" id="дата_установки_ПО" name="дата_установки_ПО">
         </div>
+        <button class="submit">Обновить информацию</button>
       </form>
       </div>
 </div>

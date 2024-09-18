@@ -70,7 +70,7 @@
     </div>
     <div class="sidebar">
       <h2>Расширенный фильтр</h2>
-        <form id="search-form">
+        <form id="search-form" action="{{url_for('submit_number')}}" method="POST">
         <div>
           <label for="номер_заявки">Номер заявки</label>
           <input type="text" id="номер_заявки" name="номер_заявки">
@@ -83,6 +83,7 @@
           <label for="тип_лицензии">Тип лицензии</label>
           <input type="text" id="тип_лицензии" name="тип_лицензии">
         </div>
+        <button class="submit">Обновить информацию</button>
      </form>
    </div>
 </div>

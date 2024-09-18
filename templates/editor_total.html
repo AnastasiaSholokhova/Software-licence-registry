@@ -108,7 +108,7 @@
     </div>
     <div class="sidebar">
       <h2>Расширенный поиск</h2>
-        <form id="search-form">
+        <form action="{{url_for('editor_submit_total')}}" method="POST">
           <div>
             <label for="статья_затрат">Статья затрат</label>
             <input type="text" id="статья_затрат" name="статья_затрат">
@@ -177,6 +177,7 @@
             <label for="срок_предоставления_права">Срок предоставления права</label>
             <input type="text" id="срок_предоставления_права" name="срок_предоставления_права">
           </div>
+          <button class="submit">Обновить информацию</button>
         </form>
       </div>
 </div>

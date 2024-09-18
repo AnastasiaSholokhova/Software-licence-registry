@@ -84,7 +84,7 @@
     </div>
     <div class="sidebar">
       <h2>Расширенный фильтр</h2>
-        <form id="search-form">
+        <form action="{{url_for('editor_submit_partner')}}" method="POST">
           <div>
           <label for="наименование_контрагента">Наименование контрагента</label>
           <input type="text" id="наименование_контрагента" name="наименование_контрагента">
@@ -121,6 +121,7 @@
           <label for="ОГРН">ОГРН</label>
           <input type="number" id="ОГРН" name="ОГРН">
         </div>
+        <button class="submit">Обновить информацию</button>
      </form>
    </div>
 </div>

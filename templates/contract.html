@@ -88,10 +88,10 @@
     </div>
     <div class="sidebar">
       <h2>Расширенный поиск</h2>
-      <form id="search-form">
+      <form id="search-form" action="{{ url_for('submit_contract') }}" method="POST">
         <div>
-          <label for="код">Код договора</label>
-          <input type="text" id="код" name="код">
+          <label for="код_договора">Код договора</label>
+          <input type="text" id="код_договора" name="код_договора">
         </div>
         <div>
           <label for="контрагент">Наименование контрагента</label>
@@ -121,8 +121,9 @@
           <label for="филиал">Филиал</label>
           <input type="text" id="филиал" name="филиал">
         </div>
+        <button class="submit">Обновить информацию</button>>
       </form>
-      </div>
+       </div>
 </div>
 <a href="{{url_for('download_contract_report')}}">Сгенерировать отчет по договорам</a>
 <form action="{{url_for('upload_contract')}}" method="POST" enctype="multipart/form-data">

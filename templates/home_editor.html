@@ -88,7 +88,7 @@
     <!-- Блок с фильтрами -->
     <div class="sidebar"> 
         <h2>Фильтры</h2>
-        <form id="search-form">
+        <form action="{{url_for('editor_submit')}}" method="POST">
           <div>
             <label for="name">Наименование</label>
             <input type="text" id="name" name="name">
@@ -126,6 +126,7 @@
             <label for="code">Код</label>
             <input type="text" id="code" name="code">
           </div>
+          <button class="submit">Обновить информацию</button>
         </form>
     </div>
 </div>

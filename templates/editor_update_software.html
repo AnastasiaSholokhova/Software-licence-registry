@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты поиска</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Результаты поиска ПО</h1>
+
+        {% if editor_filtered_software %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Код ПО</th>
+                        <th>Наименование ПО</th>
+                        <th>Вендор</th>
+                        <th>Признак ПО</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for software in editor_filtered_software %}
+                        <tr>
+                            <td>{{ software.код_ПО }}</td>
+                            <td>{{ software.наименование_ПО }}</td>
+                            <td>{{ software.вендор }}</td>
+                            <td>{{ software.признак_ПО }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Нет найденного ПО.</p>
+        {% endif %}
+        <form action="{{url_for('editor_export_software')}}" method="POST">
+          <button type="submit" class="submit">Сгенерировать отчет по ПО</button>
+        </form>
+        <a href="/editor_contracts" class="btn btn-primary">Назад к поиску</a>
+    </div>
+</body>
+</html>

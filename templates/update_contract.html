@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты поиска</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Результаты поиска договоров</h1>
+
+        {% if filtered_contracts %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Предмет договора</th>
+                        <th>Дата договора</th>
+                        <th>Дата начала</th>
+                        <th>Дата окончания</th>
+                        <th>Филиал</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contract in filtered_contracts %}
+                        <tr>
+                            <td>{{ contract.код_договора }}</td>
+                            <td>{{ contract.предмет_договора }}</td>
+                            <td>{{ contract.дата_договора }}</td>
+                            <td>{{ contract.дата_начала_действия_договора }}</td>
+                            <td>{{ contract.дата_окончания_действия_договора }}</td>
+                            <td>{{ contract.филиал }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Нет найденных договоров.</p>
+        {% endif %}
+        <form action="{{url_for('export_contracts')}}" method="POST">
+          <button type="submit" class="submit">Сгенерировать отчет по договорам</button>
+        </form>
+        <a href="/contracts" class="btn btn-primary">Назад к поиску</a>
+    </div>
+</body>
+</html>

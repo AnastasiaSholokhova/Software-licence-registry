@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты поиска</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Результаты поиска данных об установках ПО</h1>
+
+        {% if filtered_install %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Код установки</th>
+                        <th>Наименование ПО</th>
+                        <th>Тип лицензии</th>
+                        <th>Дата установки ПО</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for install in filtered_install %}
+                        <tr>
+                            <td>{{ install.код_установки }}</td>
+                            <td>{{ install.наименование_ПО }}</td>
+                            <td>{{ install.тип_лицензии }}</td>
+                            <td>{{ install.дата_установки_ПО }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Нет найденных данных об установке ПО.</p>
+        {% endif %}
+        <form action="{{url_for('export_install')}}" method="POST">
+          <button type="submit" class="submit">Сгенерировать отчет по установкам ПО</button>
+        </form>
+        <a href="/contracts" class="btn btn-primary">Назад к поиску</a>
+    </div>
+</body>
+</html>
